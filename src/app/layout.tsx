@@ -1,15 +1,15 @@
-import "../globals.css";
+import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import NavBar from "@/components/navBar";
+import NavBar from "@/components/custom/navBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "Ask Abe",
+	title: "I Want To Be an AI Engineer",
 	description:
-		"AI Powered Legal Education and Research. Ask Abe is a legal research and education tool that uses AI to help you better understand the complexities of the law.",
+		"Documenting a young software engineers journey to getting his dream job as an AI Engineer. You should hire Will!",
 };
 
 export default function RootLayout({
@@ -22,8 +22,7 @@ export default function RootLayout({
 
 		<html lang="en">
 			<body className={inter.className}>
-				<NavBar />
-
+				<NavBar></NavBar>
 				{children}
 				{/* <PageFooter /> */}
 			</body>
