@@ -1,33 +1,82 @@
 "use client";
-import React, { useState } from 'react';
+// inlineActions.tsx
+// inlineActions.tsx
+import React from 'react';
 import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
 } from "@/components/ui/toolTip";
+import { InformationCircleIcon, QuestionMarkCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid';
+// Common interface for all inline actions
+interface InlineActionProps {
+    message: string;
+}
 
+interface HighlightProps extends InlineActionProps {
+    children: React.ReactNode;
+}
 
+// Warning Component
+const Warning: React.FC<InlineActionProps> = ({ message }) => (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span className="cursor-pointer">
+                    <ExclamationCircleIcon />
+                </span>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>{message}</p>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
+);
 
-const WarningTooltip: React.FC<{ message: string; }> = ({ message }) => {
+// Informative Component
+const Informative: React.FC<InlineActionProps> = ({ message }) => (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                
+                <InformationCircleIcon />
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>{message}</p>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
+);
 
-	return (
+// Question Component
+const Question: React.FC<InlineActionProps> = ({ message }) => (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <QuestionMarkCircleIcon />å
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>{message}</p>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
+);
 
-		<TooltipProvider>
-			<Tooltip>
+// Highlight Component
+const Highlight: React.FC<HighlightProps> = ({ children, message }) => (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span className="bg-yellow-200 cursor-pointer">
+                    {children}
+                </span>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>{message}</p>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
+);
 
-				<TooltipTrigger className="bg-gray-200 flex items-center justify-center">
-					⚠️
-					<span className="ml-1">WARNING</span>
-				</TooltipTrigger>
-
-				<TooltipContent>
-					<p>{message}</p>
-				</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
-
-	);
-};
-
-export default WarningTooltip;
+export { Warning, Informative, Question, Highlight };

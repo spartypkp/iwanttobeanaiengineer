@@ -1,6 +1,4 @@
-// BlogPreview.tsx
 import React from 'react';
-import DaveAnalysis from './daveAnalysis';
 
 interface BlogPreviewProps {
     title: string;
@@ -10,26 +8,17 @@ interface BlogPreviewProps {
 }
 
 const BlogPreview: React.FC<BlogPreviewProps> = ({ title, excerpt, date, link }) => {
-    // Placeholder data for Dave's analysis
-    const daveText = "Dave's take: A deep dive into the complexities of AI ethics that might just blow your mind—or put you to sleep. It's a fine line!";
-
     return (
-        <div className="border-b last:border-b-0 rounded-t-lg p-4 hover:bg-gray-50 transition-colors duration-200 flex justify-between items-center relative">
-            <div className="flex-1">
+        <div className="border-b last:border-b-0 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200 flex items-center justify-between">
+            <div className="flex flex-col justify-between w-5/6 pr-4">
                 <a href={link} className="hover:underline">
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">{title}</h3>
                 </a>
                 <p className="text-sm text-gray-600 mb-1">{excerpt}</p>
-                <div className="flex items-center text-gray-500 text-xs">
-                    <span>{date}</span>
-                    <div className="ml-2 cursor-pointer group">
-                        <i className="fas fa-info-circle text-blue-500"></i>
-                        <DaveAnalysis analysisText={daveText} />
-                    </div>
-                </div>
+                <span className="text-xs text-gray-500">{date}</span>
             </div>
-            <div className="ml-4 flex-shrink-0">
-                <div className="h-20 w-20 bg-black"> {/* Placeholder for image */}</div>
+            <div className="w-1/6 flex justify-end items-center">
+                <div className="h-20 w-20 bg-black rounded-lg"> {/* Placeholder for image, added rounded corners */}</div>
             </div>
         </div>
     );
