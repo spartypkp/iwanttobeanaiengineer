@@ -16,7 +16,7 @@ export default async function DailyBlogPage() {
 		  <div className="text-center">
 			<h4 className="text-3xl font-bold mb-4">Latest Daily Blogs</h4>
 			<p className="text-sm mb-6">
-			  "Catch up with my daily progress and insights into the life of an aspiring AI engineer."
+			  Catch up with my daily progress and insights into the life of an aspiring AI engineer.
 			</p>
 		  </div>
 		  <div className="max-h-96 rounded-lg bg-gray-100 overflow-y-auto shadow-sm p-2">

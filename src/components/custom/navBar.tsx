@@ -91,7 +91,7 @@ const NavBar = () => {
 									</NavigationMenuLink>
 								</li>
 								<ListItem href="/random#1" title="More About Me">
-									Bartending, Football, Pydantic, LLMs... that's about it.
+									Bartending, Football, Pydantic, LLMs... that&apos;s about it.
 								</ListItem>
 								<ListItem href="/random#2" title="Interactive Resume">
 									Take a guided tour of my resume

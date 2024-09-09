@@ -18,12 +18,12 @@ const HomePage: React.FC = () => {
 		<div className="max-w-7xl mx-auto">
 			<header className="text-center space-y-6 my-12">
 				<img src="profilePic.jpg" alt="Profile Picture" className="mx-auto h-48 w-48 object-cover rounded-full" />
-				<h1 className="text-6xl font-bold">Hi, I'm Will.</h1>
+				<h1 className="text-6xl font-bold">Hi, I&apos;m Will.</h1>
 				<h2 className="text-3xl font-semibold mt-4">
 					This is My Quest to Get My Dream Job as an AI Engineer.
 				</h2>
 				<p className="text-xl">
-					It's been <span className="font-bold text-red-600 text-4xl">{daysSinceStart}</span> days since I started.
+					It&apos;s been <span className="font-bold text-red-600 text-4xl">{daysSinceStart}</span> days since I started.
 				</p>
 				<p className="text-xl">
 					The counter stops the day I get hired.
@@ -33,7 +33,7 @@ const HomePage: React.FC = () => {
 			<section className="py-8 px-4">
 				<h3 className="text-4xl font-bold text-center mb-6">Why this Website?</h3>
 				<p className="text-lg leading-relaxed mb-4">
-					The point? Transparency, catharsis, and a bit of shameless self-promotion. I post daily blogs that serve as progress reports and document my journey in a structured way, covering both the mundane and the exciting parts of my day-to-day work. There are also in-depth technical blog posts where I dive into larger projects I'm working on. <span className="inline-block"><Informative message="He means the ones he actually finishes."></Informative></span>
+					The point? Transparency, catharsis, and a bit of shameless self-promotion. I post daily blogs that serve as progress reports and document my journey in a structured way, covering both the mundane and the exciting parts of my day-to-day work. There are also in-depth technical blog posts where I dive into larger projects I&apos;m working on. <span className="inline-block"><Informative message="He means the ones he actually finishes."></Informative></span>
 				</p>
 
 				<p className="text-lg leading-relaxed mb-4">
@@ -44,7 +44,7 @@ const HomePage: React.FC = () => {
 					So, I decided to build an AI editor—Dave—to handle most of the blog editing and writing, allowing me to completely avoid responsibility. <span className="inline-block"><Question message="Avoid responsibility, or just scared of typos, Will?"></Question></span> Dave not only proofreads and compiles my thoughts but also automatically posts them, helping me overcome my fear of putting myself out there.
 				</p>
 				<p className="text-lg leading-relaxed mb-4">
-					Ultimately, this website doubles as an interactive resume, showcasing projects and experiences that highlight my capabilities as an AI engineer. It’s a real-time window into my job search, and hopefully, an inspiration for other young and passionate engineers. <span className="inline-block"><Highlight message="Just don’t look too closely at the commit messages; it’s not as inspiring.">Even if no one sees this, I'll still have this site to look back on someday.</Highlight></span>
+					Ultimately, this website doubles as an interactive resume, showcasing projects and experiences that highlight my capabilities as an AI engineer. It&apos;s a real-time window into my job search, and hopefully, an inspiration for other young and passionate engineers. <span className="inline-block"><Highlight message="Just don’t look too closely at the commit messages; it’s not as inspiring.">Even if no one sees this, I&apos;ll still have this site to look back on someday.</Highlight></span>
 				</p>
 			</section>
 
