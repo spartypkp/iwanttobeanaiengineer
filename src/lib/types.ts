@@ -18,6 +18,25 @@ export interface Task {
     follow_up_tasks?: string;
 }
 
+export const TaskFieldOrder: (keyof Task)[] = [
+    'task_goal',
+    'task_description',
+    'task_expected_difficulty',
+    'task_planned_approach',
+    'task_progress_notes',
+    'challenges_encountered',
+    'research_questions',
+    'tools_used',
+    'reflection_successes',
+    'reflection_failures',
+    'output_or_result',
+    'time_spent_coding',
+    'time_spent_researching',
+    'time_spent_debugging',
+    'follow_up_tasks'
+];
+
+
 // Interfaces for Introduction Submodel
 export interface Introduction {
     personal_context?: string;
@@ -30,6 +49,19 @@ export interface Introduction {
     burnout_level?: number;
     leetcode_hatred_level?: number;
 }
+
+export const IntroductionFieldOrder: (keyof Introduction)[] = [
+    'personal_context',
+    'daily_goals',
+    'learning_focus',
+    'challenges',
+    'plan_of_action',
+    'focus_level',
+    'enthusiasm_level',
+    'burnout_level',
+    'leetcode_hatred_level'
+];
+
 
 // Interfaces for Reflection Submodel
 export interface Reflection {
@@ -44,6 +76,20 @@ export interface Reflection {
     desire_to_play_steam_games_level?: number;
     overall_frustration_level?: number;
 }
+
+export const ReflectionFieldOrder: (keyof Reflection)[] = [
+    'technical_challenges',
+    'interesting_bugs',
+    'unanswered_questions',
+    'learning_outcomes',
+    'next_steps_short_term',
+    'next_steps_long_term',
+    'productivity_level',
+    'distraction_level',
+    'desire_to_play_steam_games_level',
+    'overall_frustration_level'
+];
+
 
 // Main Interface for Daily Blog
 export interface DailyBlog {

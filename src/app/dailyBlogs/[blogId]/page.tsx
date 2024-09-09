@@ -1,49 +1,47 @@
 import { getBlogBySlug } from "@/lib/api";
-import { DailyBlog } from "@/lib/types";
+import { DailyBlog, Task, Introduction, Reflection } from "@/lib/types";
 import { redirect } from "next/navigation";
+import Head from 'next/head';
+import DynamicHTML from "@/components/custom/dynamicHTML";
+import 'react-quill/dist/quill.snow.css';
 
 export default async function Blog({ params }: { params: { blogId: string; }; }) {
-	const blog = await getBlogBySlug(params.blogId)
-	if (!blog) {
-		redirect('/not-found')
-	}
-	console.log(blog)
-	return (
-		<div className="daily-blog-container">
-    <div className="blog-date">
-        <h3>Date</h3>
-        <p>{`${blog.date}`}</p>
-    </div>
+  const blog = await getBlogBySlug(params.blogId);
+  if (!blog) {
+    redirect('/not-found');
+  }
 
-    <div className="blog-introduction">
-        <h3>Introduction</h3>
-        <div className="personal-context"><h4>Personal Context</h4><p>{blog.introduction?.personal_context}</p></div>
-        <div className="daily-goals"><h4>Daily Goals</h4><p>{blog.introduction?.daily_goals}</p></div>
-        <div className="learning-focus"><h4>Learning Focus</h4><p>{blog.introduction?.learning_focus}</p></div>
-        <div className="challenges"><h4>Challenges</h4><p>{blog.introduction?.challenges}</p></div>
-        <div className="plan-of-action"><h4>Plan of Action</h4><p>{blog.introduction?.plan_of_action}</p></div>
-    </div>
+  return (
+    <>
+      <Head>
+        <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
+      </Head>
+      <div className="daily-blog-container max-w-6xl mx-auto my-8 p-4 bg-white shadow-lg rounded-lg leading-loose">
+        <h1 className="text-8xl font-semibold text-gray-800 mb-4">{`Day 1: ${blog.date}`}</h1>
+        
 
-    <div className="blog-tasks">
-        <h3>Tasks</h3>
-        {blog.tasks.map((task, index) => (
-            <div key={index} className="task">
-                <h4>Task {index + 1}</h4>
-                <p className="task-goal">{task.task_goal}</p>
-                <p className="task-description">{task.task_description}</p>
-                {/* Add more fields as needed */}
-            </div>
+        {blog.introduction && (
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-3 text-center">Introduction</h1>
+            <DynamicHTML sectionData={blog.introduction} type="Introduction" />
+          </div>
+        )}
+
+        {blog.tasks && blog.tasks.map((task, index) => (
+          <div key={`task-${index}`} className="mb-8">
+			<h1 className="text-4xl font-bold text-gray-800 mb-3 text-center">Task {index + 1}</h1>
+            <DynamicHTML sectionData={task} type="Task" />
+          </div>
         ))}
-    </div>
 
-    <div className="blog-reflection">
-        <h3>Reflection</h3>
-        <div className="technical-challenges"><h4>Technical Challenges</h4><p>{blog.reflection?.technical_challenges}</p></div>
-        <div className="interesting-bugs"><h4>Interesting Bugs</h4><p>{blog.reflection?.interesting_bugs}</p></div>
-        {/* Add more fields as needed */}
-    </div>
-</div>
+        {blog.reflection && (
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-3 text-center">Reflection</h1>
 
-	)
-
+            <DynamicHTML sectionData={blog.reflection} type="Reflection" />
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
