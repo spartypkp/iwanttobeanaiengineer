@@ -2,6 +2,7 @@
 import React from 'react';
 import BlogPreview from './blogPreview'; // Ensure this is correctly imported
 import { Button } from '../ui/button';
+import { DailyBlog } from '@/lib/types';
 
 interface Blog {
 	id: number;

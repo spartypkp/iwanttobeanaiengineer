@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import BlogFeed from '@/components/custom/blogFeed';
 import { Warning, Informative, Question, Highlight } from '@/components/custom/warningTooltip';
+import HiringQuiz from '@/components/custom/hiringQuiz';
 
 const HomePage: React.FC = () => {
 
@@ -30,24 +31,27 @@ const HomePage: React.FC = () => {
 			</header>
 
 			<section className="py-8 px-4">
-    <h3 className="text-4xl font-bold text-center mb-6">Why this Website?</h3>
-    <p className="text-lg leading-relaxed mb-4">
-        The point? Transparency, catharsis, and a bit of shameless self-promotion. I post daily blogs that serve as progress reports and document my journey in a structured way, covering both the mundane and the exciting parts of my day-to-day work. There are also in-depth technical blog posts where I dive into larger projects I'm working on.
-        <span><Informative message="He means the ones he actually finishes."></Informative></span>
-    </p>
-    
-    <p className="text-lg leading-relaxed mb-4">
-        Many friends and mentors suggested starting a blog to document my progress (mostly for myself), provide a window into some interesting projects I work on, and possibly help me on my goal of full-time employment. <span><Warning message="And by 'help', he means 'please hire me so I can stop pretending I understand recursion.'"></Warning></span> I always struggled with putting myself out there, and the thought of writing a technical blog terrifies me. 
-    </p>
+				<h3 className="text-4xl font-bold text-center mb-6">Why this Website?</h3>
+				<p className="text-lg leading-relaxed mb-4">
+					The point? Transparency, catharsis, and a bit of shameless self-promotion. I post daily blogs that serve as progress reports and document my journey in a structured way, covering both the mundane and the exciting parts of my day-to-day work. There are also in-depth technical blog posts where I dive into larger projects I'm working on. <span className="inline-block"><Informative message="He means the ones he actually finishes."></Informative></span>
+				</p>
 
-    <p className="text-lg leading-relaxed mb-4">
-        So, I decided to build an AI editor—Dave—to handle most of the blog editing and writing, allowing me to completely avoid responsibility. <span><Question message="Avoid responsibility, or just scared of typos, Will?"></Question></span>
-        Dave not only proofreads and compiles my thoughts but also automatically posts them, helping me overcome my fear of putting myself out there. <span className="italic">("Honestly, I'm the one doing all the heavy lifting here," Dave notes.)</span>
-    </p>
-    <p className="text-lg leading-relaxed mb-4">
-        Ultimately, this website doubles as an interactive resume, showcasing projects and experiences that highlight my capabilities as an AI engineer. It’s a real-time window into my job search, and hopefully, an inspiration for other young and passionate engineers. <span><Highlight message="Just don’t look too closely at the commit messages; it’s not as inspiring.">Even if no one sees this, I'll still have this site to look back on someday.</Highlight></span>
-    </p>
-</section>
+				<p className="text-lg leading-relaxed mb-4">
+					Many friends and mentors suggested starting a blog to document my progress (mostly for myself), provide a window into some interesting projects I work on, and possibly help me on my goal of full-time employment. <span className="inline-block"><Warning message="And by 'help', he means 'please hire me so I can stop pretending I understand recursion.'"></Warning></span> I always struggled with putting myself out there, and the thought of writing a technical blog terrifies me.
+				</p>
+
+				<p className="text-lg leading-relaxed mb-4">
+					So, I decided to build an AI editor—Dave—to handle most of the blog editing and writing, allowing me to completely avoid responsibility. <span className="inline-block"><Question message="Avoid responsibility, or just scared of typos, Will?"></Question></span> Dave not only proofreads and compiles my thoughts but also automatically posts them, helping me overcome my fear of putting myself out there.
+				</p>
+				<p className="text-lg leading-relaxed mb-4">
+					Ultimately, this website doubles as an interactive resume, showcasing projects and experiences that highlight my capabilities as an AI engineer. It’s a real-time window into my job search, and hopefully, an inspiration for other young and passionate engineers. <span className="inline-block"><Highlight message="Just don’t look too closely at the commit messages; it’s not as inspiring.">Even if no one sees this, I'll still have this site to look back on someday.</Highlight></span>
+				</p>
+			</section>
+
+			<section className="flex items-center justify-center">
+				
+				<HiringQuiz></HiringQuiz>
+			</section>
 			<section>
 
 				<div className="flex flex-row justify-between space-x-4 px-4 py-8">

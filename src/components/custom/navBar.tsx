@@ -24,45 +24,54 @@ const NavBar = () => {
             className="w-full px-4 py-2 text-base bg-background border-b border-solid"
         >
 			<NavigationMenu className="w-full min-w-full">
-				<NavigationMenuList className="w-full min-w-full flex flex-col md:flex-row justify-between items-center">
+				<NavigationMenuList>
 					<NavigationMenuItem>
-						<Link href="/">
-							<div className="flex justify-left items-center font-header font-bold text-olivebrown text-2xl">
-								Will
-							</div>
-						</Link>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
-						<Link href="/projects" legacyBehavior passHref>
+					<Link href="/" legacyBehavior passHref>
 							<NavigationMenuLink
 								className={navigationMenuTriggerStyle()}
 							>
-								Resume
+								Home
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<Link href="projects" legacyBehavior passHref>
+						<Link href="/dailyBlogs" legacyBehavior passHref>
 							<NavigationMenuLink
 								className={navigationMenuTriggerStyle()}
 							>
-								Projects
+								Daily Blogs
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<Link href="/sources" legacyBehavior passHref>
+						<Link href="/technicalBlogs" legacyBehavior passHref>
 							<NavigationMenuLink
 								className={navigationMenuTriggerStyle()}
 							>
-								Dave Demands You Hire Me
+								Technical Blogs
+							</NavigationMenuLink>
+						</Link>
+					</NavigationMenuItem>
+					<Link href="/argueWithDave" legacyBehavior passHref>
+							<NavigationMenuLink
+								className={navigationMenuTriggerStyle()}
+							>
+								Argue With Dave
+							</NavigationMenuLink>
+						</Link>
+					<NavigationMenuItem>
+						<Link href="/stats" legacyBehavior passHref>
+							<NavigationMenuLink
+								className={navigationMenuTriggerStyle()}
+							>
+								Whole Lotta Stats
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
 					
 					<NavigationMenuItem>
 						<NavigationMenuTrigger>
-							Random Blogs
+							About Me
 						</NavigationMenuTrigger>
 						<NavigationMenuContent>
 							<ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
@@ -73,45 +82,26 @@ const NavBar = () => {
 											href="/mission#dream"
 										>
 											<div className="mb-2 mt-4 text-lg font-medium">
-												TODO
+												About Will
 											</div>
 											<div className="mb-2 mt-4 text-sm font-medium">
-												Like Most of my Documentation!
+												And some shameless self plugging!
 											</div>
 										</a>
 									</NavigationMenuLink>
 								</li>
-								<ListItem href="/random#1" title="Blog">
-									Really Cool Blogpost 1
+								<ListItem href="/random#1" title="More About Me">
+									Bartending, Football, Pydantic, LLMs... that's about it.
 								</ListItem>
-								<ListItem href="/random#2" title="Blogg">
-									Really Cool Blogpost 2
+								<ListItem href="/random#2" title="Interactive Resume">
+									Take a guided tour of my resume
 								</ListItem>
-								<ListItem href="/random#3" title="Bloggg">
-									Really Cool Blogpost 3
+								<ListItem href="/random#3" title="I Want To Hire You">
+									In case of emergency
 								</ListItem>
 							</ul>
 						</NavigationMenuContent>
 					</NavigationMenuItem>
-					{/* <NavigationMenuItem>
-						<NavigationMenuTrigger>
-							Organization
-						</NavigationMenuTrigger>
-						<NavigationMenuContent>
-							<ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-								{components.map((component) => (
-									<ListItem
-										key={component.title}
-										title={component.title}
-										href={component.href}
-									>
-										{component.description}
-									</ListItem>
-								))}
-							</ul>
-						</NavigationMenuContent>
-					</NavigationMenuItem> */}
-
 				</NavigationMenuList>
 			</NavigationMenu>
 		</header>
