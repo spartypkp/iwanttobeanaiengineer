@@ -48,10 +48,7 @@ const HomePage: React.FC = () => {
 				</p>
 			</section>
 
-			<section className="flex items-center justify-center">
-				
-				<HiringQuiz></HiringQuiz>
-			</section>
+
 			<section>
 
 				<div className="flex flex-row justify-between space-x-4 px-4 py-8">
@@ -59,15 +56,22 @@ const HomePage: React.FC = () => {
 					<BlogFeed type={'technical'} />
 				</div>
 
-				<section className="my-10">
-					<h3 className="text-4xl font-bold text-center mb-6">Highlighted Projects</h3>
-					<p className="text-center text-lg mb-4">
-						Explore a curated selection of projects that exemplify innovative solutions and technical expertise. From AI-driven applications to sophisticated data pipelines, these highlights reflect the breadth and depth of my engineering capabilities.
-					</p>
-					{/* Placeholder for dynamic project highlights */}
-					<Button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Explore More Projects</Button>
-				</section>
+			</section>
 
+			<section className="flex items-center justify-center">
+				<HiringQuiz></HiringQuiz>
+			</section>
+
+
+			<section className="my-10">
+				<h3 className="text-4xl font-bold text-center mb-6">Highlighted Projects</h3>
+				<p className="text-center text-lg mb-4">
+					Explore a curated selection of projects that exemplify innovative solutions and technical expertise. From AI-driven applications to sophisticated data pipelines, these highlights reflect the breadth and depth of my engineering capabilities.
+				</p>
+				{/* Placeholder for dynamic project highlights */}
+				<Button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Explore More Projects</Button>
+			</section>
+			<section>
 				<div className="text-center my-10">
 					<Button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Learn More About My Journey</Button>
 				</div>

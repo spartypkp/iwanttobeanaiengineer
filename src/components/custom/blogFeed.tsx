@@ -1,89 +1,41 @@
-// BlogFeed.tsx
 import React from 'react';
 import BlogPreview from './blogPreview'; // Ensure this is correctly imported
 import { Button } from '../ui/button';
 import { DailyBlog } from '@/lib/types';
-
-interface Blog {
-	id: number;
-	title: string;
-	excerpt: string;
-	date: string;
-	link: string;
-}
-
+import { getAllBlogs } from '@/lib/api';
+import { BlogPreviewProps } from './blogPreview';
 interface BlogFeedProps {
 	type: 'daily' | 'technical';
 }
 
-const BlogFeed: React.FC<BlogFeedProps> = ({ type }) => {
-	const generateBlogs = (type: 'daily' | 'technical'): Blog[] => {
-		if (type === 'daily') {
-			return [
-				{
-					id: 1,
-					title: "Daily Check-In: Progress and Challenges",
-					excerpt: "Today's focus was refining the blog feed component with TypeScript.",
-					date: "September 7, 2024",
-					link: `/blogs/daily/1`
-				},
-				{
-					id: 2,
-					title: "Day's Summary: Insights and Learning",
-					excerpt: "A reflection on the lessons learned from integrating interactive elements in React.",
-					date: "September 8, 2024",
-					link: `/blogs/daily/2`
-				},
-				{
-					id: 3,
-					title: "Daily Reflection: Troubleshooting and Fixes",
-					excerpt: "An overview of today's troubleshooting efforts and the fixes implemented.",
-					date: "September 9, 2024",
-					link: `/blogs/daily/3`
-				},
-				{
-					id: 4,
-					title: "Day's End Review: Achievements and Setbacks",
-					excerpt: "A candid look at both the achievements and the setbacks faced throughout the day.",
-					date: "September 10, 2024",
-					link: `/blogs/daily/4`
-				}
-			];
-		} else {
-			return [
-				{
-					id: 1,
-					title: "Technical Dive: Building the iwanttobeanaiengineer.com",
-					excerpt: "A comprehensive breakdown of the technical aspects of creating this website.",
-					date: "September 7, 2024",
-					link: `/blogs/technical/1`
-				},
-				{
-					id: 2,
-					title: "In-depth Analysis: AI Integration in Web Projects",
-					excerpt: "Exploring the integration of AI technologies within web-based projects.",
-					date: "September 12, 2024",
-					link: `/blogs/technical/2`
-				},
-				{
-					id: 3,
-					title: "Technical Insight: Optimizing React Components",
-					excerpt: "Techniques for optimizing React components for better performance and usability.",
-					date: "September 15, 2024",
-					link: `/blogs/technical/3`
-				},
-				{
-					id: 4,
-					title: "Deep Dive: Using TypeScript in React",
-					excerpt: "Benefits and challenges of using TypeScript in React development.",
-					date: "September 18, 2024",
-					link: `/blogs/technical/4`
-				}
-			];
+async function fetchBlogs(type: string) {
+	if (type === 'daily') {
+		const allBlogs = await getAllBlogs();
+		if (allBlogs && allBlogs.length > 0) {
+			const blogProps = allBlogs.map((blog: DailyBlog): BlogPreviewProps => {
+				return {
+					day: blog.day_count,
+					title: `Day ${blog.day_count}: ${blog.blog_title}` || "No Title", // Fallback if no title
+					excerpt: blog.blog_description || "No Description", // Fallback if no description
+					date: `${blog.date}`,
+					link: `/dailyBlogs/${blog.date}`
+				};
+			});
+			return blogProps;
 		}
-	};
+	} else {
+		// Preset data for technical blogs as previously given
+		return [];
+	}
+}
 
-	const blogs = generateBlogs(type);
+const BlogFeed: React.FC<BlogFeedProps> = async ({ type }) => {
+	let blogProps = await fetchBlogs(type);
+	if (!blogProps) {
+		blogProps = [];
+	}
+	
+	
 
 	return (
 		<div className="flex-1">
@@ -95,14 +47,15 @@ const BlogFeed: React.FC<BlogFeedProps> = ({ type }) => {
 			</p>
 		  </div>
 		  <div className="max-h-96 rounded-lg bg-gray-100 overflow-y-auto shadow-sm p-2">
-			{blogs.map(blog => (
+			{blogProps.map(blog => (
 			  <BlogPreview
-				key={blog.id}
-				title={blog.title}
-				excerpt={blog.excerpt}
-				date={blog.date}
-				link={blog.link}
-			  />
+			  key={blog.day}
+			  day={blog.day}
+			  title={`${blog.title}`}
+			  excerpt={blog.excerpt}
+			  date={`${blog.date}`}
+			  link={`/dailyBlogs/${blog.date}`}
+			/>
 			))}
 		  </div>
 		  <div className="text-center mt-4">

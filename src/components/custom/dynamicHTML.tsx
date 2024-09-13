@@ -1,7 +1,5 @@
 "use client";
 
-
-
 import React, { useEffect, useRef } from 'react';
 import hljs from 'highlight.js/lib/core';
 import 'highlight.js/styles/github.css'; // Choose the style you prefer

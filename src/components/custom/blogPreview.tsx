@@ -1,6 +1,7 @@
 import React from 'react';
 
-interface BlogPreviewProps {
+export interface BlogPreviewProps {
+	day: number;
     title: string;
     excerpt: string;
     date: string;
