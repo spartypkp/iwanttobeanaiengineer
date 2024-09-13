@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, ReactElement } from 'react';
 import hljs from 'highlight.js/lib/core';
 import 'highlight.js/styles/github.css'; // Choose the style you prefer
+import parse, { Element, DOMNode, domToReact } from 'html-react-parser';
 
 // Importing languages
 import javascript from 'highlight.js/lib/languages/javascript';
@@ -11,6 +12,9 @@ import typescript from 'highlight.js/lib/languages/typescript';
 import json from 'highlight.js/lib/languages/json';
 import sql from 'highlight.js/lib/languages/sql';
 import { Introduction, IntroductionFieldOrder, Reflection, ReflectionFieldOrder, Task, TaskFieldOrder } from '@/lib/types';
+import { Question, Warning, Informative } from './warningTooltip';
+import { createRoot } from 'react-dom/client';
+
 
 // Registering languages
 hljs.registerLanguage('javascript', javascript);
@@ -20,62 +24,108 @@ hljs.registerLanguage('json', json);
 hljs.registerLanguage('sql', sql);
 
 interface DynamicHTMLProps {
-    sectionData: Introduction | Reflection | Task;
-    type: 'Introduction' | 'Reflection' | 'Task'; // Added type hint prop
+	sectionData: Introduction | Reflection | Task;
+	type: 'Introduction' | 'Reflection' | 'Task'; // Added type hint prop
 }
 
 const DynamicHTML: React.FC<DynamicHTMLProps> = ({ sectionData, type }) => {
-    const ref = useRef<HTMLDivElement | null>(null);
+	const ref = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-        if (ref.current) {
-            ref.current.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block as HTMLElement);
-            });
-        }
-    }, [sectionData]); // Rerun highlighting when data changes
+	useEffect(() => {
+		if (ref.current) {
+			// Highlight all code blocks
+			ref.current.querySelectorAll('pre').forEach((block) => {
+				hljs.highlightElement(block as HTMLElement);
+			});
+			// Find all <question> HTML elements, convert to React components
+			const questions = ref.current.querySelectorAll('question');
+			questions.forEach(question => {
+                const message = question.getAttribute('message');
+                const parentSpan = question.parentElement;
 
-    const createMarkup = (htmlString: string) => ({ __html: htmlString });
-
-    const adjustCodeBlocks = (htmlString: string) => {
-        return htmlString.replace(/<pre class="ql-syntax" spellcheck="false">/g, '<pre class="whitespace-pre-wrap"><code>').replace(/<\/pre>/g, '</code></pre>');
-    };
-
-    const getFieldOrder = (): string[] => {
-        switch (type) {
-            case 'Introduction':
-                return IntroductionFieldOrder;
-            case 'Reflection':
-                return ReflectionFieldOrder;
-            case 'Task':
-                return TaskFieldOrder;
-            default:
-                return [];
-        }
-    };
-
-    const fieldOrder = getFieldOrder();
-
-    return (
-        <div ref={ref}>
-            {fieldOrder.map((fieldName) => {
-                const value = (sectionData as any)[fieldName];
-                if (typeof value === 'string') {
-                    const cleanedValue = adjustCodeBlocks(value);
-                    return (
-                        <div key={fieldName} className="mb-4 rounded-lg bg-gray-100 p-3">
-                            <h4 className="text-lg font-semibold text-gray-700 mb-2 capitalize">{fieldName.split('_').join(' ')}</h4>
-                            <div className="text-gray-600 text-base ql-editor" dangerouslySetInnerHTML={createMarkup(cleanedValue)} />
-                        </div>
-                    );
-                } else if (typeof value === 'number') {
-                    // Assuming you have a separate component for displaying slider values
-                    return generateDynamicSlider(fieldName, value);
+                // Check if the parent is actually a <span> and replace its content
+                if (parentSpan && parentSpan.tagName === 'SPAN') {
+					const root = createRoot(parentSpan!); // createRoot(container!) if you use TypeScript
+					root.render(<Question message={message || 'Error'} />);
                 }
-                return null;
-            })}
-        </div>
-    );
+            });
+			// Repeat for <informative> components
+			const informatives = ref.current.querySelectorAll('informative');
+			informatives.forEach(informative => {
+                const message = informative.getAttribute('message');
+                const parentSpan = informative.parentElement;
+
+                // Check if the parent is actually a <span> and replace its content
+                if (parentSpan && parentSpan.tagName === 'SPAN') {
+					const root = createRoot(parentSpan!); // createRoot(container!) if you use TypeScript
+					root.render(<Informative message={message || 'Error'} />);
+                }
+            });
+			// Repeat for warnings
+			const warnings = ref.current.querySelectorAll('warning');
+			warnings.forEach(warning => {
+                const message = warning.getAttribute('message');
+                const parentSpan = warning.parentElement;
+
+                // Check if the parent is actually a <span> and replace its content
+                if (parentSpan && parentSpan.tagName === 'SPAN') {
+					const root = createRoot(parentSpan!); // createRoot(container!) if you use TypeScript
+					root.render(<Warning message={message || 'Error'} />);
+                }
+            });
+		}
+	}, [sectionData]); // Rerun highlighting when data changes
+
+	const createMarkup = (htmlString: string) => ({ __html: htmlString });
+
+	const adjustCodeBlocks = (htmlString: string) => {
+		const length = htmlString.length;
+		htmlString = htmlString.replace(/<pre class="ql-syntax" spellcheck="false">/g, '<pre class="whitespace-pre-wrap"><code>').replace(/<\/pre>/g, '</code></pre>');
+		let isCodeBlock = false;
+		if (htmlString.length != length) {
+			isCodeBlock = true;
+		}
+		return [htmlString, isCodeBlock];
+
+	};
+	
+	const getFieldOrder = (): string[] => {
+		switch (type) {
+			case 'Introduction':
+				return IntroductionFieldOrder;
+			case 'Reflection':
+				return ReflectionFieldOrder;
+			case 'Task':
+				return TaskFieldOrder;
+			default:
+				return [];
+		}
+	};
+
+	const fieldOrder = getFieldOrder();
+
+	return (
+		<div ref={ref}>
+			{fieldOrder.map((fieldName) => {
+				const value = (sectionData as any)[fieldName];
+				if (typeof value === 'string') {
+					let [cleanedValue, isCodeBlock] = adjustCodeBlocks(value);
+
+					return (
+						<div key={fieldName} className="mb-4 rounded-lg bg-gray-100 p-3">
+							<h4 className="text-lg font-semibold text-gray-700 mb-2 capitalize">{fieldName.split('_').join(' ')}</h4>
+							<div className="text-gray-600 text-base ql-editor" dangerouslySetInnerHTML={createMarkup(cleanedValue as string)} />
+							
+						</div>
+					);
+				} else if (typeof value === 'number') {
+					// Assuming you have a separate component for displaying slider values
+					return generateDynamicSlider(fieldName, value);
+				}
+				return null;
+			})}
+		</div>
+	);
 };
 
 export default DynamicHTML;
@@ -83,7 +133,7 @@ export default DynamicHTML;
 function generateDynamicSlider(slider: string, value: number) {
 	let newColorClass;
 	let sliderLabel = slider.replace(/_/g, ' ');
-	console.log(slider);
+	
 	// Determine the new color class based on the slider's value
 	switch (slider) {
 		case 'enthusiasm_level':

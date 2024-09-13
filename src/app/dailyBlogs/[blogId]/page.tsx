@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Head from 'next/head';
 import DynamicHTML from "@/components/custom/dynamicHTML";
 import 'react-quill/dist/quill.snow.css';
+import { Warning, Question, Informative } from '@/components/custom/warningTooltip';
 
 export default async function Blog({ params }: { params: { blogId: string; }; }) {
 	const blog = await getBlogBySlug(params.blogId);
