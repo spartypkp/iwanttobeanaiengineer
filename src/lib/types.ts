@@ -20,10 +20,45 @@ export interface Task {
     research_questions?: string;
     tools_used?: string;
 }
+export function isDaveSection(interfaceType: Task | Reflection | Introduction, fieldName: string): boolean {
+    const daveTaskFields: string[] = [
+        "task_reflection_summary", 
+        "output_or_result",
+        "challenges_encountered",
+        "follow_up_tasks",
+        "reflection_successes",
+        "reflection_failures",
+        "research_questions",
+        "tools_used"
+    ];
+
+    const daveReflectionFields: string[] = [
+        "entire_blog_summary",
+        "technical_challenges",
+        "interesting_bugs",
+        "unanswered_questions",
+        "learning_outcomes"
+    ];
+
+    const daveIntroductionFields: string[] = [
+        "introduction_summary"
+    ];
+
+    if ("introduction_summary" in interfaceType) {
+        return daveIntroductionFields.includes(fieldName);
+    } else if ("entire_blog_summary" in interfaceType) {
+        return daveReflectionFields.includes(fieldName);
+    } else if ("task_reflection_summary" in interfaceType) {
+        return daveTaskFields.includes(fieldName);
+    }
+
+    return false;
+}
 
 // Updated TaskFieldOrder array
 export const TaskFieldOrder: (keyof Task)[] = [
 	'task_start_summary',
+	'task_reflection_summary',
     'task_goal',
     'task_description',
     'task_expected_difficulty',
@@ -33,7 +68,6 @@ export const TaskFieldOrder: (keyof Task)[] = [
     'time_spent_coding',
     'time_spent_researching',
     'time_spent_debugging',
-    'task_reflection_summary',
     'output_or_result',
     'challenges_encountered',
     'follow_up_tasks',

@@ -20,13 +20,14 @@ import { cn } from "@/lib/utils/cn";
 
 const NavBar = () => {
 	return (
-		<header
-            className="w-full px-4 py-2 text-base bg-background border-b border-solid"
-        >
+		<div
+			className="w-full px-4 py-2 text-base bg-background border-b border-solid"
+		>
 			<NavigationMenu className="w-full min-w-full">
+
 				<NavigationMenuList>
 					<NavigationMenuItem>
-					<Link href="/" legacyBehavior passHref>
+						<Link href="/" legacyBehavior passHref>
 							<NavigationMenuLink
 								className={navigationMenuTriggerStyle()}
 							>
@@ -52,24 +53,33 @@ const NavBar = () => {
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
-					<Link href="/argueWithDave" legacyBehavior passHref>
-							<NavigationMenuLink
-								className={navigationMenuTriggerStyle()}
-							>
-								Argue With Dave
-							</NavigationMenuLink>
-						</Link>
+					<Link href="/dave" legacyBehavior passHref>
+						<NavigationMenuLink
+							className={navigationMenuTriggerStyle()}
+						>
+							Argue With Dave
+						</NavigationMenuLink>
+					</Link>
 					<NavigationMenuItem>
 						<Link href="/stats" legacyBehavior passHref>
 							<NavigationMenuLink
 								className={navigationMenuTriggerStyle()}
 							>
-								Whole Lotta Stats
+								My Statistics
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
-					
 					<NavigationMenuItem>
+						<Link href="/about" legacyBehavior passHref>
+							<NavigationMenuLink
+								className={navigationMenuTriggerStyle()}
+							>
+								About Me
+							</NavigationMenuLink>
+						</Link>
+					</NavigationMenuItem>
+
+					{/* <NavigationMenuItem>
 						<NavigationMenuTrigger>
 							About Me
 						</NavigationMenuTrigger>
@@ -79,32 +89,33 @@ const NavBar = () => {
 									<NavigationMenuLink asChild>
 										<a
 											className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-											href="/mission#dream"
+											href="/"
 										>
+
 											<div className="mb-2 mt-4 text-lg font-medium">
-												About Will
+												About Me
 											</div>
-											<div className="mb-2 mt-4 text-sm font-medium">
-												And some shameless self plugging!
-											</div>
+											<p className="text-sm leading-tight text-muted-foreground">
+												And some shameless self plugging.
+											</p>
 										</a>
 									</NavigationMenuLink>
 								</li>
-								<ListItem href="/random#1" title="More About Me">
+								<ListItem href="/about#general" title="More About Me">
 									Bartending, Football, Pydantic, LLMs... that&apos;s about it.
 								</ListItem>
-								<ListItem href="/random#2" title="Interactive Resume">
+								<ListItem href="/about#interactiveResume" title="Interactive Resume">
 									Take a guided tour of my resume
 								</ListItem>
-								<ListItem href="/random#3" title="I Want To Hire You">
+								<ListItem href="/about#hireMe" title="I Want To Hire You">
 									In case of emergency
 								</ListItem>
 							</ul>
 						</NavigationMenuContent>
-					</NavigationMenuItem>
+					</NavigationMenuItem> */}
 				</NavigationMenuList>
 			</NavigationMenu>
-		</header>
+		</div>
 	);
 };
 
