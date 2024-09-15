@@ -16,7 +16,7 @@ export async function getBlogBySlug(slug: string): Promise<DailyBlog | null> {
 
 export async function getAllBlogs() {
 	const supabase = createClient();
-	const { data, error } = await supabase.from("daily_blogs").select("*").eq("status", "published").order("day_count").returns<DailyBlog[]>();
+	const { data, error } = await supabase.from("daily_blogs").select("*").eq("status", "published").order("day_count", { ascending: false }).returns<DailyBlog[]>();
 	
 	if (error) {
 		console.log(`Error in getAllBlogs()`)

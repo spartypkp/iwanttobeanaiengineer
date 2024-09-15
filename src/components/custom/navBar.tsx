@@ -53,11 +53,11 @@ const NavBar = () => {
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
-					<Link href="/dave" legacyBehavior passHref>
+					<Link href="/projects" legacyBehavior passHref>
 						<NavigationMenuLink
 							className={navigationMenuTriggerStyle()}
 						>
-							Argue With Dave
+							My Projects
 						</NavigationMenuLink>
 					</Link>
 					<NavigationMenuItem>
