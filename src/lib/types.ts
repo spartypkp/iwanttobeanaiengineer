@@ -36,8 +36,7 @@ export function isDaveSection(interfaceType: Task | Reflection | Introduction, f
         "entire_blog_summary",
         "technical_challenges",
         "interesting_bugs",
-        "unanswered_questions",
-        "learning_outcomes"
+        "unanswered_questions"
     ];
 
     const daveIntroductionFields: string[] = [
