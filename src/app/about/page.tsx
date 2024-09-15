@@ -59,7 +59,7 @@ const AboutPage: React.FC = () => {
 					<p>He asked me if there was any idea or dream I wanted to work on or build: to which I said yes. For 5 years I&apos;ve had the idea to build some kind of aplication to help regular people understand the law and the rights that apply to them. On the spot, Sean invited me to come code with him and some friends that Sunday at a local coffee shop.
 						This group, meeting every Sunday to hack/collaborate on projects and share ideas, was named Sunday Hustle.</p>
 					<p>I seriously debated if I wanted to go, but reason took over and I realized it could be the spark I needed to restart my efforts to break into tech and get a job.
-						It was the best decision I ever made. I met a group of passionate, kind, and experienced software engineers and AI enthusiasts. Below you can see my github contributions for 2023. It's very clear when I started going to Sunday Hustle.
+						It was the best decision I ever made. I met a group of passionate, kind, and experienced software engineers and AI enthusiasts. Below you can see my github contributions for 2023. It&apos;s very clear when I started going to Sunday Hustle.
 					</p>
 					<Image width={600} height={300} src="/sundayHustleCommits.png" alt="Commits after my first Sunday Hustle."></Image>
 
@@ -127,7 +127,7 @@ const AboutPage: React.FC = () => {
 					<p>
 						These big players had such a monopoly on these AI applications because they had a monopoly on the data. We aimed to remove this barrier, level the playing field, and provide all the data and tools an AI Engineer would need to start building instantly. We wanted to democratize legal knowledge to allow for the construction of more powerful and wide spread AI applications.
 					</p>
-					<p>Finding product market fit was difficult, not to mention the technical and practical implications of offering up the world's legislative data from an API. After a lot of debate and hard thinking, I decided to open source my work and shut down the startup to focus on my career as a software engineer and AI Engineer.</p>
+					<p>Finding product market fit was difficult, not to mention the technical and practical implications of offering up the world&apos;s legislative data from an API. After a lot of debate and hard thinking, I decided to open source my work and shut down the startup to focus on my career as a software engineer and AI Engineer.</p>
 					<Button variant="link">
 						<Link href="/projects/openSourceLegislation">You can see a more detailed explanation of the project and herculean effort of scraping global legislation here.</Link>
 					</Button>
