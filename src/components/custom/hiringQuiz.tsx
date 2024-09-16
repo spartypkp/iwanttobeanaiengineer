@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation'
 import { Button } from '../ui/button';
 import { Warning } from './warningTooltip';
 
@@ -12,6 +12,7 @@ const HiringQuiz = () => {
 	const [aggressiveMode, setAggressiveMode] = useState(false); // State to track aggressive mode activation
 	const [intro, setIntro] = useState("Dave here, before you move on:");
 	const [showQuiz, setShowQuiz] = useState(true);
+	const router = useRouter()
 
 
 
@@ -44,7 +45,7 @@ const HiringQuiz = () => {
 			setQuestionIndex(1); // Start the actual questions
 		} else {
 			console.log("Redirecting to /resume");
-			redirect('/about'); // Redirect to the Resume page
+			router.push('/about'); // Redirect to the Resume page
 		}
 	};
 
