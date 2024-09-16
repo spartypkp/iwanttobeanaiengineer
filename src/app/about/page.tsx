@@ -140,7 +140,7 @@ const AboutPage: React.FC = () => {
 								</CardHeader>
 								<CardContent>
 									<ul className="list-disc list-inside text-gray-600">
-										<li>Effectively led Contoural's AI Citation Extraction Pilot Project.</li>
+										<li>Effectively led Contoural&apos;s AI Citation Extraction Pilot Project.</li>
 										<li>Designed and implemented the project plan.</li>
 										<li>Developed and maintained production prompt pipelines.</li>
 										<li>Coordinated with domain experts to build effective eval sets.</li>
@@ -631,10 +631,10 @@ const AboutPage: React.FC = () => {
 													<Image src="/totalCommits.png" alt="AI Citation Helper " className="rounded-md" width={500} height={500}></Image>
 													<div className="text-sm bg-white rounded-lg border border-black text-gray-600 space-y-2 max-w-full px-2">
 														<p>
-															Throughout my journey as an AI engineer, I have worked on numerous side projects. Full transparency, there's a lot of half finished implementations! (A common problem)
+															Throughout my journey as an AI engineer, I have worked on numerous side projects. Full transparency, there&apos;s a lot of half finished implementations! (A common problem)
 														</p>
 														<p>
-															I learned to love building. Be it NextJS websites (love/hate sometimes), custom AI engineering tools, or experimentations into LLM capabilities. The spirit of Sunday Hustle's &quot;build something and demo it&quot; lives on.
+															I learned to love building. Be it NextJS websites (love/hate sometimes), custom AI engineering tools, or experimentations into LLM capabilities. The spirit of Sunday Hustle&apos;s &quot;build something and demo it&quot; lives on.
 														</p>
 														<p>
 															You can view more of my projects in more technical depth at the link below. I will continue to build, ship, and demo. Who knows what I&apos;ll build next Sunday!
@@ -658,7 +658,7 @@ const AboutPage: React.FC = () => {
 													<Image src="/shareHolderValue.png" alt="AI Citation Helper " className="rounded-md" width={500} height={500}></Image>
 													<div className="text-sm bg-white rounded-lg border border-black text-gray-600 space-y-2 max-w-full px-2">
 														<p>
-															Although I loved founding Recodify.ai, and building LLM applications for Contoural, I've always felt I hadn't reached my potential. I'm currently looking for full time employment in software engineering and AI Engineering.
+															Although I loved founding Recodify.ai, and building LLM applications for Contoural, I&apos;ve always felt I hadn&apos;t reached my potential. I&apos;m currently looking for full time employment in software engineering and AI Engineering.
 														</p>
 														<p>
 															I want to work on interesting and difficult projects.
