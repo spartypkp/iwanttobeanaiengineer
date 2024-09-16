@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import BlogFeed from '@/components/custom/blogFeed';
 import { Warning, Informative, Question, Highlight } from '@/components/custom/warningTooltip';
 import HiringQuiz from '@/components/custom/hiringQuiz';
-
+import Link from 'next/link';
 const HomePage: React.FC = () => {
 
 	const calculateDaysSince = (startDate: Date) => {
@@ -69,11 +69,22 @@ const HomePage: React.FC = () => {
 					Explore a curated selection of projects that exemplify innovative solutions and technical expertise. From AI-driven applications to sophisticated data pipelines, these highlights reflect the breadth and depth of my engineering capabilities.
 				</p>
 				{/* Placeholder for dynamic project highlights */}
-				<Button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Explore More Projects</Button>
+				<div className="items-center justify-center">
+					<Button variant="link" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"><Link href="/projects">Explore More Projects</Link></Button>
+
+				</div>
 			</section>
-			<section>
-				<div className="text-center my-10">
-					<Button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Learn More About My Journey</Button>
+
+
+			<section className="my-10">
+				<h3 className="text-4xl font-bold text-center mb-6">Interactive Resume</h3>
+				<p className="text-center text-lg mb-4">
+					View my resume in an interactive format, including a career timeline. Learn more about my skills, experience, and my journey as as software engineer.
+				</p>
+				{/* Placeholder for dynamic project highlights */}
+				<div className="items-center justify-center">
+					<Button variant="link" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"><Link href="/about">Learn More About My Journey</Link></Button>
+
 				</div>
 			</section>
 
