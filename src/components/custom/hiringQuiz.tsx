@@ -44,7 +44,7 @@ const HiringQuiz = () => {
 			setQuestionIndex(1); // Start the actual questions
 		} else {
 			console.log("Redirecting to /resume");
-			redirect('/resume'); // Redirect to the Resume page
+			redirect('/about'); // Redirect to the Resume page
 		}
 	};
 
