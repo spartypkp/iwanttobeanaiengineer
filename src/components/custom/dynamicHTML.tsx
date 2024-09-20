@@ -87,7 +87,7 @@ const DynamicHTML: React.FC<DynamicHTMLProps> = ({ sectionData, type }) => {
 
 	};
 
-	const getFieldOrder = (): string[] => {
+	const getFieldOrder = (type: string): string[] => {
 		switch (type) {
 			case 'Introduction':
 				return IntroductionFieldOrder;
@@ -100,7 +100,7 @@ const DynamicHTML: React.FC<DynamicHTMLProps> = ({ sectionData, type }) => {
 		}
 	};
 
-	const fieldOrder = getFieldOrder();
+	const fieldOrder = getFieldOrder(type);
 
 	return (
 		<div ref={ref}>
@@ -174,7 +174,7 @@ function generateDynamicSlider(slider: string, value: number) {
 	}
 
 	return (
-		<div className="mb-4">
+		<div key={slider} className="mb-4">
 			<h4 className="text-lg font-semibold text-gray-800 mb-2 capitalize">{sliderLabel}</h4>
 			<div className="w-full bg-gray-300 h-2 rounded-lg overflow-hidden border border-black">
 				<div className={`h-full ${newColorClass}`} style={{ width: `${value}%` }}></div>

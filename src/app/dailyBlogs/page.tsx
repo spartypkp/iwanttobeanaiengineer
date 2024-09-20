@@ -22,12 +22,12 @@ export default async function DailyBlogPage() {
 		  <div className="rounded-lg bg-gray-100 overflow-y-auto shadow-sm p-8">
 			{allBlogs.map(blog => (
 			  <BlogPreview
-			    key={blog.day_count}
+			    key={blog.id}
 				day={blog.day_count}
 				title={`Day ${blog.day_count}: ${blog.blog_title}`}
 				excerpt={blog.blog_description}
 				date={`${blog.date}`}
-				link={`/dailyBlogs/${blog.date}`}
+				link={`/dailyBlogs/${blog.id}`}
 			  />
 			))}
 		  </div>

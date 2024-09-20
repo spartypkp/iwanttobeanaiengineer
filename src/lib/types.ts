@@ -1,17 +1,31 @@
 
 
-// Updated Task interface with additional AI generated fields
+export interface Introduction {
+	[key: string]: any
+    personal_context?: string;
+    daily_goals?: string;
+    learning_focus?: string;
+    challenges?: string;
+    plan_of_action?: string;
+    focus_level?: number;
+    enthusiasm_level?: number;
+    burnout_level?: number;
+    leetcode_hatred_level?: number;
+	introduction_summary?: string;
+}
+
 export interface Task {
+	[key: string]: any
+	task_name?: string;
     task_goal?: string;
     task_description?: string;
     task_expected_difficulty?: number;
     task_planned_approach?: string;
-    task_progress_notes?: string;
-    task_start_summary?: string;  // AI Generated field added
+    task_progress_notes?: string;// Default ''
     time_spent_coding?: string;
     time_spent_researching?: string;
     time_spent_debugging?: string;
-    task_reflection_summary?: string; // AI Generated field added
+    task_reflection_summary?: string; // Default ''
     output_or_result?: string;
     challenges_encountered?: string;
     follow_up_tasks?: string;
@@ -19,6 +33,35 @@ export interface Task {
     reflection_failures?: string;
     research_questions?: string;
     tools_used?: string;
+}
+export interface Reflection {
+	[key: string]: any
+    learning_outcomes?: string;
+    next_steps_short_term?: string;
+    next_steps_long_term?: string;
+    productivity_level?: number;
+    distraction_level?: number;
+    desire_to_play_steam_games_level?: number;
+    overall_frustration_level?: number; // Default 50
+    entire_blog_summary?: string; // Default ''
+    technical_challenges?: string; // Default ''
+    interesting_bugs?: string; // Default ''
+    unanswered_questions?: string; // Default ''
+	
+}
+export interface DailyBlog {
+	id?: string;
+    date: string;
+	day_count: number;
+	blog_title: string;
+	blog_description: string;
+	blog_tags: any;
+    introduction?: Introduction;
+	tasks?: ({ id: string; } & Task)[];
+    reflection?: Reflection;
+	status: string | null;
+    created_at?: string;
+    updated_at?: string;
 }
 export function isDaveSection(interfaceType: Task | Reflection | Introduction, fieldName: string): boolean {
     const daveTaskFields: string[] = [
@@ -55,8 +98,7 @@ export function isDaveSection(interfaceType: Task | Reflection | Introduction, f
 }
 
 // Updated TaskFieldOrder array
-export const TaskFieldOrder: (keyof Task)[] = [
-	'task_start_summary',
+export const TaskFieldOrder = [
 	'task_reflection_summary',
     'task_goal',
     'task_description',
@@ -79,20 +121,9 @@ export const TaskFieldOrder: (keyof Task)[] = [
 
 
 // Interfaces for Introduction Submodel
-export interface Introduction {
-    personal_context?: string;
-    daily_goals?: string;
-    learning_focus?: string;
-    challenges?: string;
-    plan_of_action?: string;
-    focus_level?: number;
-    enthusiasm_level?: number;
-    burnout_level?: number;
-    leetcode_hatred_level?: number;
-	introduction_summary?: string;
-}
 
-export const IntroductionFieldOrder: (keyof Introduction)[] = [
+
+export const IntroductionFieldOrder = [
 	'introduction_summary',
     'personal_context',
     'daily_goals',
@@ -105,23 +136,9 @@ export const IntroductionFieldOrder: (keyof Introduction)[] = [
     'leetcode_hatred_level'
 ];
 
-// Updated Reflection interface with AI generated fields
-export interface Reflection {
-    learning_outcomes?: string;
-    next_steps_short_term?: string;
-    next_steps_long_term?: string;
-    productivity_level?: number;
-    distraction_level?: number;
-    desire_to_play_steam_games_level?: number;
-    overall_frustration_level?: number;
-    entire_blog_summary?: string; // AI Generated field added
-    technical_challenges?: string; // AI Generated field added
-    interesting_bugs?: string; // AI Generated field added
-    unanswered_questions?: string; // AI Generated field added
-}
 
 // Updated ReflectionFieldOrder array
-export const ReflectionFieldOrder: (keyof Reflection)[] = [
+export const ReflectionFieldOrder = [
 	'entire_blog_summary',
     'technical_challenges',
     'interesting_bugs',
@@ -137,17 +154,3 @@ export const ReflectionFieldOrder: (keyof Reflection)[] = [
 ];
 
 
-// Main Interface for Daily Blog
-export interface DailyBlog {
-    date: Date;
-	day_count: number;
-	blog_title: string;
-	blog_description: string;
-	blog_tags: any;
-    introduction?: Introduction;
-    tasks: Task[];
-    reflection?: Reflection;
-	status: string;
-    created_at?: Date;
-    updated_at?: Date;
-}
