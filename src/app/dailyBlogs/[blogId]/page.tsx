@@ -1,18 +1,16 @@
 
-import { init, tx, id } from '@instantdb/react';
-import { DailyBlog, Introduction, Task, Reflection } from "@/lib/types";
-import Head from 'next/head';
 import DynamicHTML from "@/components/custom/dynamicHTML";
-import 'quill/dist/quill.snow.css'; // Add css for snow theme
 import { getBlogBySlug } from '@/lib/api';
+import Head from 'next/head';
+import 'quill/dist/quill.snow.css'; // Add css for snow theme
 
 
 
 
 export default async function Blog({ params }: { params: { blogId: string; }; }) {
-	
-	
-	const blog = await getBlogBySlug(params.blogId)
+
+
+	const blog = await getBlogBySlug(params.blogId);
 
 	return (
 		<>
@@ -35,7 +33,7 @@ export default async function Blog({ params }: { params: { blogId: string; }; })
 
 				{blog.tasks && blog.tasks.map((task, index) => (
 					<div key={`task-${index}`} className="mb-8">
-						<h1 className="text-4xl font-bold text-gray-800 mb-3 text-center">{task.task_name || `Task ${index}` }</h1>
+						<h1 className="text-4xl font-bold text-gray-800 mb-3 text-center">{task.task_name || `Task ${index}`}</h1>
 						<DynamicHTML sectionData={task} type="Task" />
 					</div>
 				))}
