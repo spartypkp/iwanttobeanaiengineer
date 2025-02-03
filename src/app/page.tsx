@@ -1,98 +1,92 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+"use client";
 import BlogFeed from '@/components/custom/blogFeed';
-import { Warning, Informative, Question, Highlight } from '@/components/custom/warningTooltip';
-import HiringQuiz from '@/components/custom/hiringQuiz';
-import Link from 'next/link';
+import { ContactCTA } from '@/components/custom/contactCTA';
+import { DomainExpertise } from '@/components/custom/domainExpertise';
+// import { FeaturedProjects } from '@/components/custom/featuredProjects';
+import { Hero } from '@/components/custom/hero';
+
+import { TechStack } from '@/components/custom/techStack';
+import React from 'react';
+
 const HomePage: React.FC = () => {
-
-	const calculateDaysSince = (startDate: Date) => {
-		const now = new Date();
-		const difference = now.getTime() - startDate.getTime();
-		return Math.floor(difference / (1000 * 3600 * 24)); // Convert milliseconds to days
-	};
-	const startDate = new Date('2024-09-05');
-	const daysSinceStart = calculateDaysSince(startDate);
-
 	return (
-		<div className="max-w-7xl mx-auto">
-			<header className="text-center space-y-6 my-12">
-				<img src="profilePic.jpg" alt="Profile Picture" className="mx-auto h-48 w-48 object-cover rounded-full" />
-				<h1 className="text-6xl font-bold">Hi, I&apos;m Will.</h1>
-				<h2 className="text-3xl font-semibold mt-4">
-					This is My Quest to Get My Dream Job as an AI Engineer.
-				</h2>
-				<p className="text-xl">
-					It&apos;s been <span className="font-bold text-red-600 text-4xl">{daysSinceStart}</span> days since I started.
-				</p>
-				<p className="text-xl">
-					The counter stops the day I get hired.
-				</p>
-			</header>
+		<div className="max-w-7xl mx-auto px-4">
+			{/* Hero Section */}
+			<Hero
+				name="Will Diamond"
+				title="AI Engineer"
+				tagline="AI Engineer building cool things with LLMs, always seeking to learn more and build the next exciting thing in AI."
+				image="/profilePic.jpg"
+			/>
 
-			<section className="py-8 px-4">
-				<h3 className="text-4xl font-bold text-center mb-6">Why this Website?</h3>
-				<p className="text-lg leading-relaxed mb-4">
-					The point? Transparency, catharsis, and a bit of shameless self-promotion. I post daily blogs that serve as progress reports and document my journey in a structured way, covering both the mundane and the exciting parts of my day-to-day work. There are also in-depth technical blog posts where I dive into larger projects I&apos;m working on. <span className="inline-block"><Informative message="He means the ones he actually finishes."></Informative></span>
-				</p>
+			{/* Domain Expertise Cards */}
+			<DomainExpertise />
 
-				<p className="text-lg leading-relaxed mb-4">
-					Many friends and mentors suggested starting a blog to document my progress (mostly for myself), provide a window into some interesting projects I work on, and possibly help me on my goal of full-time employment. <span className="inline-block"><Warning message="And by 'help', he means 'please hire me so I can stop pretending I understand recursion.'"></Warning></span> I always struggled with putting myself out there, and the thought of writing a technical blog terrifies me.
-				</p>
+			{/* Tech Stack */}
+			<TechStack />
 
-				<p className="text-lg leading-relaxed mb-4">
-					So, I decided to build an AI editor—Dave—to handle most of the blog editing and writing, allowing me to completely avoid responsibility. <span className="inline-block"><Question message="Avoid responsibility, or just scared of typos, Will?"></Question></span> Dave not only proofreads and compiles my thoughts but also automatically posts them, helping me overcome my fear of putting myself out there.
+			{/* Featured Projects */}
+			<section className="py-16">
+				<h2 className="text-3xl font-bold mb-8">Featured Work</h2>
+				{/* <FeaturedProjects
+					projects={[
+						{
+							title: "Information Governance AI",
+							company: "Contoural Inc",
+							description: "LLM systems helping Fortune 500 companies navigate complex information governance",
+							tags: ["Enterprise", "LLMs", "Compliance"]
+						},
+						{
+							title: "Recodify.ai",
+							company: "Founder",
+							description: "AI-powered platform making legal knowledge accessible",
+							tags: ["Legal Tech", "Startups", "NLP"]
+						},
+						{
+							title: "Content Automation",
+							company: "Latent Space",
+							description: "AI systems for streamlining tech media production",
+							tags: ["Media", "Automation", "Content"]
+						}
+					]}
+				/> */}
+			</section>
+
+			{/* Blog Section - Now more focused on technical insights */}
+			<section className="py-16">
+				<h2 className="text-3xl font-bold mb-8">Technical Insights</h2>
+				<p className="text-lg mb-8">
+					Exploring the intersection of AI engineering and real-world applications.
+					Deep dives into LLMs, system architecture, and lessons learned.
 				</p>
-				<p className="text-lg leading-relaxed mb-4">
-					Ultimately, this website doubles as an interactive resume, showcasing projects and experiences that highlight my capabilities as an AI engineer. It&apos;s a real-time window into my job search, and hopefully, an inspiration for other young and passionate engineers. <span className="inline-block"><Highlight message="Just don’t look too closely at the commit messages; it’s not as inspiring.">Even if no one sees this, I&apos;ll still have this site to look back on someday.</Highlight></span>
-				</p>
+				<BlogFeed type="daily" />
 			</section>
 
 
-			<section>
+			{/* Contact CTA */}
+			<ContactCTA
+				heading="Let's Build Something Amazing"
+				subheading="Looking to collaborate on innovative AI projects?"
+				buttonText="Get in Touch"
+			/>
 
-				<div className="flex flex-row justify-between space-x-4 px-4 py-8">
-					<BlogFeed type={'daily'} />
-					<BlogFeed type={'technical'} />
-				</div>
-
-			</section>
-
-			<section className="flex items-center justify-center">
-				<HiringQuiz></HiringQuiz>
-			</section>
-
-
-			<section className="my-10">
-				<h3 className="text-4xl font-bold text-center mb-6">Highlighted Projects</h3>
-				<p className="text-center text-lg mb-4">
-					Explore a curated selection of projects that exemplify innovative solutions and technical expertise. From AI-driven applications to sophisticated data pipelines, these highlights reflect the breadth and depth of my engineering capabilities.
-				</p>
-				{/* Placeholder for dynamic project highlights */}
-				<div className="items-center justify-center">
-					<Button variant="link" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"><Link href="/projects">Explore More Projects</Link></Button>
-
-				</div>
-			</section>
-
-
-			<section className="my-10">
-				<h3 className="text-4xl font-bold text-center mb-6">Interactive Resume</h3>
-				<p className="text-center text-lg mb-4">
-					View my resume in an interactive format, including a career timeline. Learn more about my skills, experience, and my journey as as software engineer.
-				</p>
-				{/* Placeholder for dynamic project highlights */}
-				<div className="items-center justify-center">
-					<Button variant="link" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"><Link href="/about">Learn More About My Journey</Link></Button>
-
-				</div>
-			</section>
-
-			<footer className="text-center my-10">
-				<p>Interested in my journey or want to connect? Follow me or drop a line!</p>
-				<div className="space-x-4 mt-2">
-					<Button>Twitter</Button>
-					<Button>LinkedIn</Button>
+			{/* Footer */}
+			<footer className="py-16 text-center">
+				<div className="space-y-4">
+					<div className="flex justify-center space-x-6">
+						<a href="https://x.com/itsreallywillyd" className="text-gray-600 hover:text-blue-500">
+							Twitter
+						</a>
+						<a href="https://www.linkedin.com/in/will-diamond-b1724520b/" className="text-gray-600 hover:text-blue-500">
+							LinkedIn
+						</a>
+						<a href="https://github.com/spartypkp" className="text-gray-600 hover:text-blue-500">
+							GitHub
+						</a>
+					</div>
+					<p className="text-sm text-gray-500">
+						© {new Date().getFullYear()} Will Diamond. All rights reserved.
+					</p>
 				</div>
 			</footer>
 		</div>
