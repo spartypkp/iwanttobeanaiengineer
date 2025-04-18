@@ -1,7 +1,11 @@
+"use client";
+
 import ProjectCard, { Project } from '@/components/custom/projectCard';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 const projects: Project[] = [
-    {
+	{
 		id: "daily-blog-builder",
 		name: "Daily Blog Builder",
 		description: "A local Flask application designed to aid in structuring and writing daily blogs with the help of an AI editor. It includes features such as AI-assisted content refinement, rich text editing, and automated blog management and publication. I use this tool everyday to write all of my daily blogs, edit them, and publish them to this NextJS site!",
@@ -11,38 +15,38 @@ const projects: Project[] = [
 		status: "Active",
 		startDate: new Date(2024, 9, 4), // Example start date, adjust as necessary
 		thumbnailSrc: "/blogBuilder.png",
-		features:  <div>
-        <p>
-            <strong>Daily Blog Builder</strong> simplifies the process of writing, managing, and publishing daily blogs.
-            It&apos;s designed to support individuals committed to documenting their journey towards personal or professional goals.
-            This tool integrates seamlessly into daily routines, offering a blend of technical documentation capabilities and self-reflection tools.
-        </p>
-        <h3 className="font-semibold text-lg">Core Functionalities</h3>
-        <ul>
-            <li>
-                <strong>AI-Assisted Writing:</strong> Utilizes advanced AI to provide editorial guidance, ensuring content clarity and engagement.
-                It includes automatic summarization, humor injection, and structured data extraction from technical documents.
-            </li>
-            <li>
-                <strong>Reflection and Motivation:</strong> The AI Editor helps analyze daily successes and failures, offering feedback that encourages continuous improvement and consistent goal pursuit.
-            </li>
-            <li>
-                <strong>Rich Text Editing:</strong> Incorporates Quill.js for a flexible and user-friendly writing experience.
-            </li>
-            <li>
-                <strong>Seamless Integration:</strong> Custom React components are dynamically generated for enhancing blog posts with additional content and interactive elements.
-            </li>
-            <li>
-                <strong>Storage and Management:</strong> Automated handling of blog entries with Postgres and Supabase Storage, supporting embedded images and other media.
-            </li>
-            <li>
-                <strong>Publication Ready:</strong> Features include one-click blog publishing to a NextJS frontend, with all edits and annotations intact.
-            </li>
-        </ul>
-        <p>
-            Whether you&apos;re documenting project progress, daily learning, or personal growth, <em>Daily Blog Builder</em> is tailored to make the journey insightful and documented.
-        </p>
-    </div>
+		features: <div>
+			<p>
+				<strong>Daily Blog Builder</strong> simplifies the process of writing, managing, and publishing daily blogs.
+				It&apos;s designed to support individuals committed to documenting their journey towards personal or professional goals.
+				This tool integrates seamlessly into daily routines, offering a blend of technical documentation capabilities and self-reflection tools.
+			</p>
+			<h3 className="font-semibold text-lg">Core Functionalities</h3>
+			<ul>
+				<li>
+					<strong>AI-Assisted Writing:</strong> Utilizes advanced AI to provide editorial guidance, ensuring content clarity and engagement.
+					It includes automatic summarization, humor injection, and structured data extraction from technical documents.
+				</li>
+				<li>
+					<strong>Reflection and Motivation:</strong> The AI Editor helps analyze daily successes and failures, offering feedback that encourages continuous improvement and consistent goal pursuit.
+				</li>
+				<li>
+					<strong>Rich Text Editing:</strong> Incorporates Quill.js for a flexible and user-friendly writing experience.
+				</li>
+				<li>
+					<strong>Seamless Integration:</strong> Custom React components are dynamically generated for enhancing blog posts with additional content and interactive elements.
+				</li>
+				<li>
+					<strong>Storage and Management:</strong> Automated handling of blog entries with Postgres and Supabase Storage, supporting embedded images and other media.
+				</li>
+				<li>
+					<strong>Publication Ready:</strong> Features include one-click blog publishing to a NextJS frontend, with all edits and annotations intact.
+				</li>
+			</ul>
+			<p>
+				Whether you&apos;re documenting project progress, daily learning, or personal growth, <em>Daily Blog Builder</em> is tailored to make the journey insightful and documented.
+			</p>
+		</div>
 	},
 	{
 		id: "open-source-legislation",
@@ -58,9 +62,9 @@ const projects: Project[] = [
 					<li>Large Language Model Readiness: Utilize data structured for AI applications, including pre-generated embedding fields.</li>
 					<li>Python SDK: Employ our Python SDK to interact with the legislation data using Pydantic models for seamless data handling and validation.</li>
 					<li>TypeScript SDK (Coming Soon): Enhance client-side application development with our upcoming TypeScript SDK.</li>
-					<li>Customizable Scraping Tools: Adapt and extend scraping tools as needed, contributing to the community’s growth and resource pool.</li>
+					<li>Customizable Scraping Tools: Adapt and extend scraping tools as needed, contributing to the community's growth and resource pool.</li>
 				</ul>
-				
+
 			</div>
 		),
 		technologies: ["Python", "SQL", "Pydantic", "OpenAI", "Selenium", "BeautifulSoup"],
@@ -117,20 +121,82 @@ const projects: Project[] = [
 		status: "Archived",
 		startDate: new Date(2024, 1, 1), // Example start date, adjust as necessary
 		thumbnailSrc: "/pgTypedPydantic.png", // Placeholder for the actual image URL
-	} 
+	}
 ];
+
 const ProjectsPage: React.FC = () => {
-    return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold text-center">My Projects</h1>
-			<p>Note: Currently being updated rn!</p>
-            <div className="flex flex-wrap justify-center">
-                {projects.map(project => (
-                    <ProjectCard key={project.id} project={project} />
-                ))}
-            </div>
-        </div>
-    );
-}
+	const [filter, setFilter] = useState<'All' | 'Active' | 'Maintenance' | 'Archived'>('All');
+
+	const filteredProjects = filter === 'All'
+		? projects
+		: projects.filter(project => project.status === filter);
+
+	const techCategories = Array.from(new Set(projects.flatMap(p => p.technologies))).sort();
+
+	return (
+		<div className="container mx-auto px-4 py-12">
+			<div className="text-center mb-12">
+				<h1 className="text-4xl font-bold mb-4">Project Portfolio</h1>
+				<p className="text-xl text-gray-600 max-w-3xl mx-auto">
+					A collection of my projects showcasing my experience with AI, web development,
+					and software engineering. Each project represents different skills and technologies.
+				</p>
+			</div>
+
+			<div className="mb-8">
+				<div className="flex flex-wrap justify-center gap-2 mb-4">
+					<Button
+						variant={filter === 'All' ? 'default' : 'outline'}
+						onClick={() => setFilter('All')}
+					>
+						All Projects
+					</Button>
+					<Button
+						variant={filter === 'Active' ? 'default' : 'outline'}
+						onClick={() => setFilter('Active')}
+					>
+						Active
+					</Button>
+					<Button
+						variant={filter === 'Maintenance' ? 'default' : 'outline'}
+						onClick={() => setFilter('Maintenance')}
+					>
+						Maintenance
+					</Button>
+					<Button
+						variant={filter === 'Archived' ? 'default' : 'outline'}
+						onClick={() => setFilter('Archived')}
+					>
+						Archived
+					</Button>
+				</div>
+
+				<div className="text-center mb-8">
+					<p>
+						Showing {filteredProjects.length} of {projects.length} projects
+						{filter !== 'All' && ` (filtered by ${filter})`}
+					</p>
+				</div>
+			</div>
+
+			<div className="space-y-12">
+				{filteredProjects.map(project => (
+					<ProjectCard key={project.id} project={project} />
+				))}
+			</div>
+
+			<div className="mt-16 text-center">
+				<h2 className="text-2xl font-bold mb-4">Technical Skills Showcase</h2>
+				<div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
+					{techCategories.map(tech => (
+						<span key={tech} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+							{tech}
+						</span>
+					))}
+				</div>
+			</div>
+		</div>
+	);
+};
 
 export default ProjectsPage;

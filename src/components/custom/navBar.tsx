@@ -1,118 +1,48 @@
 "use client";
-import React from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link"; // Import the Link component from the appropriate library
-import Image from "next/image"; // Import the Image component from the appropriate library
 import {
 	NavigationMenu,
-	NavigationMenuContent,
-	NavigationMenuIndicator,
 	NavigationMenuItem,
 	NavigationMenuLink,
 	NavigationMenuList,
-	NavigationMenuTrigger,
-	NavigationMenuViewport,
-	navigationMenuTriggerStyle,
+	navigationMenuTriggerStyle
 } from "@/components/ui/navigationMenu";
 import { cn } from "@/lib/utils/cn";
-
-
+import Link from "next/link";
+import React from "react";
 
 const NavBar = () => {
 	return (
-		<div
-			className="w-full px-4 py-2 text-base bg-background border-b border-solid"
-		>
+		<div className="w-full px-4 py-2 text-base bg-background border-b border-solid">
 			<NavigationMenu className="w-full min-w-full">
-
 				<NavigationMenuList>
 					<NavigationMenuItem>
 						<Link href="/" legacyBehavior passHref>
-							<NavigationMenuLink
-								className={navigationMenuTriggerStyle()}
-							>
+							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
 								Home
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<Link href="/dailyBlogs" legacyBehavior passHref>
-							<NavigationMenuLink
-								className={navigationMenuTriggerStyle()}
-							>
-								Daily Blogs
-							</NavigationMenuLink>
-						</Link>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
-						<Link href="/technicalBlogs" legacyBehavior passHref>
-							<NavigationMenuLink
-								className={navigationMenuTriggerStyle()}
-							>
-								Technical Blogs
-							</NavigationMenuLink>
-						</Link>
-					</NavigationMenuItem>
-					<Link href="/projects" legacyBehavior passHref>
-						<NavigationMenuLink
-							className={navigationMenuTriggerStyle()}
-						>
-							My Projects
-						</NavigationMenuLink>
-					</Link>
-					<NavigationMenuItem>
-						<Link href="/stats" legacyBehavior passHref>
-							<NavigationMenuLink
-								className={navigationMenuTriggerStyle()}
-							>
-								My Statistics
+						<Link href="/projects" legacyBehavior passHref>
+							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
+								Projects
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
 						<Link href="/about" legacyBehavior passHref>
-							<NavigationMenuLink
-								className={navigationMenuTriggerStyle()}
-							>
+							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
 								About Me
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
-
-					{/* <NavigationMenuItem>
-						<NavigationMenuTrigger>
-							About Me
-						</NavigationMenuTrigger>
-						<NavigationMenuContent>
-							<ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-								<li className="row-span-3">
-									<NavigationMenuLink asChild>
-										<a
-											className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-											href="/"
-										>
-
-											<div className="mb-2 mt-4 text-lg font-medium">
-												About Me
-											</div>
-											<p className="text-sm leading-tight text-muted-foreground">
-												And some shameless self plugging.
-											</p>
-										</a>
-									</NavigationMenuLink>
-								</li>
-								<ListItem href="/about#general" title="More About Me">
-									Bartending, Football, Pydantic, LLMs... that&apos;s about it.
-								</ListItem>
-								<ListItem href="/about#interactiveResume" title="Interactive Resume">
-									Take a guided tour of my resume
-								</ListItem>
-								<ListItem href="/about#hireMe" title="I Want To Hire You">
-									In case of emergency
-								</ListItem>
-							</ul>
-						</NavigationMenuContent>
-					</NavigationMenuItem> */}
+					<NavigationMenuItem>
+						<Link href="/stats" legacyBehavior passHref>
+							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
+								Statistics
+							</NavigationMenuLink>
+						</Link>
+					</NavigationMenuItem>
 				</NavigationMenuList>
 			</NavigationMenu>
 		</div>

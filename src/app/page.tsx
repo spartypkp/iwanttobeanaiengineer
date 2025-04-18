@@ -1,10 +1,8 @@
 "use client";
-import BlogFeed from '@/components/custom/blogFeed';
 import { ContactCTA } from '@/components/custom/contactCTA';
 import { DomainExpertise } from '@/components/custom/domainExpertise';
-// import { FeaturedProjects } from '@/components/custom/featuredProjects';
+import { FeaturedProjects } from '@/components/custom/featuredProjects';
 import { Hero } from '@/components/custom/hero';
-
 import { TechStack } from '@/components/custom/techStack';
 import React from 'react';
 
@@ -27,41 +25,35 @@ const HomePage: React.FC = () => {
 
 			{/* Featured Projects */}
 			<section className="py-16">
-				<h2 className="text-3xl font-bold mb-8">Featured Work</h2>
-				{/* <FeaturedProjects
+				<h2 className="text-3xl font-bold mb-8">Featured Projects</h2>
+				<FeaturedProjects
 					projects={[
 						{
 							title: "Information Governance AI",
 							company: "Contoural Inc",
 							description: "LLM systems helping Fortune 500 companies navigate complex information governance",
-							tags: ["Enterprise", "LLMs", "Compliance"]
+							tags: ["Enterprise", "LLMs", "Compliance"],
+							image: "/contoural.png",
+							link: "/projects"
 						},
 						{
-							title: "Recodify.ai",
-							company: "Founder",
-							description: "AI-powered platform making legal knowledge accessible",
-							tags: ["Legal Tech", "Startups", "NLP"]
+							title: "Open Source Legislation",
+							company: "Recodify.ai",
+							description: "Democratizing access to global legislative data through well-structured databases and APIs",
+							tags: ["Legal Tech", "Python", "NLP"],
+							image: "/openSourceLegislation.png",
+							link: "/projects"
 						},
 						{
-							title: "Content Automation",
-							company: "Latent Space",
-							description: "AI systems for streamlining tech media production",
-							tags: ["Media", "Automation", "Content"]
+							title: "PGTyped Pydantic",
+							description: "Automated system for generating Pydantic models from SQL queries for type-safe database interactions",
+							tags: ["Python", "PostgreSQL", "Developer Tools"],
+							image: "/pgTypedPydantic.png",
+							link: "/projects"
 						}
 					]}
-				/> */}
+				/>
 			</section>
-
-			{/* Blog Section - Now more focused on technical insights */}
-			<section className="py-16">
-				<h2 className="text-3xl font-bold mb-8">Technical Insights</h2>
-				<p className="text-lg mb-8">
-					Exploring the intersection of AI engineering and real-world applications.
-					Deep dives into LLMs, system architecture, and lessons learned.
-				</p>
-				<BlogFeed type="daily" />
-			</section>
-
 
 			{/* Contact CTA */}
 			<ContactCTA

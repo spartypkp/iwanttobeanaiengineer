@@ -1,7 +1,11 @@
 // components/ProjectCard.tsx
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Github, Globe } from 'lucide-react';
 import Image from 'next/image';
+import React from 'react';
+
 export interface Project {
 	id: string;
 	name: string;
@@ -22,40 +26,77 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 	return (
-		<Card className="m-2 bg-white shadow-lg rounded-lg max-w-4xl">
-			<CardHeader >
-				<CardTitle className="items-center justify-center text-4xl">{project.name}</CardTitle>
-				<div className="text-sm text-gray-600">Started: {project.startDate.toDateString()}</div>
-				<h1 className="font-bold text-xl ">Description</h1>
-				<p>{project.description}</p>
-				<div className="flex justify-center items-center p-4">
+		<Card className="m-4 bg-white shadow-lg rounded-lg max-w-4xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+			<CardHeader className="space-y-4">
+				<div className="space-y-2">
+					<CardTitle className="text-4xl font-bold text-center">{project.name}</CardTitle>
+					<div className="flex justify-center">
+						<Badge variant={project.status === 'Active' ? 'default' : project.status === 'Maintenance' ? 'secondary' : 'outline'}>
+							{project.status}
+						</Badge>
+						<span className="mx-2 text-gray-400">•</span>
+						<span className="text-sm text-gray-600">Started: {project.startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+						{project.endDate && (
+							<>
+								<span className="mx-2 text-gray-400">•</span>
+								<span className="text-sm text-gray-600">Completed: {project.endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+							</>
+						)}
+					</div>
+				</div>
+
+				<div className="rounded-lg overflow-hidden border border-gray-200">
 					<Image
 						src={project.thumbnailSrc}
 						alt={project.name}
-						width={500}
-						height={500}
-						className="rounded-lg border-4 border-gray-300"
+						width={800}
+						height={450}
+						className="w-full object-cover transition-transform duration-500 hover:scale-105"
 					/>
 				</div>
+
+				<div className="space-y-2">
+					<h2 className="font-bold text-xl border-b pb-2">Overview</h2>
+					<p className="text-gray-700 leading-relaxed">{project.description}</p>
+				</div>
 			</CardHeader>
-			<CardContent>
-				<h1 className="font-semibold text-xl ">Project Features and Functionality</h1>
-				<div>{project.features}</div>
-				<h1 className="font-bold text-xl ">Core Technologies Used</h1>
-				<div className="flex flex-wrap mt-2">
-					{project.technologies.map((tech, index) => (
-						<span key={index} className="bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">{tech}</span>
-					))}
+
+			<CardContent className="space-y-6">
+				<div className="space-y-3">
+					<h2 className="font-bold text-xl border-b pb-2">Features & Functionality</h2>
+					<div className="text-gray-700">{project.features}</div>
+				</div>
+
+				<div className="space-y-3">
+					<h2 className="font-bold text-xl border-b pb-2">Technologies</h2>
+					<div className="flex flex-wrap gap-2">
+						{project.technologies.map((tech, index) => (
+							<Badge key={index} variant="secondary" className="text-sm py-1">
+								{tech}
+							</Badge>
+						))}
+					</div>
 				</div>
 			</CardContent>
-			<CardFooter>
-				<div className="flex flex-col">
-					<a href={project.githubUrl} className="text-blue-500 hover:text-blue-800">GitHub</a>
-					<a href={project.liveDemoUrl} className="text-blue-500 hover:text-blue-800">Live Demo</a>
-					<p className="text-sm text-gray-500 mt-2">Project Status: {project.status}</p>
 
+			<CardFooter className="flex justify-between items-center pt-4 border-t">
+				<div className="flex space-x-4">
+					<Button variant="outline" size="sm" asChild>
+						<a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
+							<Github className="mr-2 h-4 w-4" />
+							GitHub
+						</a>
+					</Button>
+
+					{project.liveDemoUrl && (
+						<Button variant="default" size="sm" asChild>
+							<a href={project.liveDemoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
+								<Globe className="mr-2 h-4 w-4" />
+								Live Demo
+							</a>
+						</Button>
+					)}
 				</div>
-
 			</CardFooter>
 		</Card>
 	);
