@@ -3,57 +3,178 @@
 @tailwind utilities;
 
 @layer base {
+
+  /* ===== MATRIX TERMINAL THEME ===== */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
+    /* Base background color (main page background) */
+    --background: 0 0% 7%;
+    /* Primary text color on background */
+    --foreground: 143 90% 80%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Subdued background for secondary content */
+    --muted: 180 2% 20%;
+    /* Text color for content on muted backgrounds */
+    --muted-foreground: 143 50% 80%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    /* Card background color */
+    --card: 180 5% 10%;
+    /* Text color for content on card backgrounds */
+    --card-foreground: 143 90% 85%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+    /* Popover/dropdown background color */
+    --popover: 180 5% 10%;
+    /* Text color for content on popover backgrounds */
+    --popover-foreground: 143 90% 85%;
 
-    --border: 214.3 31.8% 91.4%;
+    /* Border color for inputs and separators */
+    --border: 143 50% 30%;
+    /* Input element border colors */
+    --input: 143 50% 30%;
 
-    --input: 214.3 31.8% 91.4%;
+    /* Primary action color (buttons, links, focus) */
+    --primary: 143 90% 50%;
+    /* Text color on primary colored elements */
+    --primary-foreground: 0 0% 0%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Secondary/supporting element color */
+    --secondary: 143 50% 20%;
+    /* Text color on secondary colored elements */
+    --secondary-foreground: 143 90% 80%;
 
+    /* Accent color for highlights and special elements */
+    --accent: 143 90% 60%;
+    /* Text color on accent colored elements */
+    --accent-foreground: 0 0% 0%;
 
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-
-    --accent: 143 68% 62%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    /* Color for destructive actions (delete, errors) */
     --destructive: 0 100% 50%;
+    /* Text color on destructive elements */
     --destructive-foreground: 210 40% 98%;
 
+    /* Focus ring color for interactive elements */
+    --ring: 143 50% 40%;
 
-
-
-    --ring: 215 20.2% 65.1%;
-
-
-    --ring: 215 20.2% 65.1%;
-
+    /* Font family could be changed to a monospace for this theme */
+    --font-sans: 'Source Code Pro', monospace;
   }
 
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Matrix Digital Rain Animation */
+  @keyframes matrixRain {
+    0% {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+
+    10% {
+      opacity: 1;
+    }
+
+    90% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+
+  .matrix-rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+    opacity: 0.15;
+  }
+
+  .matrix-rain-character {
+    position: absolute;
+    color: hsl(143, 90%, 50%);
+    font-family: monospace;
+    font-size: 1.2rem;
+    animation: matrixRain 2s linear infinite;
+  }
+
+  /* Terminal styling utilities */
+  .terminal-window {
+    border: 1px solid hsl(var(--primary));
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0 10px hsla(var(--primary), 0.2);
+  }
+
+  .terminal-header {
+    background-color: hsl(var(--secondary));
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .terminal-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .terminal-title {
+    font-family: monospace;
+    color: hsl(var(--primary));
+  }
+
+  .terminal-content {
+    background-color: hsl(var(--card));
+    padding: 1rem;
+    color: hsl(var(--primary));
+    font-family: monospace;
+  }
+
+  /* Typing animation */
+  @keyframes typing {
+    from {
+      width: 0
+    }
+
+    to {
+      width: 100%
+    }
+  }
+
+  .typing-animation {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end);
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Code+Pro:wght@300..900&display=swap');
 }
 
+/* Add terminal styling effects */
+@layer utilities {
+  .scan-lines {
+    background: linear-gradient(to bottom,
+        rgba(255, 255, 255, 0.03) 50%,
+        rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
 
+  .terminal-glow {
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.4),
+      0 0 20px rgba(0, 255, 65, 0.2);
+  }
+}
 
-
-
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-
-
+/* CSS Variable for project accent colors */
+:root {
+  --primary-rgb: 0, 255, 65;
+  /* Default matrix green */
+}

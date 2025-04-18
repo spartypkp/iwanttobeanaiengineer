@@ -7,7 +7,8 @@ import {
 	Globe,
 	Layout,
 	LucideIcon,
-	Server
+	Server,
+	Terminal
 } from "lucide-react";
 
 interface TechCategory {
@@ -91,9 +92,14 @@ export const TechStack: React.FC = () => {
 
 	return (
 		<section className="py-16">
+			<div className="flex items-center gap-2 mb-2">
+				<Terminal className="h-5 w-5 text-primary" />
+				<p className="text-sm font-mono text-primary">$ scan tech-stack --verbose</p>
+			</div>
+
 			<div className="space-y-4 mb-8">
-				<h2 className="text-3xl font-bold">Technical Stack</h2>
-				<p className="text-lg text-gray-600">
+				<h2 className="text-3xl font-bold text-foreground">Technical Stack</h2>
+				<p className="text-lg text-muted-foreground">
 					Comprehensive toolkit for building modern AI applications
 				</p>
 			</div>
@@ -102,15 +108,15 @@ export const TechStack: React.FC = () => {
 				{categories.map((category, index) => {
 					const IconComponent = getIcon(category.icon);
 					return (
-						<Card key={index} className="p-6">
+						<Card key={index} className="p-6 border border-primary/20 bg-card hover:shadow-[0_0_10px_rgba(var(--primary)/.2)] transition-shadow">
 							<div className="space-y-4">
 								<div className="flex items-center space-x-3">
-									<div className="p-2 bg-blue-50 rounded-lg">
-										<IconComponent className="h-6 w-6 text-blue-600" />
+									<div className="p-2 bg-secondary/20 rounded-lg">
+										<IconComponent className="h-6 w-6 text-primary" />
 									</div>
 									<div>
-										<h3 className="text-xl font-semibold">{category.title}</h3>
-										<p className="text-sm text-gray-600">{category.description}</p>
+										<h3 className="text-xl font-semibold text-foreground">{category.title}</h3>
+										<p className="text-sm text-muted-foreground">{category.description}</p>
 									</div>
 								</div>
 
@@ -118,8 +124,8 @@ export const TechStack: React.FC = () => {
 									{category.technologies.map((tech, i) => (
 										<Badge
 											key={i}
-											variant="secondary"
-											className="px-3 py-1 text-sm"
+											variant="outline"
+											className="px-3 py-1 text-sm border-primary/30 text-foreground bg-secondary/10 hover:bg-secondary/20"
 										>
 											{tech}
 										</Badge>
@@ -132,9 +138,9 @@ export const TechStack: React.FC = () => {
 			</div>
 
 			{/* Proficiency Level Indicator */}
-			<div className="mt-8 text-center text-sm text-gray-500">
+			<div className="mt-8 text-center text-sm text-muted-foreground font-mono border-t border-primary/10 pt-4">
 				<p>
-					Technologies listed represent production-level experience
+					<span className="text-primary">$</span> Technologies listed represent production-level experience
 				</p>
 			</div>
 		</section>

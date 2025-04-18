@@ -8,6 +8,7 @@ import {
 	Scale,
 	Video
 } from "lucide-react";
+import TerminalContainer from "./terminalContainer";
 
 interface Domain {
 	title: string;
@@ -78,9 +79,16 @@ export const DomainExpertise: React.FC = () => {
 
 	return (
 		<section className="py-16">
+			<TerminalContainer title="domain_expertise.sh" className="mb-6">
+				<div className="font-mono text-sm mb-2">
+					<p>$ scan expertise --fields=enterprise,legal,media,leadership</p>
+					<p className="mt-1 opacity-75">Analyzing domain expertise profiles...</p>
+				</div>
+			</TerminalContainer>
+
 			<div className="space-y-4 mb-8">
-				<h2 className="text-3xl font-bold">Domain Expertise</h2>
-				<p className="text-lg text-gray-600">
+				<h2 className="text-3xl font-bold text-foreground">Domain Expertise</h2>
+				<p className="text-lg text-muted-foreground">
 					Specialized experience across enterprise AI, legal tech, and media production
 				</p>
 			</div>
@@ -89,18 +97,18 @@ export const DomainExpertise: React.FC = () => {
 				{domains.map((domain, index) => {
 					const IconComponent = getIcon(domain.icon);
 					return (
-						<Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+						<Card key={index} className="p-6 hover:shadow-md transition-shadow border-primary/20 hover:border-primary/40 bg-card">
 							<div className="flex items-start space-x-4">
-								<div className="p-2 bg-blue-50 rounded-lg">
-									<IconComponent className="h-6 w-6 text-blue-600" />
+								<div className="p-2 bg-secondary/30 rounded-lg">
+									<IconComponent className="h-6 w-6 text-primary" />
 								</div>
 								<div className="space-y-3 flex-1">
-									<h3 className="text-xl font-semibold">{domain.title}</h3>
-									<p className="text-gray-600">{domain.description}</p>
+									<h3 className="text-xl font-semibold text-foreground">{domain.title}</h3>
+									<p className="text-muted-foreground">{domain.description}</p>
 									<ul className="space-y-2">
 										{domain.achievements.map((achievement, i) => (
-											<li key={i} className="flex items-center text-sm text-gray-600">
-												<span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2" />
+											<li key={i} className="flex items-center text-sm text-foreground/80">
+												<span className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
 												{achievement}
 											</li>
 										))}

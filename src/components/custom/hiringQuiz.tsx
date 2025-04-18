@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Warning } from './warningTooltip';
 
@@ -12,7 +12,7 @@ const HiringQuiz = () => {
 	const [aggressiveMode, setAggressiveMode] = useState(false); // State to track aggressive mode activation
 	const [intro, setIntro] = useState("Dave here, before you move on:");
 	const [showQuiz, setShowQuiz] = useState(true);
-	const router = useRouter()
+	const router = useRouter();
 
 
 
