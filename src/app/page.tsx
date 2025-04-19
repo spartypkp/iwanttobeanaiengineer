@@ -1,74 +1,71 @@
 "use client";
 import { ContactCTA } from '@/components/custom/contactCTA';
 import { DomainExpertise } from '@/components/custom/domainExpertise';
-import { Hero } from '@/components/custom/hero';
-import MatrixRain from '@/components/custom/matrixRain';
+import InteractiveTerminal from '@/components/custom/InteractiveTerminal';
+import MinimalHero from '@/components/custom/MinimalHero';
 import ProjectCarousel from '@/components/custom/projectShowcase/ProjectCarousel';
 import { TechStack } from '@/components/custom/techStack';
-import TerminalContainer from '@/components/custom/terminalContainer';
 import { featuredProjects } from '@/lib/projectData';
 import React, { useState } from 'react';
 
 const HomePage: React.FC = () => {
+	// UI state management
 	const [showMatrixRain, setShowMatrixRain] = useState(false);
+	const [terminalExpanded, setTerminalExpanded] = useState(true);
+
+	const toggleTerminal = () => {
+		setTerminalExpanded(prev => !prev);
+	};
 
 	return (
 		<>
-			{/* Optional Matrix Rain effect - controlled by toggle */}
-			{showMatrixRain && <MatrixRain opacity={0.1} density={40} speed={1.2} />}
-
-			<div className="mx-auto px-4">
-				{/* Theme Toggle */}
-				{/* <div className="fixed bottom-5 right-5 z-50">
-					<MatrixButton
-						variant="terminal"
-						size="sm"
-						onClick={() => setShowMatrixRain(!showMatrixRain)}
-						glowIntensity="high"
-					>
-						{showMatrixRain ? 'Disable Matrix' : 'Enable Matrix'}
-					</MatrixButton>
-				</div> */}
-
-				{/* Terminal Welcome Message */}
-				<div className="max-w-7xl mx-auto mb-10 pt-6">
-					<TerminalContainer title="welcome.sh" typeEffect={true}>
-						Hello, I'm Will Diamond. An AI Engineer with a passion for building the future.
-					</TerminalContainer>
+			<div className="mx-auto px-4 max-w-6xl">
+				{/* Interactive Terminal - Primary interface */}
+				<div className="mt-8 mb-6">
+					<InteractiveTerminal
+						expanded={terminalExpanded}
+						onToggleExpand={toggleTerminal}
+					/>
 				</div>
 
-				{/* Hero Section */}
-				<Hero
-					name="Will Diamond"
-					title="AI Engineer"
-					tagline="AI Engineer building cool things with LLMs, always seeking to learn more and build the next exciting thing in AI."
-					image="/profilePic.jpg"
-				/>
+				{/* Minimal Hero Section */}
+				<div id="about-section">
+					<MinimalHero
+						name="Will Diamond"
+						title="AI Engineer"
+						image="/profilePic.jpg"
+					/>
+				</div>
 
-				{/* Projects Showcase Section Header */}
-				<div className="mt-16 mb-8 text-center">
-					<h2 className="text-4xl font-bold mb-4">Featured Projects</h2>
-					<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+				{/* Projects Showcase Section */}
+				<div id="projects-section" className="mt-12 mb-8">
+					<h2 className="text-3xl font-bold mb-4">Featured Projects</h2>
+					<p className="text-xl text-muted-foreground max-w-3xl">
 						Dive into my most impactful work in AI engineering, legal tech, and developer tools
 					</p>
+					<div className="mt-6">
+						<ProjectCarousel projects={featuredProjects} transitionEffect="slide" />
+					</div>
 				</div>
 
-				{/* Immersive Project Showcase - Always visible */}
-				<ProjectCarousel projects={featuredProjects} transitionEffect="slide" />
-
+				{/* Skills Section */}
+				<div id="skills-section" className="mt-16">
+					<TechStack />
+				</div>
 
 				{/* Domain Expertise Cards */}
-				<DomainExpertise />
-
-				{/* Tech Stack */}
-				<TechStack />
+				<div className="mt-16">
+					<DomainExpertise />
+				</div>
 
 				{/* Contact CTA */}
-				<ContactCTA
-					heading="Let's Build Something Amazing"
-					subheading="Looking to collaborate on innovative AI projects?"
-					buttonText="Get in Touch"
-				/>
+				<div id="contact-section">
+					<ContactCTA
+						heading="Let's Build Something Amazing"
+						subheading="Looking to collaborate on innovative AI projects?"
+						buttonText="Get in Touch"
+					/>
+				</div>
 
 				{/* Footer */}
 				<footer className="py-16 text-center">

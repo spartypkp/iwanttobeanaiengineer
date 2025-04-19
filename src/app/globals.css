@@ -83,6 +83,135 @@
     }
   }
 
+  /* FadeIn Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Blink cursor animation */
+  @keyframes blink {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Terminal scan lines animations */
+  @keyframes scanlines {
+    0% {
+      background-position: 0 0;
+    }
+
+    100% {
+      background-position: 0 100%;
+    }
+  }
+
+  /* Terminal flicker animation */
+  @keyframes flicker {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    92% {
+      opacity: 1;
+    }
+
+    93% {
+      opacity: 0.8;
+    }
+
+    94% {
+      opacity: 1;
+    }
+
+    96% {
+      opacity: 0.9;
+    }
+
+    98% {
+      opacity: 1;
+    }
+  }
+
+  .cursor-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.8s ease forwards;
+  }
+
+  /* CRT screen effect */
+  .crt-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .crt-effect::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+  }
+
+  /* Terminal scan lines effect for profile photo */
+  .terminal-scan-lines {
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px);
+  }
+
+  /* Terminal header styling */
+  .terminal-header {
+    border-bottom: none;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Terminal output styling */
+  .terminal-output {
+    font-family: 'Source Code Pro', monospace;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  .terminal-output .ok {
+    color: rgb(0, 255, 65);
+  }
+
+  .terminal-output .warning {
+    color: rgb(255, 204, 0);
+  }
+
+  .terminal-output .error {
+    color: rgb(255, 102, 102);
+  }
+
   .matrix-rain-container {
     position: fixed;
     top: 0;
@@ -109,20 +238,6 @@
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 0 10px hsla(var(--primary), 0.2);
-  }
-
-  .terminal-header {
-    background-color: hsl(var(--secondary));
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .terminal-circle {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 8px;
   }
 
   .terminal-title {
@@ -168,8 +283,7 @@
   }
 
   .terminal-glow {
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.4),
-      0 0 20px rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 10px rgba(var(--primary), 0.3);
   }
 }
 
@@ -177,4 +291,264 @@
 :root {
   --primary-rgb: 0, 255, 65;
   /* Default matrix green */
+}
+
+/* New animations for enhanced hero */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes pulseSlow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 2s ease-in-out infinite;
+}
+
+@keyframes typeOnce {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.animate-type-once {
+  display: inline-block;
+  width: 0;
+  animation: typeOnce 2s steps(20, end) forwards;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.animation-delay-300 {
+  animation-delay: 0.3s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animation-delay-900 {
+  animation-delay: 0.9s;
+}
+
+/* Image hover effects */
+.image-hover-effect {
+  transition: transform 0.5s ease;
+}
+
+.image-hover-effect:hover {
+  transform: scale(1.05);
+}
+
+/* Interactive Terminal Styles */
+.terminal-container {
+  background-color: rgba(0, 0, 0, 0.95);
+  border-radius: 8px;
+  border: 1px solid hsl(143, 90%, 50%);
+  font-family: 'Source Code Pro', monospace;
+  color: hsl(143, 90%, 80%);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+  transition: all 0.3s ease;
+}
+
+.terminal-container.expanded {
+  min-height: 400px;
+  max-height: 70vh;
+}
+
+.terminal-container.collapsed {
+  height: 40px;
+  cursor: pointer;
+}
+
+.terminal-header {
+  background-color: hsl(180, 5%, 10%);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid hsl(143, 50%, 30%);
+}
+
+.window-controls {
+  display: flex;
+  gap: 6px;
+  margin-right: 12px;
+}
+
+.control {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.close {
+  background-color: #ff5f56;
+}
+
+.minimize {
+  background-color: #ffbd2e;
+}
+
+.maximize {
+  background-color: #27c93f;
+}
+
+.terminal-title {
+  color: hsl(143, 90%, 80%);
+  font-size: 14px;
+  flex-grow: 1;
+}
+
+.terminal-output {
+  flex-grow: 1;
+  padding: 12px;
+  overflow-y: auto;
+  max-height: calc(70vh - 80px);
+}
+
+.command-entry {
+  margin-bottom: 12px;
+}
+
+.command-line {
+  margin-bottom: 4px;
+}
+
+.prompt {
+  color: hsl(143, 90%, 50%);
+  margin-right: 8px;
+  user-select: none;
+}
+
+.terminal-input-form {
+  display: flex;
+  align-items: center;
+  padding: 0 12px 12px;
+}
+
+.terminal-input {
+  background: transparent;
+  border: none;
+  color: hsl(143, 90%, 80%);
+  font-family: 'Source Code Pro', monospace;
+  font-size: 14px;
+  flex-grow: 1;
+  outline: none;
+  margin-left: 8px;
+}
+
+/* Command output styling */
+.ls-output {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.directory {
+  color: hsl(143, 90%, 50%);
+  font-weight: bold;
+}
+
+.file {
+  color: hsl(143, 90%, 80%);
+}
+
+.executable {
+  color: hsl(143, 90%, 60%);
+}
+
+.command-highlight {
+  color: hsl(143, 90%, 50%);
+  font-weight: bold;
+}
+
+.welcome-message p {
+  margin-bottom: 8px;
+}
+
+.error {
+  color: hsl(0, 100%, 70%);
+}
+
+.help-output ul {
+  margin-top: 8px;
+  margin-left: 16px;
+}
+
+.help-output li {
+  margin-bottom: 4px;
+}
+
+.help-output .command {
+  color: hsl(143, 90%, 50%);
+  font-weight: bold;
+}
+
+.file-content {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 2px solid hsl(143, 50%, 50%);
+}
+
+.file-content p {
+  margin-bottom: 8px;
+}
+
+.file-content ul {
+  margin-left: 16px;
+  margin-top: 4px;
+}
+
+.file-content li {
+  margin-bottom: 2px;
+}
+
+.script-output p {
+  margin-bottom: 6px;
+}
+
+/* Terminal transition effects */
+.terminal-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
