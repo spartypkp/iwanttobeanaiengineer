@@ -1,13 +1,13 @@
-import "./globals.css";
+import NavBar from "@/components/custom/navBar";
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import NavBar from "@/components/custom/navBar";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "I Want To Be an AI Engineer",
+	title: "Will Diamond",
 	description:
 		"Documenting a young software engineers journey to getting his dream job. You should hire Will!",
 };

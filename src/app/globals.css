@@ -222,6 +222,9 @@
     z-index: -1;
     overflow: hidden;
     opacity: 0.15;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='8' y='27' fill='%2300ff4180' font-family='monospace' font-size='20'%3E10%3C/text%3E%3Ctext x='68' y='37' fill='%2300ff4180' font-family='monospace' font-size='20'%3E01%3C/text%3E%3Ctext x='23' y='57' fill='%2300ff4180' font-family='monospace' font-size='20'%3E101%3C/text%3E%3Ctext x='48' y='77' fill='%2300ff4180' font-family='monospace' font-size='20'%3E010%3C/text%3E%3Ctext x='18' y='96' fill='%2300ff4180' font-family='monospace' font-size='20'%3E1%3C/text%3E%3C/svg%3E");
+    background-size: 200px;
+    animation: matrixRain 20s linear infinite;
   }
 
   .matrix-rain-character {
@@ -265,8 +268,34 @@
 
   .typing-animation {
     overflow: hidden;
+    border-right: 2px solid hsl(143, 90%, 50%);
     white-space: nowrap;
-    animation: typing 3.5s steps(40, end);
+    margin: 0 auto;
+    animation:
+      typing 1.5s steps(30, end),
+      blink-caret .5s step-end infinite;
+  }
+
+  @keyframes typing {
+    from {
+      width: 0
+    }
+
+    to {
+      width: 100%
+    }
+  }
+
+  @keyframes blink-caret {
+
+    from,
+    to {
+      border-color: transparent
+    }
+
+    50% {
+      border-color: hsl(143, 90%, 50%)
+    }
   }
 
   @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Code+Pro:wght@300..900&display=swap');
@@ -284,6 +313,38 @@
 
   .terminal-glow {
     box-shadow: 0 0 10px rgba(var(--primary), 0.3);
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
@@ -321,7 +382,7 @@
 }
 
 .animate-pulse-slow {
-  animation: pulseSlow 2s ease-in-out infinite;
+  animation: pulseSlow 3s ease-in-out infinite;
 }
 
 @keyframes typeOnce {
@@ -337,7 +398,7 @@
 .animate-type-once {
   display: inline-block;
   width: 0;
-  animation: typeOnce 2s steps(20, end) forwards;
+  animation: typeOnce 1.5s steps(20, end) forwards;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -363,192 +424,217 @@
   transform: scale(1.05);
 }
 
-/* Interactive Terminal Styles */
-.terminal-container {
-  background-color: rgba(0, 0, 0, 0.95);
-  border-radius: 8px;
-  border: 1px solid hsl(143, 90%, 50%);
-  font-family: 'Source Code Pro', monospace;
-  color: hsl(143, 90%, 80%);
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+/* Enhanced terminal scan line effect */
+.terminal-scan-lines {
+  background: repeating-linear-gradient(0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px);
+  pointer-events: none;
+}
+
+/* Terminal glow pulses */
+.terminal-glow {
+  animation: terminalGlow 3s ease-in-out infinite;
+}
+
+@keyframes terminalGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(var(--primary), 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(var(--primary), 0.5);
+  }
+}
+
+/* Slow pulse animation */
+.animate-pulse-slow {
+  animation: pulseSlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseSlow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Type once animation with variations */
+.animate-type-once {
+  display: inline-block;
+  width: 0;
+  animation: typeOnce 1.5s steps(20, end) forwards;
   overflow: hidden;
-  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
-  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.terminal-container.expanded {
-  min-height: 400px;
-  max-height: 70vh;
+@keyframes typeOnce {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
 }
 
-.terminal-container.collapsed {
-  height: 40px;
-  cursor: pointer;
+/* Animation delays */
+.animation-delay-300 {
+  animation-delay: 0.3s;
 }
 
-.terminal-header {
-  background-color: hsl(180, 5%, 10%);
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid hsl(143, 50%, 30%);
+.animation-delay-600 {
+  animation-delay: 0.6s;
 }
 
-.window-controls {
-  display: flex;
-  gap: 6px;
-  margin-right: 12px;
+.animation-delay-900 {
+  animation-delay: 0.9s;
 }
 
-.control {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.close {
-  background-color: #ff5f56;
-}
-
-.minimize {
-  background-color: #ffbd2e;
-}
-
-.maximize {
-  background-color: #27c93f;
-}
-
-.terminal-title {
-  color: hsl(143, 90%, 80%);
-  font-size: 14px;
-  flex-grow: 1;
-}
-
-.terminal-output {
-  flex-grow: 1;
-  padding: 12px;
-  overflow-y: auto;
-  max-height: calc(70vh - 80px);
-}
-
-.command-entry {
-  margin-bottom: 12px;
-}
-
-.command-line {
-  margin-bottom: 4px;
-}
-
-.prompt {
-  color: hsl(143, 90%, 50%);
-  margin-right: 8px;
-  user-select: none;
-}
-
-.terminal-input-form {
-  display: flex;
-  align-items: center;
-  padding: 0 12px 12px;
-}
-
-.terminal-input {
-  background: transparent;
-  border: none;
-  color: hsl(143, 90%, 80%);
-  font-family: 'Source Code Pro', monospace;
-  font-size: 14px;
-  flex-grow: 1;
-  outline: none;
-  margin-left: 8px;
-}
-
-/* Command output styling */
-.ls-output {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.directory {
-  color: hsl(143, 90%, 50%);
-  font-weight: bold;
-}
-
-.file {
-  color: hsl(143, 90%, 80%);
-}
-
-.executable {
-  color: hsl(143, 90%, 60%);
-}
-
-.command-highlight {
-  color: hsl(143, 90%, 50%);
-  font-weight: bold;
-}
-
-.welcome-message p {
-  margin-bottom: 8px;
-}
-
-.error {
-  color: hsl(0, 100%, 70%);
-}
-
-.help-output ul {
-  margin-top: 8px;
-  margin-left: 16px;
-}
-
-.help-output li {
-  margin-bottom: 4px;
-}
-
-.help-output .command {
-  color: hsl(143, 90%, 50%);
-  font-weight: bold;
-}
-
-.file-content {
-  background-color: rgba(0, 0, 0, 0.3);
-  padding: 8px;
-  border-radius: 4px;
-  border-left: 2px solid hsl(143, 50%, 50%);
-}
-
-.file-content p {
-  margin-bottom: 8px;
-}
-
-.file-content ul {
-  margin-left: 16px;
-  margin-top: 4px;
-}
-
-.file-content li {
-  margin-bottom: 2px;
-}
-
-.script-output p {
-  margin-bottom: 6px;
-}
-
-/* Terminal transition effects */
-.terminal-fade-in {
-  animation: fadeIn 0.3s ease forwards;
+/* Fade in animation */
+.animate-fade-in {
+  animation: fadeIn 0.8s ease forwards;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
+}
+
+/* Glitch effect for text elements */
+.glitch {
+  position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -1px 0 #ff00ff;
+  clip: rect(24px, 550px, 90px, 0);
+  animation: glitch-anim-1 2s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: -1px 0 #00ffff;
+  clip: rect(85px, 550px, 140px, 0);
+  animation: glitch-anim-2 2s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+  0% {
+    clip: rect(22px, 9999px, 78px, 0);
+  }
+
+  25% {
+    clip: rect(26px, 9999px, 41px, 0);
+  }
+
+  50% {
+    clip: rect(59px, 9999px, 3px, 0);
+  }
+
+  75% {
+    clip: rect(91px, 9999px, 86px, 0);
+  }
+
+  100% {
+    clip: rect(30px, 9999px, 95px, 0);
+  }
+}
+
+@keyframes glitch-anim-2 {
+  0% {
+    clip: rect(58px, 9999px, 71px, 0);
+  }
+
+  25% {
+    clip: rect(95px, 9999px, 2px, 0);
+  }
+
+  50% {
+    clip: rect(2px, 9999px, 96px, 0);
+  }
+
+  75% {
+    clip: rect(13px, 9999px, 97px, 0);
+  }
+
+  100% {
+    clip: rect(100px, 9999px, 5px, 0);
+  }
+}
+
+/* CRT Effect enhancement */
+.crt-effect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.1;
+}
+
+/* Terminal flicker effect */
+.terminal-flicker {
+  animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Code-specific styling for terminal content */
+.code-comment {
+  color: rgba(var(--primary), 0.5);
+}
+
+.code-keyword {
+  color: #569CD6;
+}
+
+.code-string {
+  color: #CE9178;
+}
+
+.code-function {
+  color: #DCDCAA;
 }

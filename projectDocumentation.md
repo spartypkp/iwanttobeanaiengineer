@@ -144,27 +144,52 @@ The project is being revitalized with several key focus areas:
 - The Stats page is a canvas for future fun experimentation
 - Several interactive components add personality but need integration
 
-## Database Usage
+## Development Roadmap
 
-- Previous implementation used InstantDB (primarily for blogs)
-- Future database needs (if any) will use Supabase
-- No current active database requirements
+### MVP Phase
+The MVP (Minimum Viable Product) version of the site focuses on core functionality and essential content:
+- Complete and polished home page with hero, domain expertise, tech stack and contact sections
+- Project showcase with detailed project information
+- About page with professional background
+- Basic stats page
+- Clean, responsive design across all devices
+- Matrix/terminal theme and styling
 
-## Assets
+### Post-MVP Features
+After the MVP is complete, the following features will be implemented in order of priority:
 
-The public directory contains various images used throughout the site:
-- Project thumbnails
-- Profile picture
-- Statistics visualizations
+1. **Interactive Terminal Interface** (First post-MVP feature)
+   - Command-line interface that coexists with the traditional UI
+   - Navigation of the site using terminal commands (`cd`, `ls`, `cat`, etc.)
+   - Virtual file system reflecting website content structure
+   - Easter eggs and interactive commands for technical visitors
+   - Integration with the visual UI (terminal commands trigger scrolling to sections)
 
-## Development Environment
+2. **AI Assistant Integration ("Dave")**
+   - Interactive AI representation of the portfolio owner
+   - Ability to answer questions about skills and experience
+   - Showcase personality through conversational interface
 
-### Scripts
-- `dev`: Run development server with Next.js
-- `build`: Build the application
-- `start`: Start the production server
-- `lint`: Run linter
-- `pretty`: Format code with Prettier
+3. **Enhanced Stats and Visualizations**
+   - Integration with real data sources
+   - Dynamic charts and visualizations
+   - Interactive elements for exploring data
+
+4. **Technical Blog or Learning Resources**
+   - Content focused on AI engineering, ML, and development
+   - Code examples and educational resources
+
+## Current Functionality vs. Planned Features
+
+| Feature | Status | Priority | Timeline |
+|---------|--------|----------|----------|
+| Home Page | Implemented | High | MVP |
+| Projects Showcase | Implemented | High | MVP |
+| About Page | Implemented | High | MVP |
+| Basic Stats Page | In Progress | Medium | MVP |
+| Interactive Terminal | Planned | High | First post-MVP |
+| AI Assistant (Dave) | Placeholder UI | Medium | Post-MVP |
+| Technical Blog | Not Started | Low | Post-MVP |
 
 ## Initial Revitalization Plan
 
@@ -192,16 +217,6 @@ Based on the current state and priorities, the initial revitalization plan inclu
 5. **Stats Page Concept**
    - Identify interesting metrics to track
    - Design visualizations that highlight skills and accomplishments
-
-## Dependencies
-
-The project uses a comprehensive set of dependencies including:
-- React and Next.js ecosystem
-- UI libraries (Radix UI, ShadCN)
-- Data visualization tools (Recharts, D3)
-- AI-related packages (OpenAI, AI) for future AI assistant functionality
-- Form handling (React Hook Form)
-- And many other utilities for a rich interactive experience 
 
 ## Revitalization Progress
 
@@ -273,8 +288,57 @@ The following revitalization steps have been completed:
 
 ### 5. Next Steps
 The following items from the revitalization plan still need to be addressed:
+- Complete the MVP version of the site before implementing advanced features
 - Integrate real data sources for the Stats page
+- Implement the interactive terminal interface as the first post-MVP feature
 - Implement the actual AI functionality for Dave
-- Add more interactive elements to the home page
 - Further polish the UI/UX across all pages
-- Consider adding a blog functionality replacement focused on technical content 
+- Consider adding a blog functionality replacement focused on technical content
+
+## Future Interactive Terminal Feature
+
+A detailed plan has been created for the interactive terminal interface, which will be the first feature implemented after the MVP is complete. This feature will:
+
+- Provide a dual interface where users can navigate the site through either:
+  - Traditional scrolling and clicking UI (for all visitors)
+  - Command-line terminal interface (for technically-inclined visitors)
+- Support common bash/zsh commands (`ls`, `cd`, `cat`, etc.) for exploring content
+- Feature a virtual file system that mirrors the site's content structure
+- Include interactive "executable" commands (e.g., `./contact.exe`, `./skills.sh`)
+- Provide auto-completion, command history, and error messages
+- Integrate with the visual UI (e.g., using `cd projects` would scroll to the projects section)
+- Include easter eggs and hidden features for exploration
+
+The interactive terminal implementation has been documented in detail and will be developed once the MVP is complete.
+
+## Database Usage
+
+- Previous implementation used InstantDB (primarily for blogs)
+- Future database needs (if any) will use Supabase
+- No current active database requirements
+
+## Assets
+
+The public directory contains various images used throughout the site:
+- Project thumbnails
+- Profile picture
+- Statistics visualizations
+
+## Development Environment
+
+### Scripts
+- `dev`: Run development server with Next.js
+- `build`: Build the application
+- `start`: Start the production server
+- `lint`: Run linter
+- `pretty`: Format code with Prettier
+
+## Dependencies
+
+The project uses a comprehensive set of dependencies including:
+- React and Next.js ecosystem
+- UI libraries (Radix UI, ShadCN)
+- Data visualization tools (Recharts, D3)
+- AI-related packages (OpenAI, AI) for future AI assistant functionality
+- Form handling (React Hook Form)
+- And many other utilities for a rich interactive experience 

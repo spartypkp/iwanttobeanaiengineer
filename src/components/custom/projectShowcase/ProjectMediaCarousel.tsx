@@ -1,21 +1,18 @@
 "use client";
 
 import { ProjectShowcase } from '@/lib/types';
-import { motion } from 'framer-motion';
-import { Info, Maximize, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info, Maximize, X } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState } from 'react';
 import ReactPlayer from 'react-player/lazy';
 
-interface ProjectMediaProps {
+interface ProjectMediaCarouselProps {
 	media: ProjectShowcase['media'];
-	isActive: boolean;
 	primaryColor?: string;
 }
 
-const ProjectMedia: React.FC<ProjectMediaProps> = ({
+const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 	media,
-	isActive,
 	primaryColor = 'rgba(0, 255, 65, 0.7)', // Default matrix green
 }) => {
 	const [activeMediaIndex, setActiveMediaIndex] = useState(0);
@@ -25,6 +22,14 @@ const ProjectMedia: React.FC<ProjectMediaProps> = ({
 
 	const handleMediaChange = (index: number) => {
 		setActiveMediaIndex(index);
+	};
+
+	const handleNext = () => {
+		setActiveMediaIndex((prevIndex) => (prevIndex + 1) % media.length);
+	};
+
+	const handlePrevious = () => {
+		setActiveMediaIndex((prevIndex) => (prevIndex - 1 + media.length) % media.length);
 	};
 
 	const toggleFullscreen = () => {
@@ -47,23 +52,23 @@ const ProjectMedia: React.FC<ProjectMediaProps> = ({
 		switch (activeMedia.type) {
 			case 'image':
 				return (
-					<div className="relative flex w-full h-full min-h-0 overflow-hidden">
+					<div className="relative flex w-full h-full min-h-0 overflow-hidden rounded-lg">
 						<Image
 							src={activeMedia.url}
 							alt={activeMedia.alt || 'Project image'}
 							fill
 							className="object-cover object-center transition-transform duration-700 ease-in-out hover:scale-105"
-							priority={isActive}
+							priority
 							sizes="(max-width: 768px) 100vw, 65vw"
 						/>
 					</div>
 				);
 			case 'video':
 				return (
-					<div className="relative flex w-full h-full min-h-0">
+					<div className="relative flex w-full h-full min-h-0 rounded-lg overflow-hidden">
 						<ReactPlayer
 							url={activeMedia.url}
-							playing={isActive}
+							playing={true}
 							muted={true}
 							loop={true}
 							width="100%"
@@ -85,7 +90,7 @@ const ProjectMedia: React.FC<ProjectMediaProps> = ({
 				);
 			case 'demo':
 				return (
-					<div className="relative flex w-full h-full min-h-0">
+					<div className="relative flex w-full h-full min-h-0 rounded-lg overflow-hidden">
 						<iframe
 							src={activeMedia.url}
 							title={activeMedia.alt || 'Project demo'}
@@ -97,60 +102,49 @@ const ProjectMedia: React.FC<ProjectMediaProps> = ({
 				);
 			default:
 				return (
-					<div className="flex items-center justify-center w-full h-full min-h-0 bg-muted">
+					<div className="flex items-center justify-center w-full h-full min-h-0 bg-muted rounded-lg">
 						<span className="text-muted-foreground font-medium">No preview available</span>
 					</div>
 				);
 		}
 	};
 
-	// Animation variants
-	const containerVariants = {
-		hidden: { opacity: 0 },
-		visible: {
-			opacity: 1,
-			transition: {
-				duration: 0.5,
-				staggerChildren: 0.1
-			}
-		}
-	};
-
-	const mediaVariants = {
-		hidden: { opacity: 0, y: 20 },
-		visible: {
-			opacity: 1,
-			y: 0,
-			transition: {
-				type: "spring",
-				stiffness: 300,
-				damping: 30
-			}
-		}
-	};
-
 	// Conditional classes for fullscreen mode
 	const mediaContainerClasses = isFullscreen
 		? "fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md"
-		: "relative flex w-full h-full overflow-hidden";
+		: "relative flex flex-col w-full h-[400px] md:h-[500px] overflow-hidden";
 
 	return (
-		<motion.div
+		<div
 			className={mediaContainerClasses}
 			style={{ '--project-accent': rgbColor } as React.CSSProperties}
-			variants={containerVariants}
-			initial="hidden"
-			animate={isActive ? "visible" : "hidden"}
 		>
 			{/* Main Media Display */}
-			<motion.div
-				className="relative flex w-full h-full min-h-0 overflow-hidden"
-				variants={mediaVariants}
-			>
+			<div className="relative flex w-full h-full min-h-0 overflow-hidden">
 				{renderMedia()}
 
+				{/* Navigation arrows - only show if more than one media item */}
+				{media.length > 1 && (
+					<>
+						<button
+							onClick={handlePrevious}
+							className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-background/40 backdrop-blur-md border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md"
+							aria-label="Previous media"
+						>
+							<ChevronLeft size={20} className="text-primary/80" />
+						</button>
+						<button
+							onClick={handleNext}
+							className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-background/40 backdrop-blur-md border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md"
+							aria-label="Next media"
+						>
+							<ChevronRight size={20} className="text-primary/80" />
+						</button>
+					</>
+				)}
+
 				{/* Control buttons */}
-				<div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+				<div className="absolute top-4 right-4 z-30 flex items-center gap-2">
 					<button
 						onClick={toggleInfo}
 						className="flex items-center justify-center p-2 rounded-full bg-background/40 backdrop-blur-md border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md"
@@ -172,25 +166,20 @@ const ProjectMedia: React.FC<ProjectMediaProps> = ({
 				</div>
 
 				{/* Info overlay */}
-				{showInfo && activeMedia.alt && (
-					<motion.div
-						className="absolute bottom-0 left-0 right-0 bg-background/70 backdrop-blur-md p-4 border-t border-primary/10 text-sm"
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 20 }}
-					>
+				{showInfo && activeMedia?.alt && (
+					<div className="absolute bottom-0 left-0 right-0 bg-background/70 backdrop-blur-md p-4 border-t border-primary/10 text-sm z-20">
 						{activeMedia.alt}
-					</motion.div>
+					</div>
 				)}
 
 				{/* Gradient overlays for visual interest */}
 				<div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent pointer-events-none" />
 				<div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-background/20 pointer-events-none" />
-			</motion.div>
+			</div>
 
-			{/* Media Navigation (if multiple media items) */}
+			{/* Media Navigation (thumbnails) */}
 			{media.length > 1 && (
-				<div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-3 z-10 px-4 py-2 bg-background/40 backdrop-blur-md rounded-full border border-primary/10">
+				<div className="flex items-center justify-center gap-3 mt-4">
 					{media.map((item, index) => (
 						<button
 							key={index}
@@ -204,21 +193,16 @@ const ProjectMedia: React.FC<ProjectMediaProps> = ({
 					))}
 				</div>
 			)}
-		</motion.div>
+		</div>
 	);
 };
 
-// Helper function to convert hex to RGB
-function hexToRgb(hex: string): string {
-	// Remove # if present
-	hex = hex.replace('#', '');
+// Helper function to convert hex to rgb
+const hexToRgb = (hex: string): string => {
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+	return result
+		? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+		: '0, 255, 65'; // Default to matrix green
+};
 
-	// Parse hex values
-	const r = parseInt(hex.substring(0, 2), 16);
-	const g = parseInt(hex.substring(2, 4), 16);
-	const b = parseInt(hex.substring(4, 6), 16);
-
-	return `${r}, ${g}, ${b}`;
-}
-
-export default ProjectMedia; 
+export default ProjectMediaCarousel; 
