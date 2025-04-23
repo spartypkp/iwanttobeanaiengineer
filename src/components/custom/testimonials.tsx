@@ -119,9 +119,9 @@ export const Testimonials: React.FC = () => {
 					</div>
 
 					<p className="text-sm text-primary/70 font-mono border border-primary/20 rounded-md py-2 px-4 bg-black/20 inline-block">
-                        // Yes, I shamelessly bribed friends for testimonials.
-						<br />// No, the words weren't put in their mouths.
-						<br />// Well, maybe some light prompting...
+						{"// Yes, I shamelessly bribed friends for testimonials."}
+						<br />{"// No, the words weren't put in their mouths."}
+						<br />{"// Well, maybe some light prompting..."}
 					</p>
 				</div>
 
@@ -154,11 +154,11 @@ export const Testimonials: React.FC = () => {
 								<div className="p-5 flex-grow flex flex-col">
 									{/* Quote section */}
 									<blockquote className="text-base leading-relaxed relative mb-4 flex-grow">
-										<div className="absolute -left-1 -top-1 text-3xl text-primary/20 font-serif">"</div>
+										<div className="absolute -left-1 -top-1 text-3xl text-primary/20 font-serif">&quot;</div>
 										<p className="relative z-10 text-muted-foreground pl-3 pt-2">
 											{testimonial.quote}
 										</p>
-										<div className="absolute -right-1 bottom-0 text-3xl text-primary/20 font-serif">"</div>
+										<div className="absolute -right-1 bottom-0 text-3xl text-primary/20 font-serif">&quot;</div>
 									</blockquote>
 
 									{/* Avatar and name section */}
@@ -182,7 +182,7 @@ export const Testimonials: React.FC = () => {
 					<div className="bg-black/30 border border-primary/10 rounded-md px-4 py-2">
 						<div className="font-mono text-xs flex items-center text-primary/60">
 							<span className="text-primary/80 mr-2">$</span>
-							<span>grep -r "nice things" --include="*.friends" /home/will/social_circle</span>
+							<span>grep -r &quot;nice things&quot; --include=&quot;*.friends&quot; /home/will/social_circle</span>
 						</div>
 					</div>
 				</div>

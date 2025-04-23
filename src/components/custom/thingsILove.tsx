@@ -147,7 +147,7 @@ export const ThingsILove: React.FC = () => {
 
 												{/* Text content */}
 												<div className="flex-1">
-													<p className="text-foreground font-semibold mb-2 italic">"{tech.loveStatement}"</p>
+													<p className="text-foreground font-semibold mb-2 italic">&quot;{tech.loveStatement}&quot;</p>
 													<div className="flex text-muted-foreground items-start">
 														<span className="text-primary/70 font-mono text-sm mr-2 flex-shrink-0">$&gt;</span>
 														<p className="text-sm">{tech.personalNote}</p>

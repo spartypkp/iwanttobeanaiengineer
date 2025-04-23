@@ -100,7 +100,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
 							{/* Company name with code comment styling and enhanced look */}
 							{company && (
 								<div className="text-base text-muted-foreground flex items-center">
-									<span className="text-primary/60 font-mono mr-2 text-xs bg-black/20 px-1 py-0.5 rounded">//</span>
+									<span className="text-primary/60 font-mono mr-2 text-xs bg-black/20 px-1 py-0.5 rounded">{"//"}</span>
 									<span className="text-foreground/90 font-medium">{company}</span>
 								</div>
 							)}

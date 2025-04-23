@@ -359,6 +359,146 @@
       transform: translateY(0);
     }
   }
+
+  /* Terminal cursor blink animation */
+  .animate-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Terminal scan lines */
+  .terminal-scan-lines {
+    background: repeating-linear-gradient(0deg,
+        rgba(var(--primary-rgb), 0.05) 0px,
+        rgba(var(--primary-rgb), 0.05) 1px,
+        transparent 1px,
+        transparent 2px);
+  }
+
+  /* Animation delays */
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+
+  .animation-delay-900 {
+    animation-delay: 900ms;
+  }
+
+  .animation-delay-1000 {
+    animation-delay: 1000ms;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2000ms;
+  }
+
+  /* Animation for typing text */
+  .animate-type-once {
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    position: relative;
+    animation: typing 2s steps(40, end) forwards;
+    width: 0;
+  }
+
+  @keyframes typing {
+    from {
+      width: 0
+    }
+
+    to {
+      width: 100%
+    }
+  }
+
+  /* CRT effect for terminal-like displays */
+  .crt-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .crt-effect::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: radial-gradient(ellipse at center,
+        rgba(var(--primary-rgb), 0.1) 0%,
+        rgba(0, 0, 0, 0.2) 80%);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.3;
+  }
+
+  /* Cursor blink animation */
+  .cursor-blink {
+    animation: cursor-blink 1s step-end infinite;
+  }
+
+  @keyframes cursor-blink {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Slow pulse animation */
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fade-in 1s ease-in-out forwards;
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 /* CSS Variable for project accent colors */

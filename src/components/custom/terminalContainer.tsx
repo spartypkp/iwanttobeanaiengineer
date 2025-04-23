@@ -45,8 +45,8 @@ const TerminalContainer: React.FC<TerminalContainerProps> = ({
 			// Warning status markers - yellow
 			const warningMarkers = [
 				'\\[WARNING.*?\\]',
-				'\\[PRAY FOR ME\\]',
-				'\\[MIXED RESULTS\\]',
+				'\\[LOADING\\]',
+				'\\[THANKS FOR THE COMPUTE\\]',
 				'\\[75% PERFORMANCE, 100% CONFIDENCE\\]',
 				'\\[ONGOING\\]',
 				'\\[SYNERGISTICALLY LEVERAGING.*?\\]',
@@ -58,6 +58,7 @@ const TerminalContainer: React.FC<TerminalContainerProps> = ({
 				'\\[NOT FOUND.*?\\]',
 				'\\[404 SOLUTION NOT FOUND\\]',
 				'\\[ETHICAL VIOLATION DETECTED\\]',
+				'\\[AGI IS COMING\\]',
 			];
 
 			// Apply success colors (green)

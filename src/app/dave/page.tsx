@@ -67,7 +67,7 @@ const DavePage: React.FC = () => {
 			<div className="text-center mb-8">
 				<h1 className="text-4xl font-bold mb-4">Chat with Dave</h1>
 				<p className="text-xl text-gray-600">
-					Dave is Will's AI advocate. Ask him anything about Will's skills, projects, or why you should consider him for your team.
+					Dave is Will&apos;s AI advocate. Ask him anything about Will&apos;s skills, projects, or why you should consider him for your team.
 				</p>
 				<div className="mt-4 bg-amber-100 p-4 rounded-md text-amber-800 text-sm">
 					<strong>Note:</strong> This is a placeholder for the future AI assistant. Currently, Dave provides canned responses.
@@ -84,7 +84,7 @@ const DavePage: React.FC = () => {
 						</Avatar>
 						<div>
 							<CardTitle>Dave</CardTitle>
-							<CardDescription>Will's AI Advocate</CardDescription>
+							<CardDescription>Will&apos;s AI Advocate</CardDescription>
 						</div>
 					</div>
 				</CardHeader>
@@ -151,7 +151,7 @@ const DavePage: React.FC = () => {
 			<div className="mt-8 text-center text-sm text-gray-500">
 				<p>
 					This AI assistant is a concept demonstration. When fully implemented, Dave will be powered by a
-					custom-trained model based on Will's experience, projects, and skills.
+					custom-trained model based on Will&apos;s experience, projects, and skills.
 				</p>
 			</div>
 		</div>

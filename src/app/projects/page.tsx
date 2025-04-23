@@ -62,7 +62,7 @@ const projects: Project[] = [
 					<li>Large Language Model Readiness: Utilize data structured for AI applications, including pre-generated embedding fields.</li>
 					<li>Python SDK: Employ our Python SDK to interact with the legislation data using Pydantic models for seamless data handling and validation.</li>
 					<li>TypeScript SDK (Coming Soon): Enhance client-side application development with our upcoming TypeScript SDK.</li>
-					<li>Customizable Scraping Tools: Adapt and extend scraping tools as needed, contributing to the community's growth and resource pool.</li>
+					<li>Customizable Scraping Tools: Adapt and extend scraping tools as needed, contributing to the community&apos;s growth and resource pool.</li>
 				</ul>
 
 			</div>

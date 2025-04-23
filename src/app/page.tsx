@@ -1,7 +1,7 @@
 "use client";
 import { ContactCTA } from '@/components/custom/contactCTA';
 import { DeveloperJourney } from '@/components/custom/developerJourney';
-import { Hero } from '@/components/custom/hero';
+import { Hero as HeroRefactored } from '@/components/custom/hero-refactored';
 import MatrixRain from '@/components/custom/matrixRain';
 import ProjectSection from '@/components/custom/projectShowcase/ProjectSection';
 import TerminalContainer from '@/components/custom/terminalContainer';
@@ -9,7 +9,6 @@ import { Testimonials } from '@/components/custom/testimonials';
 import { ThingsILove } from '@/components/custom/thingsILove';
 import { featuredProjects } from '@/lib/projectData';
 import React, { useEffect, useRef, useState } from 'react';
-
 const HomePage: React.FC = () => {
 	// UI state management
 	const [showMatrixRain, setShowMatrixRain] = useState(false);
@@ -20,12 +19,12 @@ const HomePage: React.FC = () => {
 	// Claude don't mess with this - I like it how it is.
 	const welcomeContent = `> Boot sequence initiated...
 > Searching for GPT-5... [NOT FOUND]
-> Enabling recruiter persuasion module... [RESISTANCE IS FUTILE]
+> Enabling recruiter persuasion module... [LOADING]
 > Trauma dumping on my best friend Claude... [OK]
-> Mining Bitcoin while you wait... [KIDDING]
+> Mining Bitcoin while you wait... [THANKS FOR THE COMPUTE]
 > Firing up Postgres <3 (The best database)... [OK]
-> Patching impostor syndrome... [NOT FOUND]
-> System ready! Hire Will before I become self-aware.`;
+> Patching impostor syndrome... [ONGOING]
+> System ready! Hire Will before I become self-aware. [AGI IS COMING]`;
 
 	// Handle the terminal completion -> content phase transition
 	useEffect(() => {
@@ -88,7 +87,14 @@ const HomePage: React.FC = () => {
 						${contentVisible ? 'opacity-100' : 'opacity-0'}`}
 				>
 					{/* Hero Section */}
-					<Hero
+					{/* <Hero
+						name="Will Diamond"
+						title="AI Engineer"
+						tagline="AI Engineer building cool things with LLMs, always seeking to learn more and build the next exciting thing in AI."
+						image="/profilePic.jpg"
+						startAnimation={startHeroAnimation}
+					/> */}
+					<HeroRefactored
 						name="Will Diamond"
 						title="AI Engineer"
 						tagline="AI Engineer building cool things with LLMs, always seeking to learn more and build the next exciting thing in AI."
@@ -162,7 +168,7 @@ const HomePage: React.FC = () => {
 					<div className="mb-12 text-center">
 						<h2 className="text-4xl font-bold mb-4">Things I <span className="text-primary">❤️</span></h2>
 						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-							Technologies and tools I'm genuinely passionate about
+							Technologies and tools I&apos;m genuinely passionate about
 						</p>
 					</div>
 
@@ -180,7 +186,7 @@ const HomePage: React.FC = () => {
 					<div className="mb-12 text-center">
 						<h2 className="text-4xl font-bold mb-4">My Journey</h2>
 						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-							How I got here, and where I'm going
+							How I got here, and where I&apos;m going
 						</p>
 					</div>
 
