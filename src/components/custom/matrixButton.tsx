@@ -54,7 +54,7 @@ const MatrixButton: React.FC<MatrixButtonProps> = ({
 				{variant === 'terminal' && (
 					<span className="absolute inset-0 bg-primary/5 opacity-0 hover:opacity-100 transition-opacity duration-300"></span>
 				)}
-				{variant === 'terminal' ? `[ ${children} ]` : children}
+				{children}
 			</>
 		</Button>
 	);

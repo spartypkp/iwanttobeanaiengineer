@@ -496,7 +496,7 @@ export const Hero: React.FC<HeroProps> = ({
 											{/* Status indicator */}
 											<div className="absolute top-3 right-3 z-40 bg-black/80 backdrop-blur-sm rounded-md px-2 py-1 text-xs font-mono text-primary border border-primary/30">
 												<span className="inline-block h-2 w-2 rounded-full bg-primary/80 mr-1 animate-pulse"></span>
-												ONLINE
+												LOCKED IN
 											</div>
 
 											{/* Scan lines and overlays */}

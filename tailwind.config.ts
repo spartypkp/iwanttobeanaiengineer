@@ -105,11 +105,16 @@ module.exports = {
 					from: { opacity: 0 },
 					to: { opacity: 1 },
 				},
+				"scan": {
+					from: { transform: "translateY(0%)" },
+					to: { transform: "translateY(100vh)" },
+				},
 			},
 			animation: {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
 				"fade-in": "fade-in 0.8s ease-in-out forwards",
+				"scan": "scan 4s linear infinite",
 			},
 		},
 	},

@@ -50,9 +50,16 @@ The primary goals of this personal website are:
 
 ### Home Page Components
 
-- **Hero (`src/components/custom/hero.tsx`)**: Hero section displaying name, title, tagline, and image.
-- **DomainExpertise (`src/components/custom/domainExpertise.tsx`)**: Cards highlighting areas of expertise.
-- **TechStack (`src/components/custom/techStack.tsx`)**: Cards showing technical skills categorized by domain.
+- **Hero (`src/components/custom/hero-refactored.tsx`)**: Enhanced hero section with an interactive terminal interface featuring:
+  - Real-time typing animation for name, title, and tagline
+  - Simulated command execution sequence (whoami, skills, github stats)
+  - Terminal-inspired styling with window controls and scan lines
+  - Two-column layout with terminal on left, profile information on right
+  - Skills display organized by category
+  - GitHub contributions calendar integration
+  - Profile image with overlay effects and status indicators
+  - Professional information and social links
+
 - **ContactCTA (`src/components/custom/contactCTA.tsx`)**: Call-to-action section for contacting.
 
 ### Project Components
@@ -64,6 +71,8 @@ The primary goals of this personal website are:
 
 - **HiringQuiz (`src/components/custom/hiringQuiz.tsx`)**: Interactive component that playfully encourages visitors to review the resume.
 - **Magic8Ball (`src/components/custom/magic8ball.tsx`)**: Fun interactive component that adds personality to the site.
+- **TerminalContainer (`src/components/custom/terminalContainer.tsx`)**: Terminal-styled container with typewriter effect.
+- **MatrixRain (`src/components/custom/matrixRain.tsx`)**: Matrix-style rain background animation toggle.
 
 ### UI Components
 
@@ -78,10 +87,13 @@ The project uses ShadCN UI library for consistent styling across the site, with 
 ### Home Page (`src/app/page.tsx`)
 
 The landing page includes:
-- Hero section with name, title, and tagline
+- An interactive boot sequence terminal that transitions to the main content
+- Hero section with animated terminal interface and profile
+  - Left column: interactive terminal with typing animations and command execution
+  - Right column: profile image, current position, previous experience, education, and social links
 - Domain expertise cards
 - Tech stack cards
-- Featured projects section (commented out but high priority for implementation)
+- Featured projects section
 - Contact CTA
 
 ### About Page (`src/app/about/page.tsx`)
@@ -127,10 +139,12 @@ Currently undeveloped but planned to showcase interesting metrics and visualizat
 - Lucide React (for icons)
 - React Hook Form (for forms)
 - Recharts (for data visualization)
+- react-github-calendar (for GitHub activity visualization)
 
 ### Data Visualization
 - Recharts
 - D3.js
+- GitHub Calendar
 
 ### Deployment
 - Vercel
@@ -158,7 +172,7 @@ The MVP (Minimum Viable Product) version of the site focuses on core functionali
 ### Post-MVP Features
 After the MVP is complete, the following features will be implemented in order of priority:
 
-1. **Interactive Terminal Interface** (First post-MVP feature)
+1. **Interactive Terminal Interface** (Partially implemented in Hero section)
    - Command-line interface that coexists with the traditional UI
    - Navigation of the site using terminal commands (`cd`, `ls`, `cat`, etc.)
    - Virtual file system reflecting website content structure
@@ -187,7 +201,7 @@ After the MVP is complete, the following features will be implemented in order o
 | Projects Showcase | Implemented | High | MVP |
 | About Page | Implemented | High | MVP |
 | Basic Stats Page | In Progress | Medium | MVP |
-| Interactive Terminal | Planned | High | First post-MVP |
+| Interactive Terminal | Partially Implemented | High | MVP/Post-MVP |
 | AI Assistant (Dave) | Placeholder UI | Medium | Post-MVP |
 | Technical Blog | Not Started | Low | Post-MVP |
 
@@ -297,30 +311,46 @@ The following revitalization steps have been completed:
   - Optimized component interactions to prevent conflicts with main page scrolling
   - Added clearer instructions for interactive components
 
-### 6. Next Steps
+### 6. Hero Section Enhancement
+- **Interactive Terminal Interface**:
+  - Implemented a completely redesigned Hero component (`hero-refactored.tsx`)
+  - Created a two-column layout with terminal interface on the left and profile on the right
+  - Added realistic typing animations with variable speed for natural feel
+  - Implemented a command execution sequence that simulates terminal usage
+  - Included skills display organized by category in terminal output style
+  - Integrated GitHub Calendar to show real GitHub activity
+  - Added animated transitions between command execution states
+  - Created a realistic terminal UI with window controls, header bar, and scan lines
+  - Included a blinking cursor that accurately represents the interaction state
+
+- **Profile Information Display**:
+  - Added a profile image with hover effects and overlays
+  - Included current position, previous experience, and education information
+  - Implemented social links with interactive hover states
+  - Created animated transitions for content appearance
+  - Added visual decorations like corner borders and gradient overlays
+  - Ensured responsive design for different screen sizes
+
+### 7. Next Steps
 The following items from the revitalization plan still need to be addressed:
 - Complete the MVP version of the site before implementing advanced features
 - Integrate real data sources for the Stats page
-- Implement the interactive terminal interface as the first post-MVP feature
+- Implement the full interactive terminal interface across the entire site
 - Implement the actual AI functionality for Dave
 - Further polish the UI/UX across all pages
 - Consider adding a blog functionality replacement focused on technical content
 
 ## Future Interactive Terminal Feature
 
-A detailed plan has been created for the interactive terminal interface, which will be the first feature implemented after the MVP is complete. This feature will:
+The interactive terminal interface has been partially implemented in the Hero section. The plan for the complete feature is:
 
-- Provide a dual interface where users can navigate the site through either:
-  - Traditional scrolling and clicking UI (for all visitors)
-  - Command-line terminal interface (for technically-inclined visitors)
+- Extend the terminal interface to allow navigation throughout the entire site
 - Support common bash/zsh commands (`ls`, `cd`, `cat`, etc.) for exploring content
-- Feature a virtual file system that mirrors the site's content structure
-- Include interactive "executable" commands (e.g., `./contact.exe`, `./skills.sh`)
+- Implement a virtual file system that mirrors the site's content structure
+- Add interactive "executable" commands (e.g., `./contact.exe`, `./skills.sh`)
 - Provide auto-completion, command history, and error messages
 - Integrate with the visual UI (e.g., using `cd projects` would scroll to the projects section)
 - Include easter eggs and hidden features for exploration
-
-The interactive terminal implementation has been documented in detail and will be developed once the MVP is complete.
 
 ## Database Usage
 
@@ -350,6 +380,7 @@ The project uses a comprehensive set of dependencies including:
 - React and Next.js ecosystem
 - UI libraries (Radix UI, ShadCN)
 - Data visualization tools (Recharts, D3)
+- GitHub integration (react-github-calendar)
 - AI-related packages (OpenAI, AI) for future AI assistant functionality
 - Form handling (React Hook Form)
 - And many other utilities for a rich interactive experience 
@@ -360,7 +391,18 @@ The project uses a comprehensive set of dependencies including:
 
 The home page has undergone significant improvements to enhance user experience and navigation:
 
-1. **Developer Journey Component Refinements**
+1. **Hero Section Completely Redesigned**
+   - Replaced the original Hero component with a new interactive terminal-based interface
+   - Implemented real-time typing animations with natural speed variations
+   - Created a command execution sequence that demonstrates skills and GitHub activity
+   - Added a two-column layout separating the terminal interface from profile information
+   - Integrated react-github-calendar to show real GitHub contributions
+   - Improved visual styling with terminal-inspired design elements
+   - Enhanced profile presentation with image effects and information sections
+   - Added smooth transitions and animations for a polished user experience
+   - Ensured responsive design for all screen sizes
+
+2. **Developer Journey Component Refinements**
    - Replaced scroll-based navigation with more intuitive arrow-based navigation
    - Added prominent side navigation arrows for easier milestone traversal
    - Enhanced visual styling of navigation controls with better highlighting and transitions
@@ -368,7 +410,19 @@ The home page has undergone significant improvements to enhance user experience 
    - Simplified the UI by centralizing the navigation guide
    - Made the component more focused on content by removing distractions
 
-2. **General Homepage Improvements**
+3. **Contact CTA Section Redesign**
+   - Transformed into a two-column layout with terminal and contact card sides
+   - Added animated terminal section that simulates a contact protocol sequence
+   - Implemented a blinking cursor effect for authentic terminal feel
+   - Created a staged animation that progresses through command execution
+   - Designed a modern contact card with terminal-inspired window controls
+   - Added decorative corner brackets and scan line animation effects
+   - Improved button styling with numbered options ([01], [02], [03]) for each contact method
+   - Enhanced status indicators showing availability and response time
+   - Maintained consistent terminal aesthetic with the rest of the site
+   - Made the component fully responsive with proper order adjustment on mobile
+
+4. **General Homepage Improvements**
    - Optimized the main page structure for smoother navigation
    - Enhanced the terminal aesthetic throughout the site
    - Improved responsive behavior across different screen sizes
