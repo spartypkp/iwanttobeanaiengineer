@@ -25,18 +25,26 @@ The primary goals of this personal website are:
 │   │   ├── dave/       # AI assistant page (future implementation)
 │   │   ├── projects/   # Projects page
 │   │   ├── stats/      # Statistics page (future implementation)
+│   │   ├── studio/     # Embedded Sanity Studio
 │   │   ├── layout.tsx  # Root layout component
 │   │   ├── page.tsx    # Home page
 │   │   └── globals.css # Global styles
 │   ├── components/     # Reusable components
 │   │   ├── custom/     # Custom components for the site
 │   │   └── ui/         # ShadCN UI components
+│   ├── sanity/         # Sanity CMS configuration
+│   │   ├── lib/        # Sanity utility functions
+│   │   ├── schemaTypes/ # Sanity content schemas
+│   │   ├── env.ts      # Sanity environment variables
+│   │   └── structure.ts # Sanity Studio structure definition
 │   └── lib/            # Utilities and type definitions
 │       ├── hooks/      # Custom React hooks
 │       ├── utils/      # Utility functions
 │       ├── api.ts      # API functions
 │       └── types.ts    # TypeScript type definitions
 ├── public/             # Static files
+├── sanity.config.ts    # Sanity Studio configuration
+├── sanity.cli.ts       # Sanity CLI configuration
 ├── package.json        # Dependencies and scripts
 └── tailwind.config.ts  # Tailwind CSS configuration
 ```
@@ -140,6 +148,14 @@ Currently undeveloped but planned to showcase interesting metrics and visualizat
 - React Hook Form (for forms)
 - Recharts (for data visualization)
 - react-github-calendar (for GitHub activity visualization)
+
+### Content Management
+- Sanity CMS
+  - Embedded Sanity Studio in Next.js application
+  - Custom schema definitions for blog posts, projects, and author data
+  - GROQ query language for content retrieval
+  - Real-time content updates
+  - Customizable content structure with strongly typed schemas
 
 ### Data Visualization
 - Recharts
@@ -354,9 +370,10 @@ The interactive terminal interface has been partially implemented in the Hero se
 
 ## Database Usage
 
+- Sanity CMS database for structured content (projects, blog posts)
 - Previous implementation used InstantDB (primarily for blogs)
-- Future database needs (if any) will use Supabase
-- No current active database requirements
+- Future database needs (if any) may use Supabase for user-generated content
+- Sanity's CDN for media assets
 
 ## Assets
 
@@ -428,4 +445,61 @@ The home page has undergone significant improvements to enhance user experience 
    - Improved responsive behavior across different screen sizes
    - Fixed interaction issues between component-specific navigation and page scrolling
 
-These updates create a more controlled, intuitive user experience while maintaining the terminal-inspired aesthetic that gives the site its unique character. 
+These updates create a more controlled, intuitive user experience while maintaining the terminal-inspired aesthetic that gives the site its unique character.
+
+## Sanity CMS Integration
+
+The website now incorporates Sanity CMS to manage structured content, providing several significant benefits:
+
+### Sanity Implementation
+
+1. **Embedded Studio**
+   - Sanity Studio is embedded directly in the Next.js application at `/studio` route
+   - Allows for seamless content management without leaving the application
+   - Customized desk structure for optimized content editing experience
+
+2. **Content Schema**
+   - Type-safe schema definitions for various content types:
+     - Blog posts with rich text capabilities via `blockContentType`
+     - Author profiles with bio and contact information
+     - Categories for content organization
+     - Future implementation will include project schemas
+
+3. **Data Flow Architecture**
+   - Client configuration for content fetching with `next-sanity`
+   - Environment variable management for secure project connections
+   - Optimized querying with GROQ in the Sanity Vision tool
+
+### Benefits for Project Structure
+
+1. **Content Separation**
+   - Clear separation between content and presentation layers
+   - Structured content models enable consistent rendering across the site
+   - Reduced data duplication with a single source of truth
+
+2. **Developer Experience**
+   - Type-safe schema definitions and strongly typed content
+   - Real-time content updates with Live Preview capabilities
+   - Simplified content queries through GROQ or GraphQL
+
+3. **Future Extensibility**
+   - Planned unified project schema to replace hard-coded project data
+   - Enhanced filtering and sorting capabilities powered by Sanity queries
+   - Potential for internationalization and localized content
+
+### Next Steps for Sanity Integration
+
+1. **Project Schema Migration**
+   - Create comprehensive project schemas based on the unified model
+   - Migrate existing project data from static files to Sanity
+   - Implement query interfaces for featured vs. non-featured projects
+
+2. **Advanced Media Management**
+   - Utilize Sanity's image pipeline for optimized media delivery
+   - Implement responsive image handling with art direction
+   - Create custom asset metadata for improved organization
+
+3. **Content Relationships**
+   - Define relationships between projects, technologies, and other content types
+   - Create reusable components for consistent content presentation
+   - Build advanced filtering based on content relationships 
