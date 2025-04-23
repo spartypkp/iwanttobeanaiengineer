@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Calendar, Code, ExternalLink, Github, Terminal } from 'lucide-react';
+import { ArrowRight, Calendar, ExternalLink, Github, Terminal } from 'lucide-react';
 import React from 'react';
 
 interface ProjectHeaderProps {
@@ -64,7 +64,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
 			)}
 
 			{/* Main content */}
-			<div className={`bg-background/95 backdrop-blur-md ${!noTerminalHeader ? "border-x border-b" : ""} border-primary/20 p-6 relative overflow-hidden ${noTerminalHeader ? "rounded-xl" : ""}`}>
+			<div className={`bg-background/95 backdrop-blur-md ${!noTerminalHeader ? "border-x border-b" : ""} border-primary/20 p-4 relative overflow-hidden ${noTerminalHeader ? "rounded-xl" : ""}`}>
 				{/* Background pattern */}
 				<div className="absolute inset-0 pointer-events-none opacity-5">
 					<div className="h-full w-full" style={{
@@ -74,17 +74,17 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
 					}}></div>
 				</div>
 
-				<div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
-					<div className="space-y-3 max-w-3xl">
-						<div className="flex items-center gap-3 flex-wrap">
-							{/* Code tag styling for title */}
-							<h2 className="text-2xl md:text-3xl font-bold tracking-tight inline-flex items-center group">
-								<span className="text-primary/70 font-mono mr-2 text-xl">&lt;</span>
-								{title}
-								<span className="text-primary/70 font-mono ml-2 text-xl">/&gt;</span>
+				<div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-3">
+					<div className="space-y-2 max-w-3xl">
+						<div className="flex items-center gap-2 flex-wrap justify-between">
+							{/* Code tag styling for title with enhanced appearance */}
+							<h2 className="text-xl md:text-2xl font-bold tracking-tight inline-flex items-center group">
+								<span className="text-primary/70 font-mono mr-2 text-lg bg-primary/5 px-1 rounded">&lt;</span>
+								<span className="bg-gradient-to-br from-foreground to-foreground/80 bg-clip-text text-transparent">{title}</span>
+								<span className="text-primary/70 font-mono ml-2 text-lg bg-primary/5 px-1 rounded">/&gt;</span>
 
 								{/* Terminal blinking cursor */}
-								<span className="h-5 w-2 bg-primary/70 ml-2 opacity-70 animate-pulse-slow"></span>
+								<span className="h-4 w-1.5 bg-primary/70 ml-2 opacity-70 animate-pulse-slow"></span>
 							</h2>
 
 							{/* Status badge */}
@@ -96,58 +96,51 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
 									{timeline.status.charAt(0).toUpperCase() + timeline.status.slice(1)}
 								</Badge>
 							)}
+
+							{/* Company name with code comment styling and enhanced look */}
+							{company && (
+								<div className="text-base text-muted-foreground flex items-center">
+									<span className="text-primary/60 font-mono mr-2 text-xs bg-black/20 px-1 py-0.5 rounded">//</span>
+									<span className="text-foreground/90 font-medium">{company}</span>
+								</div>
+							)}
 						</div>
 
-						{/* Company name with code comment styling */}
-						{company && (
-							<div className="text-lg text-muted-foreground flex items-center">
-								<span className="text-primary/60 font-mono mr-2 text-sm">// by</span>
-								{company}
-							</div>
-						)}
 
-						{/* Description with terminal prompt styling */}
-						<p className="text-lg">
-							<span className="text-primary/70 mr-2 font-mono text-sm inline-block">$</span>
+
+						{/* Description with terminal prompt styling and improved readability */}
+						<p className="text-base leading-relaxed text-foreground/90">
+							<span className="text-primary/70 mr-2 font-mono text-xs inline-block bg-black/20 px-1 py-0.5 rounded">$</span>
 							{description}
 						</p>
 
-						{/* Timeline with better styling */}
+						{/* Timeline with improved styling */}
 						{timeline && (
-							<div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 bg-black/20 rounded-md px-3 py-1.5 inline-flex">
-								<Calendar size={14} className="text-primary/70" />
+							<div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 bg-black/20 rounded-md px-2 py-1 inline-flex border border-primary/10">
+								<Calendar size={12} className="text-primary/80" />
 								<span className="font-mono">{timeline.startDate}</span>
-								<ArrowRight size={10} />
+								<ArrowRight size={8} className="text-primary/60" />
 								<span className="font-mono">{timeline.endDate || 'Present'}</span>
 							</div>
 						)}
 					</div>
 
-					{/* Project links with improved styling */}
-					<div className="flex flex-wrap gap-2 mt-4 md:mt-0 md:flex-col md:items-end">
+					{/* Project links with improved styling - hide on mobile, will be shown at bottom */}
+					<div className="hidden md:flex flex-wrap gap-2 md:flex-col md:items-end">
 						{github && (
-							<Button variant="outline" size="sm" asChild className="h-9 border-primary/20 hover:bg-primary/10 hover:text-primary bg-black/30">
-								<a href={github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-									<Github size={16} />
+							<Button variant="outline" size="sm" asChild className="h-8 border-primary/20 hover:bg-primary/10 hover:text-primary bg-black/30 backdrop-blur-sm">
+								<a href={github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5">
+									<Github size={14} className="text-primary/80" />
 									<span>GitHub</span>
 								</a>
 							</Button>
 						)}
 
 						{demoUrl && (
-							<Button variant="outline" size="sm" asChild className="h-9 border-primary/20 hover:bg-primary/10 hover:text-primary bg-black/30">
-								<a href={demoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-									<ExternalLink size={16} />
-									<span>Live Demo</span>
-								</a>
-							</Button>
-						)}
-
-						{caseStudyUrl && (
-							<Button variant="default" size="sm" asChild className="h-9 bg-primary hover:bg-primary/90">
-								<a href={caseStudyUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-									<Code size={16} />
-									<span>Case Study</span>
+							<Button variant="outline" size="sm" asChild className="h-8 border-primary/20 hover:bg-primary/10 hover:text-primary bg-black/30 backdrop-blur-sm">
+								<a href={demoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5">
+									<ExternalLink size={14} className="text-primary/80" />
+									<span>Demo</span>
 								</a>
 							</Button>
 						)}

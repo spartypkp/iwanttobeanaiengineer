@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from '@/components/ui/button';
 import { ProjectShowcase } from '@/lib/types';
-import { FileBadge, Terminal } from 'lucide-react';
+import { Code, FileBadge, Terminal, Trophy } from 'lucide-react';
 import React, { useEffect, useId, useRef, useState } from 'react';
-import ProjectDetailTabs from './ProjectDetailTabs';
 import ProjectHeader from './ProjectHeader';
 import ProjectMediaCarousel from './ProjectMediaCarousel';
 import ProjectOverview from './ProjectOverview';
@@ -99,12 +99,12 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 				{/* Terminal content area */}
 				<div className="bg-zinc-900/90 backdrop-blur-sm border-x border-b border-primary/20">
 					{/* Simulated terminal header text */}
-					<div className="px-4 pt-3 pb-2 font-mono text-[10px] text-primary/40 border-b border-primary/5">
+					{/* <div className="px-4 pt-2 pb-1 font-mono text-[10px] text-primary/40 border-b border-primary/5">
 						<p>Last login: {new Date().toLocaleDateString()} —— Project ID: {project.id}</p>
-					</div>
+					</div> */}
 
 					{/* Project content */}
-					<div className="p-5 md:p-8 bg-background/90">
+					<div className="p-4 md:p-6 bg-background/90">
 						<div className="relative">
 							{/* Subtle background pattern */}
 							<div className="absolute inset-0 pointer-events-none opacity-3">
@@ -127,7 +127,7 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 									noTerminalHeader={true}
 								/>
 
-								<div className="grid grid-cols-1 md:grid-cols-12 gap-8 mt-8">
+								<div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
 									<div className="md:col-span-7 transition-all duration-700 delay-200 transform"
 										style={{
 											transitionDelay: '100ms',
@@ -153,20 +153,94 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 									</div>
 								</div>
 
-								<div className="transition-all duration-700 delay-500 transform"
-									style={{
-										transitionDelay: '400ms',
-										opacity: isInView ? 1 : 0,
-										transform: isInView ? 'translateY(0)' : 'translateY(20px)'
-									}}>
-									<ProjectDetailTabs project={project} />
+								{/* Key Metrics Section - Compact and visually enhanced version */}
+								{(project.metrics?.length > 0 || project.achievements?.length > 0) && (
+									<div className="mt-6 transition-all duration-700 delay-400 transform"
+										style={{
+											transitionDelay: '300ms',
+											opacity: isInView ? 1 : 0,
+											transform: isInView ? 'translateY(0)' : 'translateY(20px)'
+										}}>
+										<div className="bg-gradient-to-r from-black/30 via-black/20 to-black/30 backdrop-blur-sm rounded-lg border border-primary/20 p-3 shadow-[0_2px_10px_rgba(var(--primary-rgb),0.07)]">
+											<h3 className="text-sm font-semibold mb-3 flex items-center">
+												<Trophy size={14} className="text-primary mr-2" />
+												<span className="bg-gradient-to-r from-foreground to-foreground/90 bg-clip-text text-transparent">Key Metrics</span>
+											</h3>
+
+											<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+												{project.metrics && project.metrics.slice(0, 4).map((metric, index) => (
+													<div
+														key={index}
+														className="bg-black/30 backdrop-blur-sm p-2 rounded-md border border-primary/10 flex items-center space-x-2 hover:border-primary/20 transition-colors duration-200"
+													>
+														{metric.icon &&
+															<div className="text-primary flex-shrink-0 bg-primary/10 rounded-full p-1">
+																{metric.icon}
+															</div>
+														}
+														<div className="flex flex-col">
+															<div className="text-lg font-bold text-primary flex items-baseline">
+																{metric.value}
+																{metric.unit && <span className="text-sm ml-0.5 text-primary/80">{metric.unit}</span>}
+															</div>
+															<div className="text-[10px] text-muted-foreground leading-tight">{metric.label}</div>
+														</div>
+													</div>
+												))}
+
+												{(!project.metrics || project.metrics.length === 0) && project.achievements && project.achievements.slice(0, 1).map((achievement, index) => (
+													<div key={index} className="col-span-2 bg-black/30 backdrop-blur-sm p-2 rounded-md border border-primary/10 hover:border-primary/20 transition-colors duration-200">
+														<div className="flex items-start">
+															<div className="mr-2 mt-0.5 flex-shrink-0">
+																<div className="h-4 w-4 rounded-full bg-primary/20 flex items-center justify-center">
+																	<Trophy size={10} className="text-primary" />
+																</div>
+															</div>
+															<p className="text-xs text-muted-foreground">{achievement}</p>
+														</div>
+													</div>
+												))}
+											</div>
+										</div>
+									</div>
+								)}
+
+								{/* Simple View Project Button - Enhanced */}
+								<div className="flex justify-end mt-4 space-x-2">
+									{project.caseStudyUrl ? (
+										<Button
+											variant="default"
+											asChild
+											size="sm"
+											className="bg-primary hover:bg-primary/90 shadow-[0_2px_10px_rgba(var(--primary-rgb),0.2)] transition-all duration-200 hover:translate-y-[-1px]"
+										>
+											<a href={project.caseStudyUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5">
+												<Code size={14} />
+												<span>Full Case Study</span>
+											</a>
+										</Button>
+									) : (
+										<Button
+											variant="default"
+											asChild
+											size="sm"
+											className="bg-primary hover:bg-primary/90 shadow-[0_2px_10px_rgba(var(--primary-rgb),0.2)] transition-all duration-200 hover:translate-y-[-1px]"
+										>
+											<a href={`/projects/${project.id}`} className="flex items-center gap-1.5">
+												<Code size={14} />
+												<span>View Project</span>
+											</a>
+										</Button>
+									)}
+
+
 								</div>
 							</div>
 						</div>
 					</div>
 
 					{/* Terminal command prompt footer */}
-					<div className="px-4 py-3 bg-zinc-900 border-t border-primary/10">
+					<div className="px-4 py-2 bg-zinc-900 border-t border-primary/10">
 						<div className="font-mono text-xs flex items-center text-primary/60">
 							<span className="text-primary/80 mr-2">$</span>
 							<span className="mr-1">exit</span>

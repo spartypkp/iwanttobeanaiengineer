@@ -1,11 +1,11 @@
 "use client";
 import { ContactCTA } from '@/components/custom/contactCTA';
-import { DomainExpertise } from '@/components/custom/domainExpertise';
+import { DeveloperJourney } from '@/components/custom/developerJourney';
 import { Hero } from '@/components/custom/hero';
 import MatrixRain from '@/components/custom/matrixRain';
 import ProjectSection from '@/components/custom/projectShowcase/ProjectSection';
-import { TechStack } from '@/components/custom/techStack';
 import TerminalContainer from '@/components/custom/terminalContainer';
+import { ThingsILove } from '@/components/custom/thingsILove';
 import { featuredProjects } from '@/lib/projectData';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -136,25 +136,6 @@ const HomePage: React.FC = () => {
 								<React.Fragment key={project.id}>
 									{/* Project component */}
 									<ProjectSection project={project} />
-
-									{/* Terminal-inspired separator between projects (except after the last one) */}
-									{index < featuredProjects.length - 1 && (
-										<div className="mx-auto max-w-6xl py-3">
-											<div className="bg-zinc-900 border border-primary/20 rounded-md px-4 py-3 font-mono text-xs shadow-[0_0_30px_rgba(var(--primary-rgb),0.1)]">
-												<div className="flex items-center justify-between">
-													<div className="flex items-center">
-														<span className="text-primary/80 mr-2">$</span>
-														<span className="text-primary/60">next-project</span>
-														<span className="ml-2 animate-pulse-slow">▌</span>
-													</div>
-													<div className="flex items-center gap-2 text-[10px] text-primary/40">
-														<span>loading</span>
-														<span className="h-1.5 w-1.5 rounded-full bg-primary/30 animate-pulse"></span>
-													</div>
-												</div>
-											</div>
-										</div>
-									)}
 								</React.Fragment>
 							))}
 						</div>
@@ -177,11 +158,11 @@ const HomePage: React.FC = () => {
 						</div>
 					</section>
 
-					{/* Domain Expertise Cards */}
-					<DomainExpertise />
+					{/* Things I Love Section */}
+					<ThingsILove />
 
-					{/* Tech Stack */}
-					<TechStack />
+					{/* Developer Journey */}
+					<DeveloperJourney />
 
 					{/* Contact CTA */}
 					<ContactCTA

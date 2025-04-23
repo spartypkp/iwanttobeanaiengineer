@@ -112,7 +112,7 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 	// Conditional classes for fullscreen mode
 	const mediaContainerClasses = isFullscreen
 		? "fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md"
-		: "relative flex flex-col w-full h-[400px] md:h-[500px] overflow-hidden";
+		: "relative flex flex-col w-full h-[300px] md:h-[380px] overflow-hidden rounded-xl shadow-[0_2px_15px_rgba(var(--project-accent),0.1)] border border-primary/10";
 
 	return (
 		<div
@@ -120,7 +120,8 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 			style={{ '--project-accent': rgbColor } as React.CSSProperties}
 		>
 			{/* Main Media Display */}
-			<div className="relative flex w-full h-full min-h-0 overflow-hidden">
+			<div className="relative flex w-full h-full min-h-0 overflow-hidden rounded-lg group">
+				<div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent opacity-50 z-10 pointer-events-none"></div>
 				{renderMedia()}
 
 				{/* Navigation arrows - only show if more than one media item */}
@@ -128,46 +129,46 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 					<>
 						<button
 							onClick={handlePrevious}
-							className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-background/40 backdrop-blur-md border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md"
+							className="absolute left-2 top-1/2 transform -translate-y-1/2 z-30 flex items-center justify-center w-8 h-8 rounded-full bg-background/40 backdrop-blur-sm border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md opacity-0 group-hover:opacity-100 hover:scale-110"
 							aria-label="Previous media"
 						>
-							<ChevronLeft size={20} className="text-primary/80" />
+							<ChevronLeft size={16} className="text-primary/80" />
 						</button>
 						<button
 							onClick={handleNext}
-							className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-background/40 backdrop-blur-md border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md"
+							className="absolute right-2 top-1/2 transform -translate-y-1/2 z-30 flex items-center justify-center w-8 h-8 rounded-full bg-background/40 backdrop-blur-sm border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md opacity-0 group-hover:opacity-100 hover:scale-110"
 							aria-label="Next media"
 						>
-							<ChevronRight size={20} className="text-primary/80" />
+							<ChevronRight size={16} className="text-primary/80" />
 						</button>
 					</>
 				)}
 
 				{/* Control buttons */}
-				<div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+				<div className="absolute top-2 right-2 z-30 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 					<button
 						onClick={toggleInfo}
-						className="flex items-center justify-center p-2 rounded-full bg-background/40 backdrop-blur-md border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md"
+						className="flex items-center justify-center p-1.5 rounded-full bg-background/40 backdrop-blur-sm border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md hover:shadow-lg hover:scale-105"
 						aria-label="Media information"
 					>
-						<Info size={18} className="text-primary/80" />
+						<Info size={14} className="text-primary/80" />
 					</button>
 					<button
 						onClick={toggleFullscreen}
-						className="flex items-center justify-center p-2 rounded-full bg-background/40 backdrop-blur-md border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md"
+						className="flex items-center justify-center p-1.5 rounded-full bg-background/40 backdrop-blur-sm border border-primary/10 hover:bg-background/60 transition-all duration-200 text-foreground shadow-md hover:shadow-lg hover:scale-105"
 						aria-label={isFullscreen ? "Exit fullscreen" : "View fullscreen"}
 					>
 						{isFullscreen ? (
-							<X size={18} className="text-primary/80" />
+							<X size={14} className="text-primary/80" />
 						) : (
-							<Maximize size={18} className="text-primary/80" />
+							<Maximize size={14} className="text-primary/80" />
 						)}
 					</button>
 				</div>
 
-				{/* Info overlay */}
+				{/* Info overlay with animation */}
 				{showInfo && activeMedia?.alt && (
-					<div className="absolute bottom-0 left-0 right-0 bg-background/70 backdrop-blur-md p-4 border-t border-primary/10 text-sm z-20">
+					<div className="absolute bottom-0 left-0 right-0 bg-background/70 backdrop-blur-md p-2 border-t border-primary/10 text-xs z-20 animate-fade-in">
 						{activeMedia.alt}
 					</div>
 				)}
@@ -179,14 +180,14 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 
 			{/* Media Navigation (thumbnails) */}
 			{media.length > 1 && (
-				<div className="flex items-center justify-center gap-3 mt-4">
+				<div className="flex items-center justify-center gap-2 mt-2 bg-black/20 backdrop-blur-sm rounded-full py-1 px-3 mx-auto w-fit">
 					{media.map((item, index) => (
 						<button
 							key={index}
 							onClick={() => handleMediaChange(index)}
-							className={`flex items-center justify-center h-2 rounded-full transition-all duration-300 ${activeMediaIndex === index
-								? 'bg-primary w-8'
-								: 'bg-primary/30 hover:bg-primary/50 w-3'
+							className={`flex items-center justify-center rounded-full transition-all duration-300 ${activeMediaIndex === index
+								? 'bg-primary h-1.5 w-6 shadow-[0_0_5px_rgba(var(--project-accent),0.5)]'
+								: 'bg-primary/30 hover:bg-primary/50 h-1.5 w-2'
 								}`}
 							aria-label={`View media ${index + 1}`}
 						/>
