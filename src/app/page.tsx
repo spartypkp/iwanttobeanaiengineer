@@ -5,6 +5,7 @@ import { Hero } from '@/components/custom/hero';
 import MatrixRain from '@/components/custom/matrixRain';
 import ProjectSection from '@/components/custom/projectShowcase/ProjectSection';
 import TerminalContainer from '@/components/custom/terminalContainer';
+import { Testimonials } from '@/components/custom/testimonials';
 import { ThingsILove } from '@/components/custom/thingsILove';
 import { featuredProjects } from '@/lib/projectData';
 import React, { useEffect, useRef, useState } from 'react';
@@ -18,21 +19,13 @@ const HomePage: React.FC = () => {
 	const animationInProgress = useRef(false);
 	// Claude don't mess with this - I like it how it is.
 	const welcomeContent = `> Boot sequence initiated...
-> Checking NVIDIA drivers... [PRAY FOR ME]
-> Pretending to understand LLM evals... [OK]
 > Searching for GPT-5... [NOT FOUND]
-> Practicing saying "context window" in meetings... [EXPERT LEVEL]
 > Enabling recruiter persuasion module... [RESISTANCE IS FUTILE]
-> Generating impressive portfolio with minimal effort... [DONE]
 > Trauma dumping on my best friend Claude... [OK]
 > Mining Bitcoin while you wait... [KIDDING]
-> Hallucinating impressive accomplishments... [ETHICAL VIOLATION DETECTED]
-> Preparing compelling reasons why I'm better than ChatGPT... [ONGOING] (**Claude wrote this!**)
-> Disabling JavaScript framework opinions... [FAILED]
 > Firing up Postgres <3 (The best database)... [OK]
 > Patching impostor syndrome... [NOT FOUND]
-> System ready! Hire me before I become self-aware.
-> Note: No LLMs were harmed in the making of this portfolio.`;
+> System ready! Hire Will before I become self-aware.`;
 
 	// Handle the terminal completion -> content phase transition
 	useEffect(() => {
@@ -158,11 +151,44 @@ const HomePage: React.FC = () => {
 						</div>
 					</section>
 
+					{/* Section divider with terminal styling */}
+					<div className="w-full max-w-md mx-auto mb-12 flex items-center gap-3">
+						<div className="h-px bg-primary/20 flex-grow"></div>
+						<div className="text-xs font-mono text-primary/40 px-2 py-1 border border-primary/10 rounded">favorites</div>
+						<div className="h-px bg-primary/20 flex-grow"></div>
+					</div>
+
+					{/* Things I Love Section Header */}
+					<div className="mb-12 text-center">
+						<h2 className="text-4xl font-bold mb-4">Things I <span className="text-primary">❤️</span></h2>
+						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+							Technologies and tools I'm genuinely passionate about
+						</p>
+					</div>
+
 					{/* Things I Love Section */}
 					<ThingsILove />
 
+					{/* Section divider with terminal styling */}
+					<div className="w-full max-w-md mx-auto mb-12 flex items-center gap-3">
+						<div className="h-px bg-primary/20 flex-grow"></div>
+						<div className="text-xs font-mono text-primary/40 px-2 py-1 border border-primary/10 rounded">journey</div>
+						<div className="h-px bg-primary/20 flex-grow"></div>
+					</div>
+
+					{/* Things I Love Section Header */}
+					<div className="mb-12 text-center">
+						<h2 className="text-4xl font-bold mb-4">My Journey</h2>
+						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+							How I got here, and where I'm going
+						</p>
+					</div>
+
 					{/* Developer Journey */}
 					<DeveloperJourney />
+
+					{/* Testimonials Section */}
+					<Testimonials />
 
 					{/* Contact CTA */}
 					<ContactCTA
