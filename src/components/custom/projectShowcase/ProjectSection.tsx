@@ -98,11 +98,6 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 
 				{/* Terminal content area */}
 				<div className="bg-zinc-900/90 backdrop-blur-sm border-x border-b border-primary/20">
-					{/* Simulated terminal header text */}
-					{/* <div className="px-4 pt-2 pb-1 font-mono text-[10px] text-primary/40 border-b border-primary/5">
-						<p>Last login: {new Date().toLocaleDateString()} —— Project ID: {project.id}</p>
-					</div> */}
-
 					{/* Project content */}
 					<div className="p-4 md:p-6 bg-background/90">
 						<div className="relative">
@@ -205,7 +200,7 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 									</div>
 								)}
 
-								{/* Simple View Project Button - Enhanced */}
+								{/* View Project Button */}
 								<div className="flex justify-end mt-4 space-x-2">
 									{project.caseStudyUrl ? (
 										<Button
@@ -232,8 +227,6 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 											</a>
 										</Button>
 									)}
-
-
 								</div>
 							</div>
 						</div>
