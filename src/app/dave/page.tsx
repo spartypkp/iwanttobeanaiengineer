@@ -1,7 +1,7 @@
 "use client";
 
 import DaveIcon from '@/components/custom/dave';
-import { TerminalChat } from '@/components/custom/terminalChat';
+import { ContentCopilot } from '@/components/dave-admin/content-copilot/ContentCopilot';
 import { useRef, useState } from 'react';
 
 export default function DavePage() {
@@ -68,7 +68,7 @@ export default function DavePage() {
 				</div>
 
 				<div className="md:col-span-3">
-					<TerminalChat
+					<ContentCopilot
 						className="w-full h-[600px]"
 						ref={terminalRef}
 					/>

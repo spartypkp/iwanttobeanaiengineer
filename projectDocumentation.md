@@ -21,31 +21,47 @@ The primary goals of this personal website are:
 ├── src/                # Source code
 │   ├── app/            # Next.js app directory
 │   │   ├── about/      # About page
-│   │   ├── dailyBlogs/ # Blog page (to be removed)
-│   │   ├── dave/       # AI assistant page (future implementation)
+│   │   ├── (admin)/    # Admin-only routes with protected layout
+│   │   │   └── contentCopilot/ # Content Copilot admin feature
+│   │   ├── dave/       # Public AI assistant page 
 │   │   ├── projects/   # Projects page and individual project pages
 │   │   │   └── [slug]/ # Dynamic project detail pages
-│   │   ├── stats/      # Statistics page (future implementation)
+│   │   ├── stats/      # Statistics page
 │   │   ├── studio/     # Embedded Sanity Studio
 │   │   ├── layout.tsx  # Root layout component
 │   │   ├── page.tsx    # Home page
 │   │   └── globals.css # Global styles
 │   ├── components/     # Reusable components
 │   │   ├── custom/     # Custom components for the site
-│   │   │   ├── projectCard.tsx # Project card component
-│   │   │   ├── projectGrid.tsx # Project grid with filtering
+│   │   │   ├── dave.tsx          # Dave icon component
+│   │   │   ├── projectCard.tsx   # Project card component
+│   │   │   ├── projectGrid.tsx   # Project grid with filtering
+│   │   │   └── // other custom components
+│   │   ├── dave-admin/ # Admin components for Dave features
+│   │   │   └── content-copilot/  # Content Copilot components
+│   │   │       ├── ChatPane.tsx           # Chat interface
+│   │   │       ├── ContentCopilot.tsx     # Main component
+│   │   │       ├── ContentSidebar.tsx     # Content selection panel
+│   │   │       └── types.ts               # Type definitions
 │   │   └── ui/         # ShadCN UI components
 │   ├── sanity/         # Sanity CMS configuration
 │   │   ├── lib/        # Sanity utility functions and client
 │   │   ├── schemaTypes/ # Sanity content schemas
-│   │   │   ├── projectType.ts # Project schema definition
+│   │   │   ├── projectType.ts    # Project schema definition
+│   │   │   ├── skillType.ts      # Skill schema definition
+│   │   │   ├── knowledgeType.ts  # Knowledge base schema definition
+│   │   │   └── // other schema types
 │   │   ├── env.ts      # Sanity environment variables
 │   │   └── structure.ts # Sanity Studio structure definition
 │   └── lib/            # Utilities and type definitions
 │       ├── hooks/      # Custom React hooks
 │       ├── utils/      # Utility functions
 │       ├── api.ts      # API functions
+│       ├── dave-data.ts # Dave data access layer
 │       └── types.ts    # TypeScript type definitions
+├── docs/               # Documentation
+│   └── features/       # Feature documentation
+│       └── content-copilot.md # Content Copilot documentation
 ├── public/             # Static files
 ├── sanity.config.ts    # Sanity Studio configuration
 ├── sanity.cli.ts       # Sanity CLI configuration
@@ -243,6 +259,7 @@ Dave is an AI assistant designed to represent the portfolio owner and provide vi
   - `getKnowledgeItems`: Retrieves specific knowledge base items by topic
 - **System Prompt**: Comprehensive system prompt defining Dave's persona, knowledge base, and response style
 - **Interface**: Basic Dave icon component created
+- **Administrative Tools**: Content Copilot for managing site content through AI-assisted conversation
 
 ### Data Layer Implementation
 - **Unified Data Access Layer**: Complete implementation of `dave-data.ts` that provides a standardized interface to access:
@@ -342,9 +359,10 @@ After the MVP is complete, the following features will be implemented in order o
 | Home Page | Implemented | High | MVP |
 | Projects Showcase | Implemented | High | MVP |
 | About Page | Implemented | High | MVP |
-| Basic Stats Page | In Progress | Medium | MVP |
+| Basic Stats Page | Implemented | Medium | MVP |
 | Interactive Terminal | Partially Implemented | High | MVP/Post-MVP |
-| AI Assistant (Dave) | Placeholder UI | Medium | Post-MVP |
+| Public AI Assistant (Dave) | Implemented | Medium | Post-MVP |
+| Content Copilot | Implemented | High | Post-MVP |
 | Technical Blog | Not Started | Low | Post-MVP |
 
 ## Revitalization Progress
@@ -594,6 +612,47 @@ The project uses a comprehensive set of dependencies including:
 - And many other utilities for a rich interactive experience 
 
 ## Recent Updates
+
+### Content Copilot Implementation
+
+The website now includes Content Copilot, an admin-only feature designed to streamline content creation and editing through AI-assisted conversation:
+
+1. **Core Functionality**
+   - Implemented a conversational interface for managing Sanity CMS content
+   - Created a bi-pane layout with chat interface and content sidebar
+   - Enabled creation and editing of multiple content types (Projects, Knowledge, Skills)
+   - Added automatic field extraction from natural language conversations
+   - Implemented real-time progress tracking for field completion
+
+2. **Chat Interface**
+   - Developed a rich chat UI with message history, typing indicators, and user avatars
+   - Added support for quick responses based on content type
+   - Implemented markdown formatting for chat messages
+   - Added welcome messages tailored to content type and edit mode
+   - Included copy-to-clipboard functionality for messages
+
+3. **Content Management**
+   - Created a comprehensive sidebar for content selection and preview
+   - Implemented tabs for different content types
+   - Added search and filtering capabilities for existing content
+   - Developed a detailed field preview for reviewing extracted information
+   - Enabled seamless transitions between conversation and manual editing modes
+
+4. **Admin Architecture**
+   - Added dedicated route at `/contentCopilot` for admin access
+   - Created a protected admin layout with authentication
+   - Implemented a strongly-typed chat context for state management
+   - Added API endpoints specific to each content type
+   - Integrated with Sanity CMS for real-time content updates
+
+5. **Technical Implementation**
+   - Utilized AI SDK for streaming chat responses
+   - Implemented a shared context architecture for component communication
+   - Created detailed type definitions for content items and fields
+   - Added automatic field detection based on AI responses
+   - Developed content type-specific API routes with specialized processing
+
+This feature significantly enhances content management workflows by allowing administrators to create and update content through natural conversation rather than traditional form interfaces.
 
 ### Projects System Overhaul
 

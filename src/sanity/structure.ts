@@ -1,43 +1,49 @@
-import type { StructureResolver } from 'sanity/structure';
+import { CodeIcon } from '@sanity/icons';
+import type { DefaultDocumentNodeResolver, StructureResolver } from 'sanity/structure';
+
+// Import the Content Copilot view
+import { ContentCopilotView } from '@/components/dave-admin/sanity/ContentCopilotView';
 
 // https://www.sanity.io/docs/structure-builder-cheat-sheet
 export const structure: StructureResolver = (S) =>
 	S.list()
-		.title('Portfolio Content')
+		.title('Content')
 		.items([
-			// Main document types
-			S.documentTypeListItem('project')
-				.title('Projects'),
-
-			// Divider
-			S.divider(),
-
-			// Projects By Category - a dynamic filtered view
 			S.listItem()
-				.title('Projects By Category')
+				.title('Home Page')
 				.child(
-					S.documentTypeList('projectCategory')
-						.title('Projects by Category')
-						.child((categoryId) =>
-							S.documentList()
-								.apiVersion('v2023-01-01')
-								.title('Projects')
-								.filter('_type == "project" && $categoryId in categories[]._ref')
-								.params({ categoryId }),
-						),
+					S.editor()
+						.schemaType('home')
+						.documentId('home')
+						.title('Home Page')
 				),
-
-			// Taxonomy & Configuration section
 			S.listItem()
-				.title('Taxonomy & Configuration')
+				.title('Projects')
+				.schemaType('projectType')
+				.child(S.documentTypeList('projectType').title('Projects')),
+			S.listItem()
+				.title('Skills')
+				.schemaType('skillType')
+				.child(S.documentTypeList('skillType').title('Skills')),
+			S.listItem()
+				.title('Knowledge Base')
+				.schemaType('knowledgeType')
 				.child(
-					S.list()
-						.title('Taxonomy & Configuration')
-						.items([
-							S.documentTypeListItem('projectCategory')
-								.title('Project Categories'),
-							S.documentTypeListItem('technology')
-								.title('Technologies'),
-						]),
+					S.documentTypeList('knowledgeType').title('Knowledge Base')
 				),
 		]);
+
+// Function to add the AI Assistant view to documents
+export const defaultDocumentNode: DefaultDocumentNodeResolver = (S, { schemaType }) => {
+	// Add the AI Assistant tab to all document types
+	return S.document().views([
+		// Default form view
+		S.view.form(),
+
+		// Custom AI Assistant view
+		S.view.component(ContentCopilotView)
+			.title('AI Assistant')
+			.icon(CodeIcon)
+	]);
+};
+
