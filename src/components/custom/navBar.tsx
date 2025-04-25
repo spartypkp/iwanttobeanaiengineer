@@ -16,13 +16,6 @@ const NavBar = () => {
 			<NavigationMenu className="w-full min-w-full">
 				<NavigationMenuList>
 					<NavigationMenuItem>
-						<Link href="/" legacyBehavior passHref>
-							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
-								Home
-							</NavigationMenuLink>
-						</Link>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
 						<Link href="/projects" legacyBehavior passHref>
 							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
 								Projects
@@ -30,19 +23,21 @@ const NavBar = () => {
 						</Link>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<Link href="/about" legacyBehavior passHref>
+						<Link href="/" legacyBehavior passHref>
 							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
-								About Me
+								Home
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<Link href="/stats" legacyBehavior passHref>
+						<Link href="/dave" legacyBehavior passHref>
 							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
-								Statistics
+								Talk to My AI
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
+
+
 				</NavigationMenuList>
 			</NavigationMenu>
 		</div>

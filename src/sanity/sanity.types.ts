@@ -46,6 +46,47 @@ export type Geopoint = {
 	alt?: number;
 };
 
+export type WorkHistory = {
+	_id: string;
+	_type: "workHistory";
+	_createdAt: string;
+	_updatedAt: string;
+	_rev: string;
+	company?: string;
+	position?: string;
+	slug?: Slug;
+	startDate?: string;
+	endDate?: string;
+	isCurrent?: boolean;
+	description?: string;
+	responsibilities?: Array<string>;
+	achievements?: Array<string>;
+	projects?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "project";
+	}>;
+	technologies?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "technology";
+	}>;
+	skills?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "skill";
+	}>;
+	location?: string;
+	url?: string;
+	displayOrder?: number;
+};
+
 export type Technology = {
 	_id: string;
 	_type: "technology";
@@ -83,6 +124,62 @@ export type Technology = {
 		level?: "beginner" | "intermediate" | "advanced" | "expert";
 		notes?: string;
 	};
+	featured?: boolean;
+};
+
+export type Skill = {
+	_id: string;
+	_type: "skill";
+	_createdAt: string;
+	_updatedAt: string;
+	_rev: string;
+	name?: string;
+	slug?: Slug;
+	category?:
+		| "programming"
+		| "frameworks"
+		| "ai"
+		| "cloud"
+		| "tools"
+		| "soft"
+		| "domain";
+	description?: string;
+	proficiency?: "beginner" | "intermediate" | "advanced" | "expert";
+	yearsExperience?: number;
+	projects?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "project";
+	}>;
+	relatedSkills?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "skill";
+	}>;
+	technologies?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "technology";
+	}>;
+	examples?: Array<{
+		title?: string;
+		description?: string;
+		code?: string;
+		language?: string;
+		_key: string;
+	}>;
+	resources?: Array<{
+		title?: string;
+		url?: string;
+		type?: "course" | "book" | "article" | "video" | "docs" | "other";
+		_key: string;
+	}>;
 	featured?: boolean;
 };
 
@@ -244,6 +341,53 @@ export type SanityFileAsset = {
 	source?: SanityAssetSourceData;
 };
 
+export type KnowledgeBase = {
+	_id: string;
+	_type: "knowledgeBase";
+	_createdAt: string;
+	_updatedAt: string;
+	_rev: string;
+	title?: string;
+	slug?: Slug;
+	category?:
+		| "personal"
+		| "professional"
+		| "education"
+		| "projects"
+		| "skills"
+		| "experience"
+		| "preferences"
+		| "faq";
+	question?: string;
+	content?: string;
+	keywords?: Array<string>;
+	relatedProjects?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "project";
+	}>;
+	relatedSkills?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "skill";
+	}>;
+	relatedKnowledge?: Array<{
+		_ref: string;
+		_type: "reference";
+		_weak?: boolean;
+		_key: string;
+		[internalGroqTypeReferenceTo]?: "knowledgeBase";
+	}>;
+	source?: string;
+	lastVerified?: string;
+	priority?: number;
+	isPublic?: boolean;
+};
+
 export type Slug = {
 	_type: "slug";
 	current?: string;
@@ -347,10 +491,13 @@ export type AllSanitySchemaTypes =
 	| SanityImagePalette
 	| SanityImageDimensions
 	| Geopoint
+	| WorkHistory
 	| Technology
+	| Skill
 	| ProjectCategory
 	| Project
 	| SanityFileAsset
+	| KnowledgeBase
 	| Slug
 	| BlockContent
 	| SanityImageCrop

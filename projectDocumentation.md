@@ -228,6 +228,78 @@ The project has seen significant progress with several key features implemented:
 - The Stats page is a canvas for future fun experimentation
 - Several interactive components add personality but need integration
 
+## Dave AI Assistant Data Sources
+
+### Overview
+Dave is an AI assistant designed to represent the portfolio owner and provide visitors with information about skills, experience, and projects. The assistant integrates with several data sources to provide accurate information.
+
+### Current Implementation
+- **API Route**: A complete API route using Claude 3.7 Sonnet via AI SDK with streaming support
+- **Tool Integration**: Five primary tools implemented for data retrieval:
+  - `getFeaturedProjects`: Retrieves featured projects information
+  - `getProjectDetails`: Gets detailed information about specific projects
+  - `getSkillExpertise`: Provides expertise levels for specific skills
+  - `searchPortfolio`: Searches across projects, skills, and knowledge base based on user queries
+  - `getKnowledgeItems`: Retrieves specific knowledge base items by topic
+- **System Prompt**: Comprehensive system prompt defining Dave's persona, knowledge base, and response style
+- **Interface**: Basic Dave icon component created
+
+### Data Layer Implementation
+- **Unified Data Access Layer**: Complete implementation of `dave-data.ts` that provides a standardized interface to access:
+  - Projects data from Sanity CMS
+  - Skills data from Sanity CMS
+  - Knowledge base data from Sanity CMS
+  - Future vector search capability via Supabase
+
+- **Performance Optimizations**:
+  - Implemented LRU caching with a 10-minute TTL to reduce database load
+  - Added parallel data fetching for search operations
+  - Standardized error handling with graceful fallbacks to mock data
+  - Typed response data for better reliability
+
+- **Data Types**:
+  - Created typed interfaces for all data types (DaveProject, DaveSkill, DaveKnowledgeItem)
+  - Implemented properly typed search results
+
+- **Fallback Mechanisms**:
+  - Added graceful degradation with mock data when Sanity/Supabase is unavailable
+  - Implemented fallback search behavior when semantic search isn't possible
+
+### Knowledge Base Integration
+- **Schema**: Created a dedicated `knowledgeBase` schema in Sanity for structured Q&A content with:
+  - Category-based organization (personal, professional, skills, etc.)
+  - Priority scoring for search result ranking
+  - Relationship linking to projects and skills
+  - Keyword tagging for improved findability
+
+- **Query Engine**: 
+  - Implemented multi-source queries that check both direct matches and semantic similarity
+  - Added content-based search across title, question, content, and keywords
+  - Prioritized results based on priority field
+
+### Remaining Tasks
+1. **Knowledge Base Population**:
+   - Populate the Knowledge Base entries in Sanity CMS
+   - Add common questions and answers about skills, experience, and projects
+   - Include informative keywords for better search capabilities
+
+2. **UI Implementation**:
+   - Complete the Dave chat interface on the `/dave` route
+   - Implement message history storage
+   - Add typing indicators and other chat UI elements
+   - Create a floating Dave widget for site-wide access
+
+3. **Fine-tuning and Testing**:
+   - Test with a variety of common questions to ensure high-quality responses
+   - Refine system prompt based on output quality
+   - Create a feedback mechanism for improving responses
+   - Adjust knowledge base as needed based on common questions
+
+4. **Vector Search Enhancement**:
+   - Complete the Supabase vector database integration for semantic search
+   - Implement document chunking and embedding generation for portfolio content
+   - Add scheduled updates to keep embeddings in sync with content changes
+
 ## Development Roadmap
 
 ### MVP Phase

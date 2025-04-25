@@ -1,0 +1,190 @@
+{
+    "projects": [
+        {
+            "id": "ai-project-assistant",
+            "name": "AI Project Assistant",
+            "description": "An intelligent assistant that helps developers plan, track, and document their software projects using AI.",
+            "status": "active",
+            "timeline": {
+                "started": "2023-09-01",
+                "completed": null
+            },
+            "technologies": [
+                "Python",
+                "TypeScript",
+                "Next.js",
+                "LangChain",
+                "GPT-4",
+                "MongoDB",
+                "Vercel"
+            ],
+            "features": [
+                "AI-powered project planning",
+                "Automatic documentation generation",
+                "Smart code review suggestions",
+                "Technical debt detection",
+                "Integration with GitHub and Jira"
+            ],
+            "githubUrl": "https://github.com/spartypkp/ai-project-assistant",
+            "demoUrl": "https://ai-project-assistant.vercel.app",
+            "problem": "Software documentation and project planning are often neglected due to time constraints, leading to maintenance issues and knowledge gaps.",
+            "solution": "Leveraging LLMs to automate documentation, provide planning insights, and identify potential issues before they become problems.",
+            "details": "The AI Project Assistant uses a combination of LLM-powered agents to analyze codebases, generate documentation, and provide insights for better project management. It integrates with popular development tools and uses RAG to maintain context about the project over time."
+        },
+        {
+            "id": "llm-fine-tuning-pipeline",
+            "name": "LLM Fine-tuning Pipeline",
+            "description": "An end-to-end pipeline for fine-tuning language models on custom datasets with minimal engineering effort.",
+            "status": "completed",
+            "timeline": {
+                "started": "2023-06-15",
+                "completed": "2023-11-30"
+            },
+            "technologies": [
+                "Python",
+                "PyTorch",
+                "Hugging Face Transformers",
+                "PEFT",
+                "AWS SageMaker",
+                "Docker",
+                "FastAPI"
+            ],
+            "features": [
+                "Automated data preprocessing",
+                "Hyperparameter optimization",
+                "QLoRA fine-tuning",
+                "Model evaluation and benchmarking",
+                "One-click deployment to production",
+                "Monitoring and retraining triggers"
+            ],
+            "githubUrl": "https://github.com/spartypkp/llm-fine-tuning-pipeline",
+            "demoUrl": null,
+            "problem": "Fine-tuning LLMs requires significant expertise and infrastructure, making it inaccessible to many organizations.",
+            "solution": "A simplified pipeline that automates the complex parts of LLM fine-tuning while providing flexibility for advanced users.",
+            "details": "This project implements a modular pipeline for fine-tuning language models using Parameter-Efficient Fine-Tuning (PEFT) techniques. It handles data preparation, training, evaluation, and deployment with a focus on efficiency and reproducibility."
+        },
+        {
+            "id": "semantic-search-system",
+            "name": "Semantic Search System",
+            "description": "A high-performance semantic search engine for large document collections with advanced filtering capabilities.",
+            "status": "completed",
+            "timeline": {
+                "started": "2023-01-10",
+                "completed": "2023-05-20"
+            },
+            "technologies": [
+                "Python",
+                "TypeScript",
+                "Next.js",
+                "FastAPI",
+                "Pinecone",
+                "Sentence Transformers",
+                "Redis"
+            ],
+            "features": [
+                "Vector-based semantic search",
+                "Hybrid search combining sparse and dense representations",
+                "Real-time indexing of new documents",
+                "Faceted filtering and metadata search",
+                "Query expansion and correction",
+                "API access with rate limiting"
+            ],
+            "githubUrl": "https://github.com/spartypkp/semantic-search-system",
+            "demoUrl": "https://semantic-search-demo.vercel.app",
+            "problem": "Traditional keyword search fails to capture meaning and context, leading to poor search experiences in content-heavy applications.",
+            "solution": "A semantic search system that understands the meaning behind queries and documents, delivering more relevant results.",
+            "details": "Built using modern embedding models and vector databases, this system provides powerful search capabilities for enterprise document collections. It combines neural search with traditional techniques for optimal performance."
+        },
+        {
+            "id": "personal-portfolio",
+            "name": "Personal Portfolio Site",
+            "description": "An interactive portfolio website showcasing skills, projects, and professional experience with a unique terminal-inspired aesthetic.",
+            "status": "active",
+            "timeline": {
+                "started": "2023-11-01",
+                "completed": null
+            },
+            "technologies": [
+                "TypeScript",
+                "Next.js",
+                "React",
+                "TailwindCSS",
+                "Framer Motion",
+                "Sanity CMS",
+                "Vercel"
+            ],
+            "features": [
+                "Terminal-inspired UI with interactive elements",
+                "Detailed project showcase with case studies",
+                "AI assistant (Dave) for answering visitor questions",
+                "Interactive skills visualization",
+                "Performance optimized with 90+ Lighthouse score"
+            ],
+            "githubUrl": "https://github.com/spartypkp/portfolio",
+            "demoUrl": "https://willdiamondai.com",
+            "problem": "Standard portfolio websites often fail to effectively showcase technical skills or personality.",
+            "solution": "A unique, interactive portfolio with terminal aesthetics and an AI assistant to demonstrate both technical skills and personality.",
+            "details": "This portfolio site combines modern web technologies with a distinctive terminal-inspired design. It features rich project case studies, interactive skill visualizations, and an AI assistant named Dave that can answer questions about Will's experience and capabilities."
+        },
+        {
+            "id": "content-generation-tool",
+            "name": "Content Generation Tool",
+            "description": "An AI-powered tool for generating high-quality marketing and technical content with brand consistency.",
+            "status": "maintenance",
+            "timeline": {
+                "started": "2022-09-15",
+                "completed": "2023-08-10"
+            },
+            "technologies": [
+                "Python",
+                "TypeScript",
+                "React",
+                "FastAPI",
+                "GPT-4",
+                "Claude",
+                "PostgreSQL"
+            ],
+            "features": [
+                "Brand voice customization",
+                "Multi-format content generation (blog posts, social media, email campaigns)",
+                "SEO optimization suggestions",
+                "Content repurposing across platforms",
+                "Analytics and performance tracking",
+                "Collaborative editing workflows"
+            ],
+            "githubUrl": "https://github.com/spartypkp/content-gen",
+            "demoUrl": "https://content-generation-demo.vercel.app",
+            "problem": "Creating consistent, high-quality content across multiple channels is time-consuming and expensive for marketing teams.",
+            "solution": "An AI tool that helps content teams produce more content faster while maintaining brand voice and quality standards.",
+            "details": "This application uses fine-tuned language models to generate marketing content that matches specific brand guidelines. It includes tools for optimizing content for different platforms and tracking performance metrics."
+        }
+    ],
+    "featured": [
+        "ai-project-assistant",
+        "semantic-search-system",
+        "personal-portfolio"
+    ],
+    "categories": [
+        {
+            "name": "AI Applications",
+            "projects": [
+                "ai-project-assistant",
+                "content-generation-tool"
+            ]
+        },
+        {
+            "name": "LLM Infrastructure",
+            "projects": [
+                "llm-fine-tuning-pipeline",
+                "semantic-search-system"
+            ]
+        },
+        {
+            "name": "Web Development",
+            "projects": [
+                "personal-portfolio"
+            ]
+        }
+    ],
+    "summary": "Will's project portfolio demonstrates a combination of AI engineering expertise and full-stack development capabilities. His projects focus on practical applications of artificial intelligence, particularly in natural language processing and developer tools. Each project showcases attention to user experience, scalable architecture, and innovative use of cutting-edge technologies."
+}

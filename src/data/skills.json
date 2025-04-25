@@ -1,0 +1,249 @@
+{
+    "skills": [
+        {
+            "name": "Python",
+            "category": "programming",
+            "proficiency": "expert",
+            "yearsExperience": 5,
+            "description": "Extensive experience with Python for AI/ML development, data analysis, and backend services.",
+            "relatedProjects": [
+                "AI Project Assistant",
+                "LLM Fine-tuning Pipeline",
+                "Data Analysis Tool"
+            ],
+            "libraries": [
+                "TensorFlow",
+                "PyTorch",
+                "Pandas",
+                "NumPy",
+                "Scikit-learn",
+                "LangChain",
+                "FastAPI"
+            ]
+        },
+        {
+            "name": "TypeScript",
+            "category": "programming",
+            "proficiency": "advanced",
+            "yearsExperience": 3,
+            "description": "Strong TypeScript skills for frontend and Node.js backend development with a focus on type safety.",
+            "relatedProjects": [
+                "Personal Portfolio Site",
+                "AI Web Platform",
+                "Developer Productivity Tools"
+            ],
+            "libraries": [
+                "React",
+                "Next.js",
+                "Express",
+                "Zod",
+                "tRPC"
+            ]
+        },
+        {
+            "name": "React",
+            "category": "frontend",
+            "proficiency": "advanced",
+            "yearsExperience": 3,
+            "description": "Experience building complex, interactive UIs with React, including hooks, context, and modern patterns.",
+            "relatedProjects": [
+                "Personal Portfolio Site",
+                "AI Web Platform",
+                "Interactive Dashboard"
+            ],
+            "libraries": [
+                "React Router",
+                "React Query",
+                "Zustand",
+                "Styled Components"
+            ]
+        },
+        {
+            "name": "Next.js",
+            "category": "frontend",
+            "proficiency": "advanced",
+            "yearsExperience": 2,
+            "description": "Extensive experience with Next.js for server-side rendering, static site generation, and building full-stack applications.",
+            "relatedProjects": [
+                "Personal Portfolio Site",
+                "AI Web Platform",
+                "Content Management System"
+            ],
+            "features": [
+                "App Router",
+                "API Routes",
+                "Server Components",
+                "Middleware"
+            ]
+        },
+        {
+            "name": "Machine Learning",
+            "category": "ai",
+            "proficiency": "advanced",
+            "yearsExperience": 4,
+            "description": "Strong understanding of ML concepts, algorithms, and practical implementation experience.",
+            "relatedProjects": [
+                "Predictive Analytics Tool",
+                "Recommendation System",
+                "Computer Vision Project"
+            ],
+            "techniques": [
+                "Supervised Learning",
+                "Unsupervised Learning",
+                "Neural Networks",
+                "Feature Engineering"
+            ]
+        },
+        {
+            "name": "LLMs",
+            "category": "ai",
+            "proficiency": "expert",
+            "yearsExperience": 2,
+            "description": "Deep expertise in working with large language models, including prompt engineering, fine-tuning, and application development.",
+            "relatedProjects": [
+                "AI Project Assistant",
+                "Content Generation Tool",
+                "Semantic Search System"
+            ],
+            "models": [
+                "GPT-4",
+                "Claude",
+                "Mistral",
+                "Llama",
+                "Gemini"
+            ],
+            "techniques": [
+                "Prompt Engineering",
+                "RAG",
+                "RLHF",
+                "Fine-tuning",
+                "Quantization"
+            ]
+        },
+        {
+            "name": "Docker",
+            "category": "devops",
+            "proficiency": "intermediate",
+            "yearsExperience": 3,
+            "description": "Experience containerizing applications and services for development and deployment.",
+            "relatedProjects": [
+                "Microservices Platform",
+                "AI API Service",
+                "Development Environment"
+            ],
+            "related": [
+                "Docker Compose",
+                "Multi-stage builds",
+                "Container Orchestration"
+            ]
+        },
+        {
+            "name": "AWS",
+            "category": "cloud",
+            "proficiency": "intermediate",
+            "yearsExperience": 2,
+            "description": "Experience deploying and managing applications on AWS, with a focus on serverless architecture.",
+            "relatedProjects": [
+                "Serverless API",
+                "Data Processing Pipeline",
+                "Cloud-based AI Service"
+            ],
+            "services": [
+                "Lambda",
+                "S3",
+                "EC2",
+                "API Gateway",
+                "DynamoDB",
+                "SageMaker"
+            ]
+        },
+        {
+            "name": "Database Design",
+            "category": "backend",
+            "proficiency": "intermediate",
+            "yearsExperience": 3,
+            "description": "Experience designing and optimizing relational and NoSQL database schemas for various applications.",
+            "relatedProjects": [
+                "Content Management System",
+                "Analytics Platform",
+                "E-commerce Backend"
+            ],
+            "technologies": [
+                "PostgreSQL",
+                "MongoDB",
+                "Redis",
+                "Prisma",
+                "SQL"
+            ]
+        },
+        {
+            "name": "TailwindCSS",
+            "category": "frontend",
+            "proficiency": "advanced",
+            "yearsExperience": 2,
+            "description": "Proficient in building responsive, custom interfaces with TailwindCSS utility classes.",
+            "relatedProjects": [
+                "Personal Portfolio Site",
+                "Admin Dashboard",
+                "Marketing Website"
+            ],
+            "features": [
+                "Custom Configuration",
+                "Component Patterns",
+                "Responsive Design",
+                "Dark Mode"
+            ]
+        }
+    ],
+    "categories": [
+        {
+            "name": "AI & Machine Learning",
+            "skills": [
+                "LLMs",
+                "Machine Learning",
+                "Natural Language Processing",
+                "Computer Vision",
+                "Data Science"
+            ],
+            "description": "Strong foundation in artificial intelligence concepts and practical implementation, with a focus on LLMs and NLP.",
+            "level": "Expert"
+        },
+        {
+            "name": "Frontend Development",
+            "skills": [
+                "React",
+                "Next.js",
+                "TypeScript",
+                "TailwindCSS",
+                "UI/UX Design"
+            ],
+            "description": "Advanced frontend development skills focused on building modern, responsive web applications.",
+            "level": "Advanced"
+        },
+        {
+            "name": "Backend Development",
+            "skills": [
+                "Python",
+                "Node.js",
+                "Express",
+                "FastAPI",
+                "Database Design"
+            ],
+            "description": "Strong backend development experience, with a focus on API design, serverless functions, and database optimization.",
+            "level": "Advanced"
+        },
+        {
+            "name": "DevOps & Cloud",
+            "skills": [
+                "Docker",
+                "AWS",
+                "CI/CD",
+                "Git",
+                "Cloud Architecture"
+            ],
+            "description": "Working knowledge of DevOps practices and cloud infrastructure, with experience deploying and maintaining applications.",
+            "level": "Intermediate"
+        }
+    ],
+    "summary": "Will is an AI Engineer with full-stack development capabilities, specializing in building AI-powered applications. His strongest skills are in Python, TypeScript, and LLM engineering, with particular expertise in prompt engineering, RAG implementations, and integrating AI capabilities into web applications. He combines technical depth with practical product development experience."
+}

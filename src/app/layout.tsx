@@ -1,15 +1,13 @@
 import NavBar from "@/components/custom/navBar";
 import { Analytics } from "@vercel/analytics/react";
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+export const metadata = {
 	title: "Will Diamond",
-	description:
-		"Documenting a young software engineers journey to getting his dream job. You should hire Will!",
+	description: "AI Engineer and Builder",
 };
 
 export default function RootLayout({
@@ -18,16 +16,12 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		// <ClerkProvider>
-
 		<html lang="en">
 			<body className={inter.className}>
-				<NavBar></NavBar>
+				<NavBar />
 				{children}
-				{/* <PageFooter /> */}
+				<Analytics />
 			</body>
-			<Analytics />
 		</html>
-		// </ClerkProvider>
 	);
 }
