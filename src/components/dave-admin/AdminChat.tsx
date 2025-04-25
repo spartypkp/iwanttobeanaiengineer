@@ -34,6 +34,7 @@ export function AdminChat({
 }: AdminChatProps) {
 	// Access the shared context
 	const { setChatHooks } = useContext(AdminChatContext);
+	const chatHooksSetRef = useRef(false);
 
 	// Use the entity-specific API endpoint for better context awareness
 	const chatHooks = useChat({
@@ -68,10 +69,16 @@ export function AdminChat({
 		}
 	});
 
-	// Share chat hooks through context
+	// Share chat hooks through context only once or when key properties change
 	useEffect(() => {
-		setChatHooks(chatHooks);
-	}, [chatHooks, setChatHooks]);
+		// Only set the chat hooks if they haven't been set yet or if critical properties have changed
+		const chatId = `${activeContentType || 'general'}-${selectedItemId || 'new'}`;
+
+		if (!chatHooksSetRef.current || chatHooks.id !== chatId) {
+			setChatHooks(chatHooks);
+			chatHooksSetRef.current = true;
+		}
+	}, [activeContentType, selectedItemId, setChatHooks]);
 
 	const { messages, input, handleInputChange, handleSubmit, isLoading, setInput, setMessages } = chatHooks;
 
