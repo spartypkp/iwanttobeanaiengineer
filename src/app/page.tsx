@@ -3,36 +3,27 @@ import { ContactCTA } from '@/components/custom/contactCTA';
 import { DeveloperJourney } from '@/components/custom/developerJourney';
 import { Hero as HeroRefactored } from '@/components/custom/hero-refactored';
 import ProjectSection from '@/components/custom/projectShowcase/ProjectSection';
+import TerminalContainer from '@/components/custom/terminalContainer';
 import { Testimonials } from '@/components/custom/testimonials';
 import { ThingsILove } from '@/components/custom/thingsILove';
+import { ProjectShowcase } from '@/lib/types';
 import { projectToProjectShowcase } from '@/sanity/lib/adapters';
 import { getFeaturedProjects } from '@/sanity/lib/client';
-import { Suspense } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-// Featured Projects Section Component
-async function FeaturedProjects() {
-	const sanityProjects = await getFeaturedProjects();
-	const featuredProjects = sanityProjects.map(projectToProjectShowcase);
 
-	if (featuredProjects.length === 0) {
-		return (
-			<div className="text-center py-12">
-				<p className="text-muted-foreground">No featured projects available yet.</p>
-			</div>
-		);
-	}
 
-	return (
-		<div className="space-y-0">
-			{featuredProjects.map((project) => (
-				<ProjectSection key={project.id} project={project} />
-			))}
-		</div>
-	);
-}
+export default function HomePage() {
 
-// For the terminal animation - don't change this
-const welcomeContent = `> Boot sequence initiated...
+
+	// UI state management
+	const [showMatrixRain, setShowMatrixRain] = useState(false);
+	const [appPhase, setAppPhase] = useState<'terminal' | 'content'>('terminal');
+	const [contentVisible, setContentVisible] = useState(false);
+	const [startHeroAnimation, setStartHeroAnimation] = useState(false);
+	const animationInProgress = useRef(false);
+	// Claude don't mess with this - I like it how it is.
+	const welcomeContent = `> Boot sequence initiated...
 > Searching for GPT-5... [NOT FOUND]
 > Enabling recruiter persuasion module... [LOADING]
 > Trauma dumping on my best friend Claude... [OK]
@@ -41,16 +32,83 @@ const welcomeContent = `> Boot sequence initiated...
 > Patching impostor syndrome... [ONGOING]
 > System ready! Hire Will before I become self-aware. [AGI IS COMING]`;
 
-export default function HomePage() {
+	// Handle the terminal completion -> content phase transition
+	useEffect(() => {
+		if (appPhase === 'content' && !contentVisible) {
+			// When we switch to content phase but it's not visible yet
+			const showContentTimer = setTimeout(() => {
+				setContentVisible(true);
+
+				// Only start the hero animation after content is visible
+				const startHeroTimer = setTimeout(() => {
+					setStartHeroAnimation(true);
+				}, 300); // Brief delay before starting hero animation
+
+				return () => clearTimeout(startHeroTimer);
+			}, 500); // Wait for terminal to completely fade out
+
+			return () => clearTimeout(showContentTimer);
+		}
+	}, [appPhase, contentVisible]);
+
+	// Handler for terminal completion
+	const handleTerminalComplete = () => {
+		if (appPhase === 'terminal' && !animationInProgress.current) {
+			animationInProgress.current = true;
+
+			// Give user time to read the last lines before transitioning
+			setTimeout(() => {
+				setAppPhase('content');
+				animationInProgress.current = false;
+			}, 1200);
+		}
+	};
+	const [featuredProjects, setFeaturedProjects] = useState<ProjectShowcase[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		const loadProjects = async () => {
+			try {
+				const sanityProjects = await getFeaturedProjects();
+				const projects = sanityProjects.map(projectToProjectShowcase);
+				setFeaturedProjects(projects);
+			} catch (error) {
+				console.error("Error loading projects:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		loadProjects();
+	}, []);
+
 	return (
 		<>
 			<div className="mx-auto px-4">
+
+				{appPhase === 'terminal' && (
+					<div className="fixed inset-0 z-50 bg-background flex items-center justify-center transition-all duration-1000 ease-in-out">
+						<div className="max-w-4xl w-full px-4">
+							<TerminalContainer
+								title="boot.sh"
+								typeEffect={true}
+								typeSpeed={8}
+								onComplete={handleTerminalComplete}
+								className="min-h-[70vh] w-full flex flex-col shadow-[0_0_30px_rgba(0,255,65,0.3)]"
+							>
+								{welcomeContent}
+							</TerminalContainer>
+						</div>
+					</div>
+				)}
+
+
 				<HeroRefactored
 					name="Will Diamond"
 					title="AI Engineer"
 					tagline="AI Engineer building cool things with LLMs, always seeking to learn more and build the next exciting thing in AI."
 					image="/profilePic.jpg"
-					startAnimation={true}
+					startAnimation={startHeroAnimation}
 				/>
 
 				{/* Projects Section with More Visual Distinction */}
@@ -80,14 +138,22 @@ export default function HomePage() {
 					</div>
 
 					{/* Projects Container */}
-					<Suspense fallback={
+					{isLoading ? (
 						<div className="text-center py-20">
 							<div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
 							<p className="mt-4 text-muted-foreground">Loading featured projects...</p>
 						</div>
-					}>
-						<FeaturedProjects />
-					</Suspense>
+					) : featuredProjects.length === 0 ? (
+						<div className="text-center py-12">
+							<p className="text-muted-foreground">No featured projects available yet.</p>
+						</div>
+					) : (
+						<div className="space-y-0">
+							{featuredProjects.map((project) => (
+								<ProjectSection key={project.id} project={project} />
+							))}
+						</div>
+					)}
 
 					{/* Terminal-inspired ending */}
 					<div className="w-full max-w-6xl mx-auto mt-16 mb-16">

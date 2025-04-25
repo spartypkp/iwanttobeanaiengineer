@@ -281,6 +281,76 @@ export const Hero: React.FC<HeroProps> = ({
 	// Determine if the image should be visible
 	const shouldShowImage = profileImageReady && (animationComplete || !startAnimation);
 
+	if (!startAnimation) {
+		<section className="pb-16 md:py-24 relative">
+			{/* Background connector elements */}
+			<div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent z-0"></div>
+			<div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent z-0"></div>
+
+			{/* Main content container */}
+			<div className="relative z-10 container mx-auto px-4">
+				<div className="mx-auto max-w-6xl shadow-[0_0_60px_rgba(var(--primary),0.1)] rounded-xl overflow-hidden">
+					{/* Terminal window header bar */}
+					<div className="bg-zinc-900 border-b border-primary/20 flex items-center justify-between px-4 py-2.5">
+						<div className="flex items-center gap-4">
+							{/* Left side with dots */}
+							<div className="flex items-center space-x-1.5">
+								<div className="h-3 w-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors"></div>
+								<div className="h-3 w-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors"></div>
+								<div className="h-3 w-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors"></div>
+							</div>
+
+							{/* Terminal title */}
+							<div className="text-xs text-primary/70 font-mono flex items-center">
+								<Terminal size={11} className="mr-1.5" />
+								<span>hero — portfolio.terminal</span>
+							</div>
+						</div>
+
+						<div className="text-xs font-mono bg-black/30 px-2 py-0.5 rounded-sm border border-primary/10 flex items-center">
+							<span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
+							<FileBadge size={10} className="text-primary/60 mr-1" />
+							<span className="uppercase text-[10px]">ACTIVE</span>
+						</div>
+					</div>
+
+					{/* Terminal content area */}
+					<div className="bg-zinc-900/90 backdrop-blur-sm border-x border-b border-primary/20">
+						<div className="bg-background/90">
+							{/* Two-column layout */}
+							<div className="flex flex-col md:flex-row gap-6 p-5 md:p-8">
+								{/* LEFT COLUMN - Unified Terminal */}
+								<div className="w-full md:w-7/12">
+									{/* Unified terminal window with scrollable content */}
+									<div
+										ref={terminalRef}
+										className="crt-effect p-5 bg-black/50 border border-primary/30 rounded-md relative h-[750px] overflow-y-auto"
+									>
+										{/* Subtle scan lines */}
+										<div className="absolute inset-0 pointer-events-none terminal-scan-lines opacity-20"></div>
+
+									</div>
+								</div>
+
+								{/* RIGHT COLUMN - Profile & Static Information */}
+								<div className="w-full md:w-5/12 space-y-8">
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Section divider with terminal styling */}
+			<div className="w-full max-w-md mx-auto mt-16 md:mt-20 flex items-center gap-3">
+				<div className="h-px bg-primary/20 flex-grow"></div>
+				<div className="text-xs font-mono text-primary/40 px-2 py-1 border border-primary/10 rounded">projects</div>
+				<div className="h-px bg-primary/20 flex-grow"></div>
+			</div>
+		</section>;
+	}
+
 	return (
 		<section className="pb-16 md:py-24 relative">
 			{/* Background connector elements */}

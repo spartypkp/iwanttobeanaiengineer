@@ -39,28 +39,6 @@ export type SanityImageDimensions = {
 	aspectRatio?: number;
 };
 
-export type SanityFileAsset = {
-	_id: string;
-	_type: "sanity.fileAsset";
-	_createdAt: string;
-	_updatedAt: string;
-	_rev: string;
-	originalFilename?: string;
-	label?: string;
-	title?: string;
-	description?: string;
-	altText?: string;
-	sha1hash?: string;
-	extension?: string;
-	mimeType?: string;
-	size?: number;
-	assetId?: string;
-	uploadId?: string;
-	path?: string;
-	url?: string;
-	source?: SanityAssetSourceData;
-};
-
 export type Geopoint = {
 	_type: "geopoint";
 	lat?: number;
@@ -192,6 +170,17 @@ export type Project = {
 	complexity?: "simple" | "medium" | "complex" | "enterprise";
 	media?: Array<{
 		type?: "image" | "video" | "demo" | "3d";
+		videoSource?: "upload" | "url";
+		videoFile?: {
+			asset?: {
+				_ref: string;
+				_type: "reference";
+				_weak?: boolean;
+				[internalGroqTypeReferenceTo]?: "sanity.fileAsset";
+			};
+			media?: unknown;
+			_type: "file";
+		};
 		image?: {
 			asset?: {
 				_ref: string;
@@ -231,6 +220,28 @@ export type Project = {
 		_key: string;
 	}>;
 	documentation?: string;
+};
+
+export type SanityFileAsset = {
+	_id: string;
+	_type: "sanity.fileAsset";
+	_createdAt: string;
+	_updatedAt: string;
+	_rev: string;
+	originalFilename?: string;
+	label?: string;
+	title?: string;
+	description?: string;
+	altText?: string;
+	sha1hash?: string;
+	extension?: string;
+	mimeType?: string;
+	size?: number;
+	assetId?: string;
+	uploadId?: string;
+	path?: string;
+	url?: string;
+	source?: SanityAssetSourceData;
 };
 
 export type Slug = {
@@ -335,11 +346,11 @@ export type AllSanitySchemaTypes =
 	| SanityImagePaletteSwatch
 	| SanityImagePalette
 	| SanityImageDimensions
-	| SanityFileAsset
 	| Geopoint
 	| Technology
 	| ProjectCategory
 	| Project
+	| SanityFileAsset
 	| Slug
 	| BlockContent
 	| SanityImageCrop

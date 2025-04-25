@@ -1,3 +1,5 @@
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { ArrowRight, CheckCircle2, Code, Coffee, Linkedin, Mail, MessageCircle, Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -40,7 +42,7 @@ export const ContactCTA: React.FC<ContactCTAProps> = ({
 					<div className="bg-black/50 px-4 py-2 flex items-center justify-between border-b border-primary/20">
 						<div className="flex items-center gap-2">
 							<Terminal className="h-4 w-4 text-primary/70" />
-							<span className="text-xs font-mono text-primary/70">let's_connect.sh</span>
+							<span className="text-xs font-mono text-primary/70">let&apos;s_connect.sh</span>
 						</div>
 						<div className="flex gap-1.5">
 							<div className="h-2.5 w-2.5 rounded-full bg-red-500/70"></div>
@@ -63,7 +65,7 @@ export const ContactCTA: React.FC<ContactCTAProps> = ({
 
 						<div className="inline-block px-4 py-2 bg-gradient-to-r from-primary/10 to-transparent border-l-2 border-primary/50 mb-6">
 							<h2 className="text-3xl font-bold mb-1 text-primary font-mono">
-								Let's Connect
+								Let&apos;s Connect
 							</h2>
 							<div className="flex items-center justify-center gap-2 text-foreground/70 text-sm">
 								<Code className="h-4 w-4 text-primary/50" />
@@ -123,7 +125,7 @@ export const ContactCTA: React.FC<ContactCTAProps> = ({
 						</div>
 
 						<div className="max-w-2xl mx-auto text-center text-foreground/70 mb-6">
-							<p>Whether you're looking to collaborate on an AI project, chat about tech, or just connect with a fellow developer - I'm always up for a good conversation!</p>
+							<p>Whether you&apos;re looking to collaborate on an AI project, chat about tech, or just connect with a fellow developer - I&apos;m always up for a good conversation!</p>
 						</div>
 
 						<div className="flex flex-wrap items-center justify-center gap-4 text-sm text-foreground/70 mt-6 border-t border-primary/10 pt-4">

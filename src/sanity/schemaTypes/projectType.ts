@@ -370,6 +370,41 @@ export const projectType = defineType({
 							validation: Rule => Rule.required(),
 						},
 						{
+							name: 'videoSource',
+							title: 'Video Source',
+							type: 'string',
+							options: {
+								list: [
+									{ title: 'Upload', value: 'upload' },
+									{ title: 'External URL', value: 'url' },
+								],
+							},
+							hidden: ({ parent }) => parent?.type !== 'video',
+							validation: Rule =>
+								Rule.custom((value, context) => {
+									const parent = context.parent as { type?: string; };
+									if (parent?.type === 'video' && !value) return 'Required for videos';
+									return true;
+								}),
+						},
+						{
+							name: 'videoFile',
+							title: 'Video File',
+							type: 'file',
+							hidden: ({ parent }) => parent?.type !== 'video' || parent?.videoSource !== 'upload',
+							options: {
+								accept: 'video/*'
+							},
+							validation: Rule =>
+								Rule.custom((value, context) => {
+									const parent = context.parent as { type?: string, videoSource?: string; };
+									if (parent?.type === 'video' &&
+										parent?.videoSource === 'upload' &&
+										!value) return 'Required for uploaded videos';
+									return true;
+								}),
+						},
+						{
 							name: 'image',
 							title: 'Image',
 							type: 'image',
@@ -390,7 +425,7 @@ export const projectType = defineType({
 							title: 'URL',
 							description: 'External URL for video, demo or 3D content',
 							type: 'url',
-							hidden: ({ parent }) => parent?.type === 'image',
+							hidden: ({ parent }) => parent?.type === 'image' || (parent?.type === 'video' && parent?.videoSource === 'upload'),
 						},
 						{
 							name: 'alt',

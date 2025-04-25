@@ -12,7 +12,7 @@ import React from "react";
 
 const NavBar = () => {
 	return (
-		<div className="w-full px-4 py-2 text-base bg-background border-b border-solid">
+		<div className="sticky top-0 z-50 w-full px-4 py-2 text-base bg-background border-b border-solid shadow-sm">
 			<NavigationMenu className="w-full min-w-full">
 				<NavigationMenuList>
 					<NavigationMenuItem>

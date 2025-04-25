@@ -39,8 +39,10 @@ export async function getFeaturedProjects(): Promise<Project[]> {
       technologies,
       "media": media[] {
         type,
+        videoSource,
         "url": select(
           type == "image" => image.asset->url,
+          type == "video" && videoSource == "upload" => videoFile.asset->url,
           type != "image" => url
         ),
         alt,
@@ -81,8 +83,10 @@ export async function getProjectById(id: string): Promise<Project | null> {
       technologies,
       "media": media[] {
         type,
+        videoSource,
         "url": select(
           type == "image" => image.asset->url,
+          type == "video" && videoSource == "upload" => videoFile.asset->url,
           type != "image" => url
         ),
         alt,
@@ -105,4 +109,105 @@ export async function getProjectById(id: string): Promise<Project | null> {
 	);
 
 	return projects.length > 0 ? projects[0] : null;
+}
+
+// Function to get all projects
+export async function getAllProjects(): Promise<Project[]> {
+	return client.fetch(
+		`*[_type == "project"] | order(timeline.startDate desc) {
+      _id,
+      title,
+      slug,
+      id,
+      company,
+      description,
+      isFeatured,
+      problem,
+      solution,
+      challenges,
+      approach,
+      technicalInsights,
+      learnings,
+      achievements,
+      personalContribution,
+      results,
+      metrics,
+      technologies,
+      "media": media[] {
+        type,
+        videoSource,
+        "url": select(
+          type == "image" => image.asset->url,
+          type == "video" && videoSource == "upload" => videoFile.asset->url,
+          type != "image" => url
+        ),
+        alt,
+        "poster": select(
+          defined(poster) => poster.asset->url,
+          null
+        ),
+        isThumbnail
+      },
+      primaryColor,
+      github,
+      demoUrl,
+      caseStudyUrl,
+      timeline,
+      categories,
+      tags,
+      complexity
+    }`
+	);
+}
+
+// Function to get a project by slug
+export async function getProjectBySlug(slug: string): Promise<Project | null> {
+	const projects = await client.fetch(
+		`*[_type == "project" && slug.current == $slug][0] {
+      _id,
+      title,
+      slug,
+      id,
+      company,
+      description,
+      isFeatured,
+      problem,
+      solution,
+      challenges,
+      approach,
+      technicalInsights,
+      learnings,
+      achievements,
+      personalContribution,
+      results,
+      metrics,
+      technologies,
+      "media": media[] {
+        type,
+        videoSource,
+        "url": select(
+          type == "image" => image.asset->url,
+          type == "video" && videoSource == "upload" => videoFile.asset->url,
+          type != "image" => url
+        ),
+        alt,
+        "poster": select(
+          defined(poster) => poster.asset->url,
+          null
+        ),
+        isThumbnail
+      },
+      primaryColor,
+      github,
+      demoUrl,
+      caseStudyUrl,
+      timeline,
+      categories,
+      tags,
+      complexity
+    }`,
+		{ slug }
+	);
+
+	return projects;
 }
