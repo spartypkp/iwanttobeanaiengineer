@@ -23,6 +23,7 @@ export async function getFeaturedProjects(): Promise<Project[]> {
 		`*[_type == "project" && isFeatured == true] | order(timeline.startDate desc) {
       _id,
       title,
+	  slug,
       id,
       company,
       description,
@@ -67,6 +68,7 @@ export async function getProjectById(id: string): Promise<Project | null> {
 		`*[_type == "project" && id == $id] {
       _id,
       title,
+	  slug,
       id,
       company,
       description,

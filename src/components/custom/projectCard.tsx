@@ -24,6 +24,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
 	// Get slug for project detail page
 	const slug = project.slug?.current || '';
+	console.log(`Slug for ${project.title} is ${slug}`);
 
 	// Get a list of technology names
 	const techNames = project.technologies?.map(tech => tech.name).filter(Boolean) || [];

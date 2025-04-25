@@ -1,14 +1,25 @@
 "use client";
 
-import { ProjectShowcase } from '@/lib/types';
 import { BrainCircuit, Code, Database, Server, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+
+interface Technology {
+	name: string;
+	category: "frontend" | "backend" | "data" | "devops" | "ai";
+	icon?: React.ReactNode;
+}
+
+interface Timeline {
+	startDate: string;
+	endDate?: string;
+	status: "active" | "completed" | "maintenance" | "archived";
+}
 
 interface ProjectOverviewProps {
 	problem: string;
 	solution: string;
-	technologies: ProjectShowcase['technologies'];
-	timeline?: ProjectShowcase['timeline'];
+	technologies: Technology[];
+	timeline?: Timeline;
 	noTerminalHeader?: boolean;
 }
 

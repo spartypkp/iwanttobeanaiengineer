@@ -1,9 +1,9 @@
 import { Badge } from '@/components/ui/badge';
-import { Code, Coffee, FileBadge, Github, Linkedin, Terminal, Twitter, User } from 'lucide-react';
+import { Code, FileBadge, Github, Linkedin, Terminal, Twitter, User } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import GitHubCalendar from "react-github-calendar";
-
 interface HeroProps {
 	name: string;
 	title: string;
@@ -282,73 +282,75 @@ export const Hero: React.FC<HeroProps> = ({
 	const shouldShowImage = profileImageReady && (animationComplete || !startAnimation);
 
 	if (!startAnimation) {
-		<section className="pb-16 md:py-24 relative">
-			{/* Background connector elements */}
-			<div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent z-0"></div>
-			<div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent z-0"></div>
+		return (
+			<section className="pb-16 md:py-24 relative">
+				{/* Background connector elements */}
+				<div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent z-0"></div>
+				<div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent z-0"></div>
 
-			{/* Main content container */}
-			<div className="relative z-10 container mx-auto px-4">
-				<div className="mx-auto max-w-6xl shadow-[0_0_60px_rgba(var(--primary),0.1)] rounded-xl overflow-hidden">
-					{/* Terminal window header bar */}
-					<div className="bg-zinc-900 border-b border-primary/20 flex items-center justify-between px-4 py-2.5">
-						<div className="flex items-center gap-4">
-							{/* Left side with dots */}
-							<div className="flex items-center space-x-1.5">
-								<div className="h-3 w-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors"></div>
-								<div className="h-3 w-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors"></div>
-								<div className="h-3 w-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors"></div>
-							</div>
-
-							{/* Terminal title */}
-							<div className="text-xs text-primary/70 font-mono flex items-center">
-								<Terminal size={11} className="mr-1.5" />
-								<span>hero — portfolio.terminal</span>
-							</div>
-						</div>
-
-						<div className="text-xs font-mono bg-black/30 px-2 py-0.5 rounded-sm border border-primary/10 flex items-center">
-							<span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
-							<FileBadge size={10} className="text-primary/60 mr-1" />
-							<span className="uppercase text-[10px]">ACTIVE</span>
-						</div>
-					</div>
-
-					{/* Terminal content area */}
-					<div className="bg-zinc-900/90 backdrop-blur-sm border-x border-b border-primary/20">
-						<div className="bg-background/90">
-							{/* Two-column layout */}
-							<div className="flex flex-col md:flex-row gap-6 p-5 md:p-8">
-								{/* LEFT COLUMN - Unified Terminal */}
-								<div className="w-full md:w-7/12">
-									{/* Unified terminal window with scrollable content */}
-									<div
-										ref={terminalRef}
-										className="crt-effect p-5 bg-black/50 border border-primary/30 rounded-md relative h-[750px] overflow-y-auto"
-									>
-										{/* Subtle scan lines */}
-										<div className="absolute inset-0 pointer-events-none terminal-scan-lines opacity-20"></div>
-
-									</div>
+				{/* Main content container */}
+				<div className="relative z-10 container mx-auto px-4">
+					<div className="mx-auto max-w-6xl shadow-[0_0_60px_rgba(var(--primary),0.1)] rounded-xl overflow-hidden">
+						{/* Terminal window header bar */}
+						<div className="bg-zinc-900 border-b border-primary/20 flex items-center justify-between px-4 py-2.5">
+							<div className="flex items-center gap-4">
+								{/* Left side with dots */}
+								<div className="flex items-center space-x-1.5">
+									<div className="h-3 w-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors"></div>
+									<div className="h-3 w-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors"></div>
+									<div className="h-3 w-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors"></div>
 								</div>
 
-								{/* RIGHT COLUMN - Profile & Static Information */}
-								<div className="w-full md:w-5/12 space-y-8">
+								{/* Terminal title */}
+								<div className="text-xs text-primary/70 font-mono flex items-center">
+									<Terminal size={11} className="mr-1.5" />
+									<span>hero — portfolio.terminal</span>
+								</div>
+							</div>
 
+							<div className="text-xs font-mono bg-black/30 px-2 py-0.5 rounded-sm border border-primary/10 flex items-center">
+								<span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
+								<FileBadge size={10} className="text-primary/60 mr-1" />
+								<span className="uppercase text-[10px]">ACTIVE</span>
+							</div>
+						</div>
+
+						{/* Terminal content area */}
+						<div className="bg-zinc-900/90 backdrop-blur-sm border-x border-b border-primary/20">
+							<div className="bg-background/90">
+								{/* Two-column layout */}
+								<div className="flex flex-col md:flex-row gap-6 p-5 md:p-8">
+									{/* LEFT COLUMN - Unified Terminal */}
+									<div className="w-full md:w-7/12">
+										{/* Unified terminal window with scrollable content */}
+										<div
+											ref={terminalRef}
+											className="crt-effect p-5 bg-black/50 border border-primary/30 rounded-md relative h-[750px] overflow-y-auto"
+										>
+											{/* Subtle scan lines */}
+											<div className="absolute inset-0 pointer-events-none terminal-scan-lines opacity-20"></div>
+
+										</div>
+									</div>
+
+									{/* RIGHT COLUMN - Profile & Static Information */}
+									<div className="w-full md:w-5/12 space-y-8">
+
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
-			{/* Section divider with terminal styling */}
-			<div className="w-full max-w-md mx-auto mt-16 md:mt-20 flex items-center gap-3">
-				<div className="h-px bg-primary/20 flex-grow"></div>
-				<div className="text-xs font-mono text-primary/40 px-2 py-1 border border-primary/10 rounded">projects</div>
-				<div className="h-px bg-primary/20 flex-grow"></div>
-			</div>
-		</section>;
+				{/* Section divider with terminal styling */}
+				<div className="w-full max-w-md mx-auto mt-16 md:mt-20 flex items-center gap-3">
+					<div className="h-px bg-primary/20 flex-grow"></div>
+					<div className="text-xs font-mono text-primary/40 px-2 py-1 border border-primary/10 rounded">projects</div>
+					<div className="h-px bg-primary/20 flex-grow"></div>
+				</div>
+			</section>
+		);
 	}
 
 	return (
@@ -446,7 +448,6 @@ export const Hero: React.FC<HeroProps> = ({
 											<div className="min-h-[4rem] pl-4 border-l-2 border-primary/20">
 												{showTagline ? (
 													<p className="text-xl text-foreground max-w-2xl font-light flex items-start">
-														<span className="text-primary/70 mr-2 font-mono">&gt;</span>
 														<span dangerouslySetInnerHTML={{ __html: highlightTagline(typedTagline) }} />
 														{showTaglineCursor && <span className="cursor-blink ml-0.5">█</span>}
 													</p>
@@ -488,9 +489,9 @@ export const Hero: React.FC<HeroProps> = ({
 														<div className="font-mono text-sm">
 															{skillCategories.map((category, index) => (
 																<div key={index} className="mb-2">
-																	<div className="text-primary/70 text-xs mb-1">
+																	{/* <div className="text-primary/70 text-xs mb-1">
 																		<span className="text-primary mr-1">drwxr-xr-x</span> {category.name}/
-																	</div>
+																	</div> */}
 																	<div className="grid grid-cols-3 md:grid-cols-5 gap-2">
 																		{category.items.map((skill, skillIndex) => (
 																			<div key={skillIndex} className="text-muted-foreground hover:text-primary transition-colors truncate">
@@ -609,7 +610,7 @@ export const Hero: React.FC<HeroProps> = ({
 												<h3 className="text-lg font-semibold">Current Position</h3>
 											</div>
 											<p className="text-lg text-muted-foreground">
-												Currently at <span className="text-primary hover:underline transition-all">Contoural Inc</span>, building LLM systems for Fortune 500 companies.
+												Currently at <Link href="https://contoural.com" target="_blank" rel="noopener noreferrer" className="text-primary underline transition-all">Contoural Inc</Link>, building legal tech LLM systems for Fortune 500 companies. Pursuing independent <span className="text-primary">contract AI Engineering</span> opportunities.
 											</p>
 										</div>
 
@@ -619,9 +620,17 @@ export const Hero: React.FC<HeroProps> = ({
 												<Code size={16} className="text-primary" />
 												<h3 className="text-lg font-semibold">Previously</h3>
 											</div>
-											<p className="text-lg text-muted-foreground">
-												Founded <span className="text-primary hover:underline transition-all">Recodify.ai</span>, organized Latent Space Podcast and AI Engineer Conference.
-											</p>
+											<div className="text-lg text-muted-foreground space-y-2">
+												<p>
+													Founded <span className="text-primary transition-all">Recodify.ai</span>
+												</p>
+												<p>
+													Production Assistant at <Link href="https://www.latent.space/" target="_blank" rel="noopener noreferrer" className="text-primary underline transition-all">Latent Space Podcast</Link>
+												</p>
+												<p>
+													Helped Organize <Link href="https://www.ai.engineer/" target="_blank" rel="noopener noreferrer" className="text-primary underline transition-all">AI Engineer Conference</Link>
+												</p>
+											</div>
 										</div>
 
 										{/* Education */}
@@ -631,7 +640,7 @@ export const Hero: React.FC<HeroProps> = ({
 												<h3 className="text-lg font-semibold">Education</h3>
 											</div>
 											<p className="text-lg text-muted-foreground">
-												Michigan State University, <span className="text-primary">Computer Science BS</span>
+												Michigan State University, <span className="text-primary">Data Science BS</span>
 											</p>
 										</div>
 
@@ -664,15 +673,7 @@ export const Hero: React.FC<HeroProps> = ({
 												<Twitter className="h-5 w-5 mr-1" />
 												<span className="text-sm">Twitter</span>
 											</a>
-											<a
-												href="https://buymeacoffee.com/willyd"
-												target="_blank"
-												rel="noopener noreferrer"
-												className="text-muted-foreground hover:text-primary transition-colors flex items-center"
-											>
-												<Coffee className="h-5 w-5 mr-1" />
-												<span className="text-sm">Buy me a coffee</span>
-											</a>
+
 										</div>
 									</div>
 								</div>

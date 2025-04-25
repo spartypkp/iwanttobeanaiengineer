@@ -39,7 +39,7 @@ const TerminalContainer: React.FC<TerminalContainerProps> = ({
 				'\\[DONE\\]',
 				'\\[RESISTANCE IS FUTILE\\]',
 				'\\[EXPERT LEVEL\\]',
-				'\\[TOKENS SAVED: 9000\\+\\]',
+				'\\[TOKENS SAVED: 9000+\\]',
 			];
 
 			// Warning status markers - yellow
@@ -123,10 +123,10 @@ const TerminalContainer: React.FC<TerminalContainerProps> = ({
 					// Signal completion after a delay, but only once
 					if (!hasCalledComplete.current) {
 						setIsComplete(true);
+						hasCalledComplete.current = true; // Set this immediately to prevent multiple calls
 
 						const completeTimer = setTimeout(() => {
-							if (onComplete && !hasCalledComplete.current) {
-								hasCalledComplete.current = true;
+							if (onComplete) {
 								onComplete();
 							}
 						}, 1000); // Longer delay to see completion

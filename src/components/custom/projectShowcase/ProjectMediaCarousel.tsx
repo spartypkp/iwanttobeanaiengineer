@@ -1,13 +1,19 @@
 "use client";
 
-import { ProjectShowcase } from '@/lib/types';
 import { ChevronLeft, ChevronRight, Info, Maximize, X } from 'lucide-react';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactPlayer from 'react-player/lazy';
 
+interface MediaItem {
+	type: "image" | "video" | "demo" | "3d";
+	url: string;
+	alt?: string;
+	poster?: string; // for videos
+}
+
 interface ProjectMediaCarouselProps {
-	media: ProjectShowcase['media'];
+	media: MediaItem[];
 	primaryColor?: string;
 }
 
@@ -18,7 +24,36 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 	const [activeMediaIndex, setActiveMediaIndex] = useState(0);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [showInfo, setShowInfo] = useState(false);
+	const [isInView, setIsInView] = useState(false);
+	const mediaRef = useRef<HTMLDivElement>(null);
 	const activeMedia = media[activeMediaIndex];
+
+	// Set up intersection observer to detect when the media is in view
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					setIsInView(true);
+				} else {
+					setIsInView(false);
+				}
+			},
+			{
+				rootMargin: '0px',
+				threshold: 0.1,
+			}
+		);
+
+		if (mediaRef.current) {
+			observer.observe(mediaRef.current);
+		}
+
+		return () => {
+			if (mediaRef.current) {
+				observer.unobserve(mediaRef.current);
+			}
+		};
+	}, []);
 
 	const handleMediaChange = (index: number) => {
 		setActiveMediaIndex(index);
@@ -68,7 +103,7 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 					<div className="relative flex w-full h-full min-h-0 rounded-lg overflow-hidden">
 						<ReactPlayer
 							url={activeMedia.url}
-							playing={true}
+							playing={isInView || isFullscreen}
 							muted={true}
 							loop={true}
 							width="100%"
@@ -116,6 +151,7 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 
 	return (
 		<div
+			ref={mediaRef}
 			className={mediaContainerClasses}
 			style={{ '--project-accent': rgbColor } as React.CSSProperties}
 		>

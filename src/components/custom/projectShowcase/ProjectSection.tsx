@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from '@/components/ui/button';
-import { ProjectShowcase } from '@/lib/types';
+import { Project } from '@/sanity/sanity.types';
 import { Code, FileBadge, Terminal, Trophy } from 'lucide-react';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import ProjectHeader from './ProjectHeader';
@@ -9,20 +9,22 @@ import ProjectMediaCarousel from './ProjectMediaCarousel';
 import ProjectOverview from './ProjectOverview';
 
 interface ProjectSectionProps {
-	project: ProjectShowcase;
+	project: Project;
 }
 
 const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 	const [isInView, setIsInView] = useState(false);
 	const sectionRef = useRef<HTMLElement>(null);
+	const slug = project.slug?.current || '';
+	console.log(`Slug for ${project.title} is ${slug}`);
 
 	// Generate a stable unique ID for this component instance
 	const uniqueId = useId();
 
 	// Extract base color from project's primaryColor
-	const rgbColor = project.primaryColor.startsWith('#')
+	const rgbColor = project.primaryColor?.startsWith('#')
 		? hexToRgb(project.primaryColor)
-		: project.primaryColor;
+		: project.primaryColor || '0, 255, 65';
 
 	// Observe when section comes into view for animations
 	useEffect(() => {
@@ -112,10 +114,14 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 
 							<div className="relative z-10">
 								<ProjectHeader
-									title={project.title}
+									title={project.title || ''}
 									company={project.company}
-									description={project.description}
-									timeline={project.timeline}
+									description={project.description || ''}
+									timeline={project.timeline ? {
+										startDate: project.timeline.startDate || '',
+										endDate: project.timeline.endDate,
+										status: (project.timeline.status || 'active') as 'active' | 'completed' | 'maintenance' | 'archived'
+									} : undefined}
 									github={project.github}
 									demoUrl={project.demoUrl}
 									caseStudyUrl={project.caseStudyUrl}
@@ -129,7 +135,15 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 											opacity: isInView ? 1 : 0,
 											transform: isInView ? 'translateX(0)' : 'translateX(-20px)'
 										}}>
-										<ProjectMediaCarousel media={project.media} primaryColor={project.primaryColor} />
+										<ProjectMediaCarousel
+											media={project.media?.map(m => ({
+												type: m.type || 'image',
+												url: m.url || '',
+												alt: m.alt || '',
+												poster: typeof m.poster === 'string' ? m.poster : undefined
+											})) || []}
+											primaryColor={project.primaryColor || '#00FF41'}
+										/>
 									</div>
 
 									<div className="md:col-span-5 transition-all duration-700 delay-300 transform"
@@ -139,17 +153,24 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 											transform: isInView ? 'translateX(0)' : 'translateX(20px)'
 										}}>
 										<ProjectOverview
-											problem={project.problem}
-											solution={project.solution}
-											technologies={project.technologies}
-											timeline={project.timeline}
+											problem={project.problem || ''}
+											solution={project.solution || ''}
+											technologies={project.technologies?.map(tech => ({
+												name: tech.name || '',
+												category: (tech.category as "frontend" | "backend" | "data" | "devops" | "ai") || 'frontend',
+											})) || []}
+											timeline={project.timeline ? {
+												startDate: project.timeline.startDate || '',
+												endDate: project.timeline.endDate,
+												status: (project.timeline.status || 'active') as 'active' | 'completed' | 'maintenance' | 'archived'
+											} : undefined}
 											noTerminalHeader={true}
 										/>
 									</div>
 								</div>
 
 								{/* Key Metrics Section - Compact and visually enhanced version */}
-								{(project.metrics?.length > 0 || project.achievements?.length > 0) && (
+								{((project.metrics && project.metrics.length > 0) || (project.achievements && project.achievements.length > 0)) && (
 									<div className="mt-6 transition-all duration-700 delay-400 transform"
 										style={{
 											transitionDelay: '300ms',
@@ -168,11 +189,6 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 														key={index}
 														className="bg-black/30 backdrop-blur-sm p-2 rounded-md border border-primary/10 flex items-center space-x-2 hover:border-primary/20 transition-colors duration-200"
 													>
-														{metric.icon &&
-															<div className="text-primary flex-shrink-0 bg-primary/10 rounded-full p-1">
-																{metric.icon}
-															</div>
-														}
 														<div className="flex flex-col">
 															<div className="text-lg font-bold text-primary flex items-baseline">
 																{metric.value}
@@ -221,7 +237,7 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 											size="sm"
 											className="bg-primary hover:bg-primary/90 shadow-[0_2px_10px_rgba(var(--primary-rgb),0.2)] transition-all duration-200 hover:translate-y-[-1px]"
 										>
-											<a href={`/projects/${project.id}`} className="flex items-center gap-1.5">
+											<a href={`/projects/${slug}`} className="flex items-center gap-1.5">
 												<Code size={14} />
 												<span>View Project</span>
 											</a>
