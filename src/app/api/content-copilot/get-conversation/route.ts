@@ -3,7 +3,7 @@ import { Message } from 'ai';
 
 interface GetConversationRequest {
 	documentId: string;
-	schemaType: string;
+	schemaType: Record<string, any>;
 }
 
 export async function POST(req: Request) {
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 			.select('*')
 			.eq('conversation_type', 'content-copilot')
 			.eq('context->documentId', documentId)
-			.eq('context->schemaType', schemaType)
+			.eq('context->schemaType', schemaType.name)
 			.order('updated_at', { ascending: false })
 			.limit(1)
 			.single();

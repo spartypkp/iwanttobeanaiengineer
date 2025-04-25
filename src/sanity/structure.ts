@@ -19,17 +19,17 @@ export const structure: StructureResolver = (S) =>
 				),
 			S.listItem()
 				.title('Projects')
-				.schemaType('projectType')
-				.child(S.documentTypeList('projectType').title('Projects')),
+				.schemaType('project')
+				.child(S.documentTypeList('project').title('Projects')),
 			S.listItem()
 				.title('Skills')
-				.schemaType('skillType')
-				.child(S.documentTypeList('skillType').title('Skills')),
+				.schemaType('skill')
+				.child(S.documentTypeList('skill').title('Skills')),
 			S.listItem()
 				.title('Knowledge Base')
-				.schemaType('knowledgeType')
+				.schemaType('knowledgeBase')
 				.child(
-					S.documentTypeList('knowledgeType').title('Knowledge Base')
+					S.documentTypeList('knowledgeBase').title('Knowledge Base')
 				),
 		]);
 
