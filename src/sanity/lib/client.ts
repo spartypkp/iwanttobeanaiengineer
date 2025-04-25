@@ -213,3 +213,55 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 
 	return projects;
 }
+
+// Function to get all skills
+export async function getAllSkills() {
+	return client.fetch(
+		`*[_type == "skill"] | order(name asc) {
+      _id,
+      name,
+      slug,
+      category,
+      description,
+      proficiency,
+      yearsExperience,
+      examples,
+      featured,
+      "projects": projects[]->{ 
+        _id, 
+        title, 
+        id, 
+        description 
+      }
+    }`
+	);
+}
+
+// Function to get all knowledge base items
+export async function getAllKnowledgeItems() {
+	return client.fetch(
+		`*[_type == "knowledgeBase"] | order(priority desc) {
+      _id,
+      title,
+      slug,
+      category,
+      question,
+      content,
+      keywords,
+      priority,
+      isPublic,
+      "relatedProjects": relatedProjects[]->{ 
+        _id, 
+        title, 
+        id,
+        description 
+      },
+      "relatedSkills": relatedSkills[]->{ 
+        _id, 
+        name, 
+        category,
+        proficiency 
+      }
+    }`
+	);
+}

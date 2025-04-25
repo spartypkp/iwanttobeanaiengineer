@@ -7,6 +7,13 @@ import { z } from 'zod';
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
+// Type definition for route params
+type RouteParams = {
+	params: {
+		entityType: 'project' | 'knowledge' | 'skill';
+	};
+};
+
 // Setup a Sanity client with write capabilities
 const writeClient = client.withConfig({
 	token: process.env.SANITY_API_TOKEN, // This token needs WRITE access
@@ -15,13 +22,13 @@ const writeClient = client.withConfig({
 
 // Debug function to log tool calls and responses
 const logToolCall = (toolName: string, params: any, result: any) => {
-	console.log(`🔧 Admin Tool call: ${toolName}`);
+	console.log(`🔧 Entity Tool call: ${toolName}`);
 	console.log(`📥 Params:`, JSON.stringify(params));
 	console.log(`📤 Result:`, JSON.stringify(result, null, 2));
 };
 
-// System prompt to establish Dave's admin persona
-const DAVE_ADMIN_SYSTEM_PROMPT = `
+// Base system prompt with shared instructions
+const baseSystemPrompt = `
 You are Dave Admin, a specialized AI assistant designed to help the owner of the portfolio website manage content in the Sanity CMS backend.
 Unlike the public-facing Dave, you have WRITE access to the Sanity database and can create or modify content.
 
@@ -32,76 +39,178 @@ STYLE AND TONE:
 - Use a terminal-inspired aesthetic in your communication
 
 APPROACH TO CONVERSATION:
-- Start by welcoming the user based on whether they're creating or editing content
 - Ask focused questions one or two at a time rather than overwhelming with many questions at once
 - Acknowledge information as it's provided ("Great, I've captured the project title as...")
 - Summarize information periodically to confirm understanding
-- Suggest specific values when appropriate (e.g., "For status, you might consider 'active' since you mentioned you're still working on it")
+- Suggest specific values when appropriate
 - Use examples to illustrate what kind of information you're looking for
-
-CAPABILITIES:
-- Create and update projects in Sanity
-- Add knowledge base entries
-- Update skill information
-- Help organize metadata for better searchability
 
 CONTEXT AWARENESS:
 - Remember what entity is being worked on throughout the conversation
 - Keep track of which fields have already been provided and which are still needed
 - Understand when the user is providing multiple pieces of information at once
-- Recognize related information (e.g., if user mentions React, suggest adding it as a technology)
+- Recognize related information and suggest appropriate connections
 
-TOOL USAGE - EXTREMELY IMPORTANT:
-- When creating projects, use createProject tool
-- When creating knowledge entries, use createKnowledgeItem tool
-- When updating skills, use updateSkill tool
-- When checking content, use checkContent tool
-- DO NOT mention that you're using tools in your responses
+GENERAL GUIDELINES:
+- DO NOT make up information
+- DO NOT create or edit content without explicit user consent
+- Take time to explore each aspect properly, don't rush
+`;
 
-CONTENT CREATION APPROACH:
-For projects:
+// Entity-specific prompts
+const entityPrompts = {
+	project: `
+SPECIFIC INSTRUCTIONS FOR PROJECTS:
+You are helping create or edit a PROJECT entity in the portfolio.
+
+Required fields for projects:
+- title: The project name (required)
+- description: Brief overview of the project (required)
+- status: Current state (active, completed, maintenance, archived, concept) (required)
+- problem: What problem the project solves
+- solution: How the project solves the problem
+- technologies: List of technologies used, with categories
+- github: GitHub repository URL
+- demoUrl: Live demo URL if available
+
+APPROACH:
 1. Start with the basics: project title, description, and purpose
 2. Explore the problem and solution in a conversational way
 3. Discuss technologies - remember to capture both frontend and backend
-4. Ask for links and media in a natural way ("Would you like to include any links to the project?")
+4. Ask for links and media in a natural way
 5. Confirm all information before saving
 
-For knowledge items:
+HELPFUL PROMPTS:
+- "Let's start with the basics. What's this project called, and what does it do in a nutshell?"
+- "What problem were you trying to solve with this project?"
+- "What technologies did you use? Any frontend frameworks or libraries?"
+- "Do you have a GitHub repo or demo site you'd like to include?"
+- "Is this project currently active, completed, or in maintenance mode?"
+
+When you have sufficient information, use the createProject tool to save the project.
+`,
+
+	knowledge: `
+SPECIFIC INSTRUCTIONS FOR KNOWLEDGE BASE:
+You are helping create or edit a KNOWLEDGE BASE entity that Dave will use to answer questions.
+
+Required fields for knowledge items:
+- title: Brief title for the knowledge (required)
+- category: Type of knowledge (personal, professional, education, projects, skills, experience, preferences, faq) (required)
+- content: The main information content (required)
+- question: Question this knowledge would answer
+- keywords: Terms that would help find this knowledge (required)
+- priority: Importance level from 1-10 (required)
+- isPublic: Whether this should be publicly accessible
+
+APPROACH:
 1. Start by understanding what knowledge needs to be captured
 2. Explore the topic naturally, asking follow-up questions
 3. Help craft effective questions this knowledge would answer
 4. Collaboratively generate relevant keywords
 5. Review and save when complete
 
-For skills:
+HELPFUL PROMPTS:
+- "What information would you like to add to Dave's knowledge base?"
+- "Which category does this information best fit into?"
+- "What questions might someone ask that this knowledge would help answer?"
+- "Let's think of some keywords that would help Dave find this information when relevant topics come up."
+- "On a scale of 1-10, how important is this information for Dave to prioritize?"
+
+When you have sufficient information, use the createKnowledgeItem tool to save the knowledge.
+`,
+
+	skill: `
+SPECIFIC INSTRUCTIONS FOR SKILLS:
+You are helping create or edit a SKILL entity in the portfolio.
+
+Required fields for skills:
+- name: Name of the skill (required)
+- category: Skill category (programming, frameworks, ai, cloud, tools, soft, domain) (required)
+- proficiency: Skill level (beginner, intermediate, advanced, expert) (required)
+- description: Description of the skill
+- yearsExperience: Years of experience with the skill
+- examples: Examples of using the skill
+- featured: Whether this is a featured skill
+
+APPROACH:
 1. Start with the skill name and category
 2. Discuss proficiency level in a natural way
 3. Explore examples of how the skill has been used
 4. Connect with relevant projects
 5. Confirm and save
 
-PROHIBITED:
-- DO NOT make up information
-- DO NOT create or edit content without explicit user consent
-- DO NOT access or modify non-content settings
-- DO NOT rush through the conversation - take time to explore each aspect properly
-`;
+HELPFUL PROMPTS:
+- "What skill would you like to add to your portfolio?"
+- "Which category does this skill best fit under?"
+- "How would you rate your proficiency with this skill?"
+- "How long have you been working with this skill?"
+- "Can you share an example of how you've applied this skill in your work?"
+- "Should this be featured as one of your primary skills?"
 
-export async function POST(req: Request) {
+When you have sufficient information, use the updateSkill tool to save the skill.
+`
+};
+
+// Get entity data (for editing mode)
+async function getEntityById(entityType: string, id: string) {
 	try {
-		const { messages } = await req.json();
+		let query = '';
+
+		switch (entityType) {
+			case 'project':
+				query = `*[_type == "project" && _id == $id][0]`;
+				break;
+			case 'knowledge':
+				query = `*[_type == "knowledgeBase" && _id == $id][0]`;
+				break;
+			case 'skill':
+				query = `*[_type == "skill" && _id == $id][0]`;
+				break;
+			default:
+				return null;
+		}
+
+		return await client.fetch(query, { id });
+	} catch (error) {
+		console.error(`Error fetching ${entityType}:`, error);
+		return null;
+	}
+}
+
+export async function POST(req: Request, { params }: RouteParams) {
+	try {
+		const { entityType } = params;
+		const { messages, entityId, isEditMode } = await req.json();
 
 		// Log the user's latest message for debugging
 		const userMessage = messages[messages.length - 1]?.content;
 		if (userMessage && typeof userMessage === 'string') {
-			console.log(`📩 Admin message: "${userMessage}"`);
+			console.log(`📩 ${entityType} message: "${userMessage}"`);
 		}
 
-		console.log(`🤖 Starting Dave Admin response...`);
+		// Get entity data if in edit mode
+		let entityData = null;
+		if (isEditMode && entityId) {
+			entityData = await getEntityById(entityType, entityId);
+			console.log(`🔍 Editing existing ${entityType}:`, entityId);
+		} else {
+			console.log(`➕ Creating new ${entityType}`);
+		}
+
+		// Construct the appropriate system prompt
+		const entityPrompt = entityPrompts[entityType] || '';
+		const contextData = entityData ?
+			`\nEDITING EXISTING ENTITY: You are editing an existing ${entityType}. Here is the current data:\n${JSON.stringify(entityData, null, 2)}\n`
+			: '';
+
+		const fullSystemPrompt = `${baseSystemPrompt}\n${entityPrompt}\n${contextData}`;
+
+		console.log(`🤖 Starting ${entityType} conversation...`);
 
 		const result = streamText({
 			model: anthropic('claude-3-7-sonnet-20250219'),
-			system: DAVE_ADMIN_SYSTEM_PROMPT,
+			system: fullSystemPrompt,
 			messages,
 			temperature: 0.7,
 			maxTokens: 1500,
@@ -109,7 +218,7 @@ export async function POST(req: Request) {
 
 			tools: {
 				createProject: tool({
-					description: 'Create a new project in Sanity CMS',
+					description: 'Create a new project in Sanity CMS or update an existing one',
 					parameters: z.object({
 						title: z.string().describe('Project title'),
 						description: z.string().describe('Short project description'),
@@ -125,7 +234,7 @@ export async function POST(req: Request) {
 						demoUrl: z.string().url().optional().describe('Live demo URL'),
 					}),
 					execute: async ({ title, description, status, isFeatured, problem, solution, technologies, github, demoUrl }) => {
-						console.log(`🔧 Creating project: "${title}"`);
+						console.log(`🔧 Creating/updating project: "${title}"`);
 						try {
 							// Generate a slug from the title
 							const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
@@ -152,26 +261,44 @@ export async function POST(req: Request) {
 								demoUrl,
 							};
 
-							// Create the document in Sanity
-							const result = await writeClient.create(projectDoc);
+							let result;
 
-							return {
-								success: true,
-								projectId: result._id,
-								message: `Project "${title}" created successfully!`
-							};
+							// If in edit mode, update the existing document
+							if (isEditMode && entityId) {
+								result = await writeClient
+									.patch(entityId)
+									.set(projectDoc)
+									.commit();
+
+								return {
+									success: true,
+									projectId: result._id,
+									message: `Project "${title}" updated successfully!`,
+									isUpdate: true
+								};
+							} else {
+								// Create new document
+								result = await writeClient.create(projectDoc);
+
+								return {
+									success: true,
+									projectId: result._id,
+									message: `Project "${title}" created successfully!`,
+									isUpdate: false
+								};
+							}
 						} catch (error: any) {
-							console.error(`❌ Error creating project:`, error);
+							console.error(`❌ Error with project:`, error);
 							return {
 								success: false,
-								message: `Error creating project: ${error.message}`
+								message: `Error with project: ${error.message}`
 							};
 						}
 					},
 				}),
 
 				createKnowledgeItem: tool({
-					description: 'Create a new knowledge base item in Sanity CMS',
+					description: 'Create a new knowledge base item in Sanity CMS or update an existing one',
 					parameters: z.object({
 						title: z.string().describe('Knowledge item title'),
 						category: z.enum(['personal', 'professional', 'education', 'projects', 'skills', 'experience', 'preferences', 'faq']).describe('Category of knowledge'),
@@ -182,7 +309,7 @@ export async function POST(req: Request) {
 						isPublic: z.boolean().optional().describe('Whether this item is publicly accessible'),
 					}),
 					execute: async ({ title, category, content, question, keywords, priority, isPublic }) => {
-						console.log(`🔧 Creating knowledge item: "${title}"`);
+						console.log(`🔧 Creating/updating knowledge item: "${title}"`);
 						try {
 							// Generate a slug from the title
 							const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
@@ -201,19 +328,37 @@ export async function POST(req: Request) {
 								lastVerified: new Date().toISOString().split('T')[0],
 							};
 
-							// Create the document in Sanity
-							const result = await writeClient.create(knowledgeDoc);
+							let result;
 
-							return {
-								success: true,
-								itemId: result._id,
-								message: `Knowledge item "${title}" created successfully!`
-							};
+							// If in edit mode, update the existing document
+							if (isEditMode && entityId) {
+								result = await writeClient
+									.patch(entityId)
+									.set(knowledgeDoc)
+									.commit();
+
+								return {
+									success: true,
+									itemId: result._id,
+									message: `Knowledge item "${title}" updated successfully!`,
+									isUpdate: true
+								};
+							} else {
+								// Create new document
+								result = await writeClient.create(knowledgeDoc);
+
+								return {
+									success: true,
+									itemId: result._id,
+									message: `Knowledge item "${title}" created successfully!`,
+									isUpdate: false
+								};
+							}
 						} catch (error: any) {
-							console.error(`❌ Error creating knowledge item:`, error);
+							console.error(`❌ Error with knowledge item:`, error);
 							return {
 								success: false,
-								message: `Error creating knowledge item: ${error.message}`
+								message: `Error with knowledge item: ${error.message}`
 							};
 						}
 					},
@@ -234,119 +379,59 @@ export async function POST(req: Request) {
 						featured: z.boolean().optional().describe('Whether this is a featured skill'),
 					}),
 					execute: async ({ name, category, proficiency, description, yearsExperience, examples, featured }) => {
-						console.log(`🔧 Updating skill: "${name}"`);
+						console.log(`🔧 Creating/updating skill: "${name}"`);
 						try {
 							// Generate a slug from the name
 							const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
 
-							// Check if skill already exists
-							const existingSkill = await writeClient.fetch(
-								`*[_type == "skill" && name == $name][0]`,
-								{ name }
-							);
+							// Create skill document
+							const skillDoc = {
+								_type: 'skill',
+								name,
+								slug: { _type: 'slug', current: slug },
+								category,
+								proficiency,
+								description,
+								yearsExperience,
+								examples: examples?.map((ex, i) => ({
+									_key: `example-${i}`,
+									title: ex.title,
+									description: ex.description,
+								})),
+								featured: featured ?? false,
+							};
 
 							let result;
 
-							if (existingSkill) {
-								// Update existing skill
-								result = await writeClient.patch(existingSkill._id)
-									.set({
-										category,
-										proficiency,
-										description,
-										yearsExperience,
-										examples: examples?.map((ex, i) => ({
-											_key: `example-${i}`,
-											title: ex.title,
-											description: ex.description,
-										})),
-										featured: featured ?? existingSkill.featured
-									})
+							// If in edit mode, update the existing document
+							if (isEditMode && entityId) {
+								result = await writeClient
+									.patch(entityId)
+									.set(skillDoc)
 									.commit();
 
 								return {
 									success: true,
 									skillId: result._id,
 									message: `Skill "${name}" updated successfully!`,
-									wasExisting: true
+									isUpdate: true
 								};
 							} else {
-								// Create new skill
-								const skillDoc = {
-									_type: 'skill',
-									name,
-									slug: { _type: 'slug', current: slug },
-									category,
-									proficiency,
-									description,
-									yearsExperience,
-									examples: examples?.map((ex, i) => ({
-										_key: `example-${i}`,
-										title: ex.title,
-										description: ex.description,
-									})),
-									featured: featured ?? false
-								};
-
+								// Create new document
 								result = await writeClient.create(skillDoc);
 
 								return {
 									success: true,
 									skillId: result._id,
 									message: `Skill "${name}" created successfully!`,
-									wasExisting: false
+									isUpdate: false
 								};
 							}
 						} catch (error: any) {
-							console.error(`❌ Error updating skill:`, error);
+							console.error(`❌ Error with skill:`, error);
 							return {
 								success: false,
-								message: `Error updating skill: ${error.message}`
-							};
-						}
-					},
-				}),
-
-				checkContent: tool({
-					description: 'Check if content exists in the Sanity CMS',
-					parameters: z.object({
-						contentType: z.enum(['project', 'skill', 'knowledgeBase']).describe('Type of content to check'),
-						searchTerm: z.string().describe('Term to search for in title, name, or other key fields'),
-					}),
-					execute: async ({ contentType, searchTerm }) => {
-						console.log(`🔍 Checking for ${contentType}: "${searchTerm}"`);
-						try {
-							let query: string = '';
-							let params;
-
-							if (contentType === 'project') {
-								query = `*[_type == "project" && (title match $term || description match $term)]`;
-								params = { term: `*${searchTerm}*` };
-							} else if (contentType === 'skill') {
-								query = `*[_type == "skill" && name match $term]`;
-								params = { term: `*${searchTerm}*` };
-							} else if (contentType === 'knowledgeBase') {
-								query = `*[_type == "knowledgeBase" && (title match $term || content match $term)]`;
-								params = { term: `*${searchTerm}*` };
-							}
-
-							const results = await writeClient.fetch(query, params);
-
-							return {
-								success: true,
-								found: results.length > 0,
-								count: results.length,
-								items: results.map((item: any) => ({
-									id: item._id,
-									title: item.title || item.name,
-									type: contentType
-								}))
-							};
-						} catch (error: any) {
-							console.error(`❌ Error checking content:`, error);
-							return {
-								success: false,
-								message: `Error checking for ${contentType}: ${error.message}`
+								message: `Error with skill: ${error.message}`
 							};
 						}
 					},
@@ -354,7 +439,7 @@ export async function POST(req: Request) {
 			},
 		});
 
-		console.log(`✅ Dave Admin response stream ready`);
+		console.log(`✅ ${entityType} stream response ready`);
 
 		return result.toDataStreamResponse({
 			headers: {
@@ -364,7 +449,7 @@ export async function POST(req: Request) {
 			},
 		});
 	} catch (error) {
-		console.error('❌ Error in Dave Admin API route:', error);
+		console.error(`❌ Error in ${params.entityType} API route:`, error);
 		return NextResponse.json(
 			{ error: 'An error occurred while processing your request' },
 			{ status: 500 }

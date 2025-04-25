@@ -6,52 +6,52 @@
 
   /* ===== MATRIX TERMINAL THEME ===== */
   :root {
-    /* Base background color (main page background) */
+    /* Near black background (very dark gray) */
     --background: 0 0% 7%;
-    /* Primary text color on background */
+    /* Bright matrix green text */
     --foreground: 143 90% 80%;
 
-    /* Subdued background for secondary content */
+    /* Dark grayish background with slight green tint for inactive sections */
     --muted: 180 2% 20%;
-    /* Text color for content on muted backgrounds */
+    /* Muted matrix green text */
     --muted-foreground: 143 50% 80%;
 
-    /* Card background color */
-    --card: 180 5% 10%;
-    /* Text color for content on card backgrounds */
+    /* Very dark green-tinted black for card backgrounds */
+    --card: 143 10% 8%;
+    /* Bright matrix green text for cards */
     --card-foreground: 143 90% 85%;
 
-    /* Popover/dropdown background color */
-    --popover: 180 5% 10%;
-    /* Text color for content on popover backgrounds */
+    /* Dark green-tinted black for popovers (slightly lighter than cards) */
+    --popover: 143 10% 9%;
+    /* Bright matrix green text for popovers */
     --popover-foreground: 143 90% 85%;
 
-    /* Border color for inputs and separators */
+    /* Medium dark matrix green for borders */
     --border: 143 50% 30%;
-    /* Input element border colors */
+    /* Medium dark matrix green for input borders */
     --input: 143 50% 30%;
 
-    /* Primary action color (buttons, links, focus) */
+    /* Vibrant matrix green for primary actions */
     --primary: 143 90% 50%;
-    /* Text color on primary colored elements */
+    /* Black text on primary colored backgrounds */
     --primary-foreground: 0 0% 0%;
 
-    /* Secondary/supporting element color */
+    /* Darker matrix green for secondary elements */
     --secondary: 143 50% 20%;
-    /* Text color on secondary colored elements */
+    /* Bright matrix green for text on secondary elements */
     --secondary-foreground: 143 90% 80%;
 
-    /* Accent color for highlights and special elements */
+    /* Bright green with higher saturation for accent elements */
     --accent: 143 90% 60%;
-    /* Text color on accent colored elements */
+    /* Black text on accent colored backgrounds */
     --accent-foreground: 0 0% 0%;
 
-    /* Color for destructive actions (delete, errors) */
+    /* Bright red for destructive actions */
     --destructive: 0 100% 50%;
-    /* Text color on destructive elements */
+    /* Very light blue-white for text on destructive backgrounds */
     --destructive-foreground: 210 40% 98%;
 
-    /* Focus ring color for interactive elements */
+    /* Medium brightness matrix green for focus rings */
     --ring: 143 50% 40%;
 
     /* Font family could be changed to a monospace for this theme */
