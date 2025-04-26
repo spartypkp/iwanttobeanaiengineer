@@ -9,7 +9,7 @@ interface Testimonial {
 	name: string;
 	role: string;
 	company: string;
-	relationship: "colleague" | "friend" | "mentor" | "client";
+	relationship: "colleague" | "friend" | "mentor" | "client" | 'advisor';
 	quote: string;
 	featured?: boolean;
 }
@@ -29,11 +29,11 @@ export const Testimonials: React.FC = () => {
 	const testimonials: Testimonial[] = [
 		{
 			id: 1,
-			name: "Alex Johnson",
-			role: "Senior AI Engineer",
-			company: "TechCorp",
-			relationship: "colleague",
-			quote: "Will's approach to AI engineering problems is refreshingly innovative. He doesn't just solve problems—he reimagines them.",
+			name: "Mark Shlick",
+			role: "Member of Technical Staff",
+			company: "Anthropic",
+			relationship: "advisor",
+			quote: "Will you can quote anything from me as long as it gets you a job.",
 			featured: true
 		},
 		{
