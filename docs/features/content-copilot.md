@@ -28,9 +28,10 @@ The Content Copilot has been implemented as a tab in Sanity Studio's document ed
    - Maintains document context between views
 
 3. **Conversation Focus**
-   - UI focuses solely on the conversational aspect
-   - Field extraction happens automatically during conversation
-   - Changes are applied directly to the document
+   - Modern chat interface with message bubbles and avatars
+   - Markdown support for rich content display
+   - Interactive elements for common actions
+   - Typing indicators and visual feedback
 
 ### 2.2 Implementation Architecture
 
@@ -40,9 +41,9 @@ Sanity Studio
     ├── Form View (standard)
     └── AI Assistant View (Content Copilot)
         └── ContentCopilotView Component
-            ├── Message History
+            ├── Message History with Markdown Support
             ├── Typing Indicators
-            └── Input Field + AI Streaming
+            └── Auto-expanding Input Field + AI Streaming
 ```
 
 ### 2.3 Backend Architecture
@@ -119,66 +120,89 @@ We've implemented a robust database schema in Supabase to store and manage conve
 
 ## 4. Technical Implementation
 
-### 4.1 Custom Document View Component
+### 4.1 Enhanced Chat UI Component
 
-The Content Copilot is now implemented as a single consolidated component:
+The Content Copilot now features a modern, responsive chat interface:
 
 ```typescript
 // src/components/dave-admin/sanity/ContentCopilotView.tsx
 import { useChat } from '@ai-sdk/react';
-import { Box, Card, Spinner, Stack, Text } from '@sanity/ui';
+import { Avatar, Badge, Box, Button, Card, Flex, Stack, Text, TextArea } from '@sanity/ui';
 import { useEffect, useRef, useState } from 'react';
-import { useDocumentOperation, useSchema } from 'sanity';
-import { useDocumentPatcher } from '../../../lib/document-utils';
-
-interface CustomSanityComponentProps {
-  document: {
-    published?: Record<string, any> | null;
-    draft?: Record<string, any> | null;
-    displayed: Record<string, any>;
-    historical?: Record<string, any> | null;
-  };
-  documentId: string;
-  schemaType: string;
-}
+import ReactMarkdown from 'react-markdown';
 
 export const ContentCopilotView = (props: CustomSanityComponentProps) => {
-  const { document, documentId, schemaType } = props;
+  // State and hooks...
   
-  // AI SDK chat integration
   const { messages, input, setInput, handleInputChange, handleSubmit } = useChat({
     api: '/api/content-copilot',
     body: {
       documentData: document.displayed,
       schemaType,
       documentId,
+      conversationId,
     },
+    onResponse: (response) => {
+      // Show typing indicator while generating response
+      setIsTyping(true);
+      
+      // Extract conversation ID from headers if available
+      const newConversationId = response.headers.get('X-Conversation-Id');
+      if (newConversationId) {
+        setConversationId(newConversationId);
+      }
+    },
+    onFinish: () => {
+      // Hide typing indicator when response is complete
+      setIsTyping(false);
+    }
   });
   
   // Component implementation...
 };
 ```
 
-### 4.2 API Route
+### 4.2 Key UI Features
+
+1. **Modern Chat Interface**
+   - Message bubbles with avatars
+   - Visual distinction between user and AI messages
+   - Empty state with suggested actions
+   - Typing indicator animation
+   - Auto-growing text input
+
+2. **Rich Content Support**
+   - Markdown rendering for AI responses
+   - Code block formatting
+   - Lists and formatting preserved
+   - Syntax highlighting
+
+3. **Improved UX**
+   - Real-time typing indicator
+   - Keyboard shortcuts (Enter to send, Shift+Enter for newline)
+   - Responsive layout
+   - Visual feedback for actions
+
+4. **Error Handling**
+   - Improved error states
+   - Retry mechanisms
+   - Clear error messaging
+
+### 4.3 Backend API Route
 
 The Content Copilot API route manages conversation state and AI interaction:
 
 ```typescript
 // src/app/api/content-copilot/route.ts
-import { createClient } from '@/lib/utils/supabase/server';
-import { anthropic } from '@ai-sdk/anthropic';
-import { Message, streamText } from 'ai';
-
 export async function POST(req: Request) {
   const { messages, body } = await req.json();
-  const { documentId, schemaType } = body;
-
+  
   // Initialize Supabase client
   const supabase = await createClient();
-
-  // Manage conversation session
-  let sessionId = await getOrCreateConversationSession(supabase, documentId, schemaType);
-
+  
+  // Create or retrieve conversation session
+  let sessionId = getOrCreateConversationSession(...);
+  
   // Stream response from AI model
   const stream = streamText({
     model: anthropic('claude-3-7-sonnet-latest'),
@@ -190,37 +214,16 @@ export async function POST(req: Request) {
       await saveConversation(supabase, sessionId, messages, result.text);
     }
   });
-
-  return stream.toDataStreamResponse();
-}
-```
-
-### 4.3. Conversation Management
-
-Conversation state is persisted using the Supabase client:
-
-```typescript
-// Helper function to save conversation to Supabase
-async function saveConversation(supabase, sessionId, userMessage, assistantResponse) {
-  const userMsg = messages[messages.length - 1];
   
-  if (userMsg && userMsg.role === 'user') {
-    await supabase.from('messages').insert({
-      conversation_id: sessionId,
-      external_id: userMsg.id,
-      role: 'user',
-      content: userMsg.content,
-      sequence: getNextSequence()
-    });
+  // Add conversation ID to response headers
+  const response = await stream.toDataStreamResponse();
   
-    await supabase.from('messages').insert({
-      conversation_id: sessionId,
-      external_id: generateId(),
-      role: 'assistant',
-      content: assistantResponse,
-      sequence: getNextSequence() + 1
-    });
-  }
+  return new Response(response.body, {
+    headers: {
+      ...Object.fromEntries(response.headers),
+      'X-Conversation-Id': sessionId
+    }
+  });
 }
 ```
 
@@ -229,61 +232,53 @@ async function saveConversation(supabase, sessionId, userMessage, assistantRespo
 ### Completed
 - ✅ Custom document view implementation
 - ✅ Integration with Sanity Studio
-- ✅ Basic AI conversation functionality
-- ✅ Supabase schema design for conversation storage
-- ✅ API route for handling messages
+- ✅ Modern chat UI with markdown support
+- ✅ Typing indicators and visual feedback
+- ✅ Conversation history persistence
+- ✅ Document-to-conversation session mapping
+- ✅ Message loading when switching documents
 
 ### In Progress
-- 🔄 Conversation history persistence
-- 🔄 Document-to-conversation session mapping
-- 🔄 Message loading when switching documents
+- 🔄 Enhanced extraction of field values from conversations
+- 🔄 Tool implementation for document updates
 
 ### Pending
-- ⏳ Conversation switching between documents
-- ⏳ Enhanced extraction of field values from conversations
-- ⏳ Tool implementation for document updates
-- ⏳ UI refinements and loading states
+- ⏳ Analytics dashboard for usage metrics
+- ⏳ Advanced document analysis features
 
 ## 6. Next Steps
 
-### 6.1 Frontend Conversation Management
+### 6.1 Content Tools Integration
 
-1. **Document-Based Conversation Loading**
-   - Implement loading of conversation history when opening a document
-   - Create utilities to fetch conversation history by document ID
-   - Add conversation reset/new conversation functionality
+1. **Field Update Tools**
+   - Implement tools for updating specific document fields
+   - Add change visualization
+   - Develop field validation
 
-2. **Session Management**
-   - Implement conversation ID tracking per document
-   - Create UI for viewing conversation history
-   - Add conversation metadata display
+2. **Content Analysis**
+   - Implement document structure analysis
+   - Add content quality suggestions
+   - Create SEO optimization tools
 
-### 6.2 AI Enhancement
+### 6.2 UI/UX Refinements
 
-1. **Improved Context Integration**
-   - Enhance system prompts with document-specific information
-   - Add document schema details to AI context
-   - Implement field validation information in prompts
+1. **Mobile Optimization**
+   - Ensure full responsiveness on mobile devices
+   - Optimize touch interactions
+   - Test on various screen sizes
 
-2. **Tool Implementation**
-   - Create function calling tools for field updates
-   - Implement field extraction tools
-   - Add document analysis capabilities
+2. **Accessibility Improvements**
+   - Enhance keyboard navigation
+   - Add screen reader support
+   - Implement accessibility best practices
 
-### 6.3 UI Refinements
-
-1. **Conversation Experience**
-   - Add typing indicators
-   - Improve message rendering
-   - Implement markdown support
-
-2. **Feedback Mechanisms**
-   - Add visual indicators for field updates
-   - Create success/error notifications
-   - Implement undo functionality
+3. **Theme Support**
+   - Ensure dark/light mode compatibility
+   - Respect user theme preferences
+   - Implement consistent styling
 
 ## 7. Conclusion
 
-The Content Copilot feature has made significant progress with the implementation of a custom document view in Sanity Studio and a robust conversation storage architecture in Supabase. The current implementation provides a solid foundation for AI-assisted content editing, with a clear path forward for enhancing functionality and user experience.
+The Content Copilot feature has evolved into a polished, user-friendly interface for AI-assisted content creation in Sanity Studio. The new UI provides a modern chat experience with rich content support, typing indicators, and improved visual feedback. The backend architecture ensures robust conversation persistence and document context management.
 
-The next phase of development will focus on improving conversation management, particularly when switching between documents, and enhancing the AI's ability to extract and update field values based on natural conversation. These improvements will further streamline the content creation process and make the Content Copilot an essential tool for efficient content management. 
+With the foundational UI and conversation management in place, future development will focus on implementing document field tools to extract and update content automatically. This will further streamline the content creation process and make the Content Copilot an even more powerful assistant for content management. 

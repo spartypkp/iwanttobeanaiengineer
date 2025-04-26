@@ -1,7 +1,7 @@
 "use client";
 
 import DaveIcon from '@/components/custom/dave';
-import { ContentCopilot } from '@/components/dave-admin/content-copilot/ContentCopilot';
+//import { ContentCopilot } from '@/components/dave-admin/content-copilot/ContentCopilot';
 import { useRef, useState } from 'react';
 
 export default function DavePage() {
@@ -68,10 +68,10 @@ export default function DavePage() {
 				</div>
 
 				<div className="md:col-span-3">
-					<ContentCopilot
+					{/* <ContentCopilot
 						className="w-full h-[600px]"
 						ref={terminalRef}
-					/>
+					/> */}
 				</div>
 			</div>
 

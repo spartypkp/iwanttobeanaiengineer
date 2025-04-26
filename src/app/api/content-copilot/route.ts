@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/utils/supabase/server';
 import { anthropic } from '@ai-sdk/anthropic';
-import { SupabaseClient } from '@supabase/supabase-js';
 import { Message, streamText } from 'ai';
 
 const individualTools = [
@@ -14,13 +13,20 @@ interface ContentCopilotRequest {
 		historical?: Record<string, any> | null;
 	};
 	documentId: string;
-	schemaType: Record<string, any>;
+	schemaType: { name: string;[key: string]: any; };
 	conversationId?: string | null;
 }
 
 export async function POST(req: Request) {
 	const { messages, body }: { messages: Message[]; body: ContentCopilotRequest; } = await req.json();
 	const { documentId, schemaType, conversationId } = body;
+
+	console.log('POST content-copilot:', {
+		documentId,
+		schemaType: schemaType?.name || 'unknown',
+		conversationId: conversationId || 'new',
+		messageCount: messages.length
+	});
 
 	// Initialize Supabase client
 	const supabase = await createClient();
@@ -46,7 +52,8 @@ export async function POST(req: Request) {
 				context: {
 					source: 'sanity',
 					documentId,
-					schemaType: schemaType.name
+					schemaType: schemaType.name,
+					documentTitle: body.document.displayed?.title || 'Untitled'
 				},
 				system_prompt: generateSystemPrompt(body)
 			})
@@ -62,6 +69,7 @@ export async function POST(req: Request) {
 		}
 
 		sessionId = newConversation.id;
+		console.log('Created new conversation:', sessionId);
 	}
 
 	// Get the last user message to save
@@ -77,6 +85,7 @@ export async function POST(req: Request) {
 			content: userMessage.content,
 			sequence: nextSequence
 		});
+		console.log('Saved user message:', { conversationId: sessionId, sequence: nextSequence });
 	}
 
 	// Create the stream with callbacks
@@ -95,6 +104,7 @@ export async function POST(req: Request) {
 				content: result.text,
 				sequence: nextSequence
 			});
+			console.log('Saved assistant response:', { conversationId: sessionId, sequence: nextSequence });
 
 			// Update any analytics if needed
 			await updateConversationAnalytics(supabase, sessionId);
@@ -125,9 +135,8 @@ function generateSystemPrompt(body: ContentCopilotRequest): string {
   You are currently in 'content-copilot' mode. You are helping Will write content for his website - directly integrated with Sanity studio. Writing about content is very difficult for Will. He built you in order to facilitate the creation and enrichment of content in Sanity studio.
 
   You are currently editing a Sanity document of type: ${schemaType.name}.
-  Here are all of the fields:
-  ${JSON.stringify(schemaType.fields, null, 2)}
-
+  Document ID: ${documentId}
+  Document Title: ${document.displayed?.title || 'Untitled'}
 
   Current document data:
   ${JSON.stringify(document.displayed, null, 2)}
@@ -141,7 +150,7 @@ function generateSystemPrompt(body: ContentCopilotRequest): string {
 }
 
 // Helper function to get the next sequence number for messages
-async function getNextSequence(supabase: SupabaseClient, conversationId: string): Promise<number> {
+async function getNextSequence(supabase: any, conversationId: string): Promise<number> {
 	const { data, error } = await supabase
 		.from('messages')
 		.select('sequence')
@@ -158,7 +167,7 @@ async function getNextSequence(supabase: SupabaseClient, conversationId: string)
 }
 
 // Helper function to update conversation analytics
-async function updateConversationAnalytics(supabase: SupabaseClient, conversationId: string) {
+async function updateConversationAnalytics(supabase: any, conversationId: string) {
 	try {
 		// Count messages
 		const { data: messageCount, error: countError } = await supabase

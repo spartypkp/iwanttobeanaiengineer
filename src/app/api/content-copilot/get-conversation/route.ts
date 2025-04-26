@@ -3,7 +3,7 @@ import { Message } from 'ai';
 
 interface GetConversationRequest {
 	documentId: string;
-	schemaType: Record<string, any>;
+	schemaType?: Record<string, any>;
 }
 
 export async function POST(req: Request) {
@@ -17,16 +17,19 @@ export async function POST(req: Request) {
 		// Initialize Supabase client
 		const supabase = await createClient();
 
-		// Find the latest conversation for this document
-		const { data: conversation, error: conversationError } = await supabase
+		console.log('Fetching conversation for document:', documentId);
+
+		// Find the latest conversation for this document by title
+		// Much simpler query - using documentId directly as the title
+		const query = supabase
 			.from('conversations')
 			.select('*')
 			.eq('conversation_type', 'content-copilot')
-			.eq('context->documentId', documentId)
-			.eq('context->schemaType', schemaType.name)
+			.eq('title', documentId)
 			.order('updated_at', { ascending: false })
-			.limit(1)
-			.single();
+			.limit(1);
+
+		const { data: conversation, error: conversationError } = await query.single();
 
 		if (conversationError && conversationError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
 			console.error('Error fetching conversation:', conversationError);
@@ -35,8 +38,11 @@ export async function POST(req: Request) {
 
 		// If no conversation exists yet
 		if (!conversation) {
+			console.log('No conversation found for document:', documentId);
 			return Response.json({ conversation: null, messages: [] });
 		}
+
+		console.log('Found conversation:', conversation.id);
 
 		// Get messages for this conversation
 		const { data: messagesData, error: messagesError } = await supabase
@@ -49,6 +55,8 @@ export async function POST(req: Request) {
 			console.error('Error fetching messages:', messagesError);
 			return Response.json({ error: 'Failed to fetch messages' }, { status: 500 });
 		}
+
+		console.log(`Found ${messagesData?.length || 0} messages for conversation ${conversation.id}`);
 
 		// Convert to the format expected by AI SDK
 		const messages: Message[] = messagesData.map(msg => ({

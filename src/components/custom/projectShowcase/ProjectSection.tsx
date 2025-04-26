@@ -16,7 +16,6 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 	const [isInView, setIsInView] = useState(false);
 	const sectionRef = useRef<HTMLElement>(null);
 	const slug = project.slug?.current || '';
-	console.log(`Slug for ${project.title} is ${slug}`);
 
 	// Generate a stable unique ID for this component instance
 	const uniqueId = useId();
