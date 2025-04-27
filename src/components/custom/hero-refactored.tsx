@@ -12,16 +12,6 @@ interface HeroProps {
 	startAnimation?: boolean;
 }
 
-// Helper function to simulate natural typing with variable speed
-const getRandomTypingDelay = (baseSpeed: number) => {
-	// Occasionally add a slightly longer pause to simulate thinking
-	if (Math.random() < 0.08) {
-		return baseSpeed * 2;
-	}
-	// Normal variation in typing speed
-	return baseSpeed * (0.7 + Math.random() * 0.5);
-};
-
 // Unified terminal component that executes commands in sequence
 export const Hero: React.FC<HeroProps> = ({
 	name,
@@ -57,18 +47,24 @@ export const Hero: React.FC<HeroProps> = ({
 
 	// Set profile image ready after initial render
 	useEffect(() => {
-		// Ensure image starts hidden, then mark it as ready
-		const timer = setTimeout(() => {
+		// Make the profile image visible immediately when animation starts
+		if (startAnimation) {
+			// Show profile image immediately
 			setProfileImageReady(true);
-		}, 100);
-		return () => clearTimeout(timer);
-	}, []);
+		} else {
+			// For non-animated state, also make image ready immediately
+			const timer = setTimeout(() => {
+				setProfileImageReady(true);
+			}, 50);
+			return () => clearTimeout(timer);
+		}
+	}, [startAnimation]);
 
-	// Terminal command sequence (removed system status command)
+	// Terminal command sequence
 	const commands = [
-		{ id: 'whoami', display: '$ whoami', delay: 0, typingSpeed: 50 },
-		{ id: 'skills', display: '$ ls skills/', delay: 500, typingSpeed: 40 },
-		{ id: 'github', display: '$ github stats --user=spartypkp', delay: 800, typingSpeed: 35 },
+		{ id: 'whoami', display: '$ whoami', delay: 0, typingSpeed: 15 },
+		{ id: 'skills', display: '$ ls skills/', delay: 300, typingSpeed: 15 },
+		{ id: 'github', display: '$ github stats --user=spartypkp', delay: 300, typingSpeed: 15 },
 	];
 
 	// Organized skills data by category
@@ -93,89 +89,90 @@ export const Hero: React.FC<HeroProps> = ({
 		if (!startAnimation || animationInProgress.current) return;
 
 		animationInProgress.current = true;
-		setShowName(true); // Make name container visible once animation starts
 
-		// Slight initial delay before starting animation
+		// Add delay to start typing animation, allowing profile image to be seen first
 		const initialDelay = setTimeout(() => {
-			// Type name first - with natural typing delays
-			let nameIndex = 0;
-			const baseNameSpeed = 40; // slightly slower for name for emphasis
+			setShowName(true); // Make name container visible after initial delay
 
-			const typeCharWithVariableSpeed = () => {
-				if (nameIndex <= name.length) {
-					setTypedName(name.substring(0, nameIndex));
-					nameIndex++;
-					setTimeout(typeCharWithVariableSpeed, getRandomTypingDelay(baseNameSpeed));
-				} else {
-					// Hide cursor for name after a brief pause
-					setTimeout(() => {
-						setShowNameCursor(false);
+			// Fast initial typing speeds
+			const nameSpeed = 10;
+			const titleSpeed = 10;
+			const taglineSpeed = 6;
 
-						// Pause before starting title animation
+			// Start typing name after user has had time to see the profile image
+			setTimeout(() => {
+				// Type name first
+				let nameIndex = 0;
+
+				const typeName = () => {
+					if (nameIndex <= name.length) {
+						setTypedName(name.substring(0, nameIndex));
+						nameIndex++;
+						setTimeout(typeName, nameSpeed);
+					} else {
+						// Hide cursor for name
 						setTimeout(() => {
-							setShowTitle(true);
+							setShowNameCursor(false);
 
-							// Then type title with natural variations
-							let titleIndex = 0;
-							const baseTitleSpeed = 30;
+							// Start title animation with a visible pause
+							setTimeout(() => {
+								setShowTitle(true);
 
-							const typeTitleChar = () => {
-								if (titleIndex <= title.length) {
-									setTypedTitle(title.substring(0, titleIndex));
-									titleIndex++;
-									setTimeout(typeTitleChar, getRandomTypingDelay(baseTitleSpeed));
-								} else {
-									// Hide cursor for title after a brief pause
-									setTimeout(() => {
-										setShowTitleCursor(false);
-
-										// Pause before starting tagline animation
+								let titleIndex = 0;
+								const typeTitle = () => {
+									if (titleIndex <= title.length) {
+										setTypedTitle(title.substring(0, titleIndex));
+										titleIndex++;
+										setTimeout(typeTitle, titleSpeed);
+									} else {
+										// Hide cursor for title
 										setTimeout(() => {
-											setShowTagline(true);
+											setShowTitleCursor(false);
 
-											// Finally type tagline with natural variations
-											let taglineIndex = 0;
-											const baseTaglineSpeed = 12; // faster for longer tagline text
+											// Start tagline animation with a pause
+											setTimeout(() => {
+												setShowTagline(true);
 
-											const typeTaglineChar = () => {
-												if (taglineIndex <= tagline.length) {
-													setTypedTagline(tagline.substring(0, taglineIndex));
-													taglineIndex++;
-													setTimeout(typeTaglineChar, getRandomTypingDelay(baseTaglineSpeed));
-												} else {
-													// Hide cursor for tagline after a brief pause
-													setTimeout(() => {
-														setShowTaglineCursor(false);
-
-														// Show "Access Granted" message after animation completes
+												let taglineIndex = 0;
+												const typeTagline = () => {
+													if (taglineIndex <= tagline.length) {
+														setTypedTagline(tagline.substring(0, taglineIndex));
+														taglineIndex++;
+														setTimeout(typeTagline, taglineSpeed);
+													} else {
+														// Hide cursor for tagline
 														setTimeout(() => {
-															setShowAccessGranted(true);
+															setShowTaglineCursor(false);
 
-															// Final pause before completing animation
+															// Show "Access Granted" message
 															setTimeout(() => {
-																setAnimationComplete(true);
-																animationInProgress.current = false;
-															}, 500);
-														}, 200);
-													}, 150);
-												}
-											};
+																setShowAccessGranted(true);
 
-											typeTaglineChar();
-										}, 300); // Pause between title and tagline
-									}, 150);
-								}
-							};
+																// Complete animation
+																setTimeout(() => {
+																	setAnimationComplete(true);
+																	animationInProgress.current = false;
+																}, 200);
+															}, 100);
+														}, 80);
+													}
+												};
 
-							typeTitleChar();
-						}, 300); // Pause between name and title
-					}, 150);
-				}
-			};
+												typeTagline();
+											}, 200); // Slightly longer pause before tagline
+										}, 100);
+									}
+								};
 
-			// Start the typing animation
-			typeCharWithVariableSpeed();
-		}, 150);
+								typeTitle();
+							}, 200); // Slightly longer pause before title
+						}, 100);
+					}
+				};
+
+				typeName();
+			}, 300); // Longer initial delay to appreciate the profile image
+		}, 100); // Slightly longer initial delay
 
 		return () => {
 			clearTimeout(initialDelay);
@@ -202,19 +199,19 @@ export const Hero: React.FC<HeroProps> = ({
 
 				let cmdIndex = 0;
 				const commandText = commands[index].display;
-				const baseTypingSpeed = commands[index].typingSpeed;
+				const typingSpeed = commands[index].typingSpeed;
 
-				// Simulate typing the command with natural variations
+				// Type the command with consistent speed
 				const typeCommandChar = () => {
 					if (cmdIndex < commandText.length) {
 						setTypedCommand(commandText.substring(0, cmdIndex + 1));
 						cmdIndex++;
-						setTimeout(typeCommandChar, getRandomTypingDelay(baseTypingSpeed));
+						setTimeout(typeCommandChar, typingSpeed);
 					} else {
 						// Command typing completed
 						setTypingCommand(false);
 
-						// After a brief pause, show the result
+						// Show the result immediately
 						setTimeout(() => {
 							switch (commands[index].id) {
 								case 'skills':
@@ -225,7 +222,7 @@ export const Hero: React.FC<HeroProps> = ({
 									break;
 							}
 
-							// Scroll terminal to bottom with a smooth effect
+							// Scroll terminal to bottom
 							if (terminalRef.current) {
 								terminalRef.current.scrollTo({
 									top: terminalRef.current.scrollHeight,
@@ -242,7 +239,7 @@ export const Hero: React.FC<HeroProps> = ({
 								// This was the last command
 								setAllCommandsComplete(true);
 							}
-						}, 250); // Pause between typing command and showing result
+						}, 100);
 					}
 				};
 
@@ -250,10 +247,10 @@ export const Hero: React.FC<HeroProps> = ({
 				typeCommandChar();
 			};
 
-			// Start execution of commands with a delay after initial animation
+			// Start execution of commands with a pause after initial animation
 			setTimeout(() => {
 				executeNextCommand(1); // Skip the whoami command as it's already shown
-			}, 600);
+			}, 400); // Slightly longer delay before commands start
 		};
 
 		executeCommands();
@@ -279,7 +276,7 @@ export const Hero: React.FC<HeroProps> = ({
 	};
 
 	// Determine if the image should be visible
-	const shouldShowImage = profileImageReady && (animationComplete || !startAnimation);
+	const shouldShowImage = profileImageReady;
 
 	if (!startAnimation) {
 		return (

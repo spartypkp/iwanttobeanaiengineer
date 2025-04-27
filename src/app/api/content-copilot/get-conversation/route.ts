@@ -16,28 +16,26 @@ export async function POST(req: Request) {
 		// Initialize Supabase client
 		const supabase = await createClient();
 
-		// Updated query to search in the context JSONB field for matching documentId
-		const query = supabase
+		// Use a simpler approach to query the JSONB field
+		// The containsObject filter checks if the JSON object has the specified field with the specified value
+		const { data: conversations, error: conversationError } = await supabase
 			.from('conversations')
 			.select('*')
-			.eq('conversation_type', 'content-copilot')
-			.filter('context->documentId', 'eq', documentId)
-			.order('updated_at', { ascending: false })
+			.contains('context', { documentId })
 			.limit(1);
 
-		const { data: conversation, error: conversationError } = await query.single();
-
-		if (conversationError && conversationError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+		if (conversationError) {
 			console.error('Error fetching conversation:', conversationError);
 			return Response.json({ error: 'Failed to fetch conversation' }, { status: 500 });
 		}
 
 		// If no conversation exists yet
-		if (!conversation) {
+		if (!conversations || conversations.length === 0) {
 			console.log('No conversation found for document:', documentId);
 			return Response.json({ conversation: null, messages: [] });
 		}
 
+		const conversation = conversations[0];
 		console.log('Found conversation:', conversation.id);
 
 		// Get messages for this conversation
