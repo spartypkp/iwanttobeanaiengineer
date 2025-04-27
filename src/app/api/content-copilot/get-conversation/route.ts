@@ -3,12 +3,11 @@ import { Message } from 'ai';
 
 interface GetConversationRequest {
 	documentId: string;
-	schemaType?: Record<string, any>;
 }
 
 export async function POST(req: Request) {
 	try {
-		const { documentId, schemaType }: GetConversationRequest = await req.json();
+		const { documentId }: GetConversationRequest = await req.json();
 
 		if (!documentId) {
 			return Response.json({ error: 'Document ID is required' }, { status: 400 });
@@ -17,15 +16,12 @@ export async function POST(req: Request) {
 		// Initialize Supabase client
 		const supabase = await createClient();
 
-		console.log('Fetching conversation for document:', documentId);
-
-		// Find the latest conversation for this document by title
-		// Much simpler query - using documentId directly as the title
+		// Updated query to search in the context JSONB field for matching documentId
 		const query = supabase
 			.from('conversations')
 			.select('*')
 			.eq('conversation_type', 'content-copilot')
-			.eq('title', documentId)
+			.filter('context->documentId', 'eq', documentId)
 			.order('updated_at', { ascending: false })
 			.limit(1);
 

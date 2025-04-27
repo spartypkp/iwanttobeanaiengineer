@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/utils/supabase/server';
+import { extractSchemaInfo, formatSchemaFieldsForPrompt, SchemaField, SchemaInfo, SerializableSchema } from '@/utils/schema-serialization';
 import { anthropic } from '@ai-sdk/anthropic';
 import { createClient as createSanityClient } from '@sanity/client';
 import { Message, streamText, tool } from 'ai';
@@ -24,12 +25,6 @@ function buildNestedValue(pathParts: string[], finalValue: any): Record<string, 
 		result[pathParts[0]] = buildNestedValue(pathParts.slice(1), finalValue);
 		return result;
 	}
-}
-
-// Define interfaces for tool parameters and context
-interface ToolContext {
-	documentId: string;
-	schemaType: { name: string;[key: string]: any; };
 }
 
 // Define the tools available to the AI
@@ -121,15 +116,6 @@ const suggestContentTool = tool({
 		}
 	}
 });
-
-// Define interface for field information
-interface SchemaField {
-	name: string;
-	type: string;
-	title: string;
-	description?: string;
-	required: boolean;
-}
 
 // Define interface for incomplete field
 interface IncompleteField {
@@ -338,7 +324,7 @@ const readSubFieldTool = tool({
 	}
 });
 
-// Define available tools - currently only the writeField tool
+// Define available tools
 const availableTools = {
 	writeField: writeFieldTool,
 	suggestContent: suggestContentTool,
@@ -346,28 +332,32 @@ const availableTools = {
 	readSubField: readSubFieldTool
 };
 
+
+
+// Request interface that matches what we receive from the frontend
 interface ContentCopilotRequest {
-	document: {
-		published?: Record<string, any> | null;
-		draft?: Record<string, any> | null;
-		displayed: Record<string, any>;
-		historical?: Record<string, any> | null;
-	};
+	id?: string;
+	messages: Message[];
 	documentId: string;
-	schemaType: { name: string;[key: string]: any; };
-	conversationId?: string | null;
+	conversationId: string | null;
+	schemaType: string;
+	serializableSchema: SerializableSchema;
+	documentData: Record<string, any>;
 }
 
 export async function POST(req: Request) {
-	const { messages, body }: { messages: Message[]; body: ContentCopilotRequest; } = await req.json();
-	const { documentId, schemaType, conversationId } = body;
+	// Parse the request body
+	const requestData: ContentCopilotRequest = await req.json();
+	console.log('POST content-copilot - received request for document:', requestData.documentId);
 
-	console.log('POST content-copilot:', {
+	const {
+		messages,
 		documentId,
-		schemaType: schemaType?.name || 'unknown',
-		conversationId: conversationId || 'new',
-		messageCount: messages.length
-	});
+		conversationId,
+		schemaType,
+		serializableSchema,
+		documentData
+	} = requestData;
 
 	// Initialize Supabase client
 	const supabase = await createClient();
@@ -377,6 +367,7 @@ export async function POST(req: Request) {
 	// Use existing conversation ID if provided
 	if (conversationId) {
 		sessionId = conversationId;
+		console.log('Using existing conversation:', sessionId);
 
 		// Update the conversation timestamp
 		await supabase
@@ -384,19 +375,25 @@ export async function POST(req: Request) {
 			.update({ updated_at: new Date().toISOString() })
 			.eq('id', sessionId);
 	} else {
+		console.log('Creating new conversation for document:', documentId);
 		// Create a new conversation record
 		const { data: newConversation, error } = await supabase
 			.from('conversations')
 			.insert({
-				title: documentId,
+				title: documentData.title || `New ${schemaType} - ${documentId.substring(0, 8)}`,
 				conversation_type: 'content-copilot',
 				context: {
 					source: 'sanity',
 					documentId,
-					schemaType: schemaType.name,
-					documentTitle: body.document.displayed?.title || 'Untitled'
+					schemaType,
+					documentTitle: documentData.title || 'Untitled'
 				},
-				system_prompt: generateSystemPrompt(body)
+				system_prompt: generateSystemPrompt({
+					documentId,
+					schemaType,
+					documentData,
+					serializableSchema
+				})
 			})
 			.select()
 			.single();
@@ -421,7 +418,7 @@ export async function POST(req: Request) {
 		const nextSequence = await getNextSequence(supabase, sessionId);
 		await supabase.from('messages').insert({
 			conversation_id: sessionId,
-			external_id: userMessage.id,
+			external_id: userMessage.id || `msg_${Date.now()}`,
 			role: 'user',
 			content: userMessage.content,
 			sequence: nextSequence
@@ -429,11 +426,23 @@ export async function POST(req: Request) {
 		console.log('Saved user message:', { conversationId: sessionId, sequence: nextSequence });
 	}
 
+	// Convert messages to the format expected by the streamText function
+	const aiMessages: Message[] = messages.map(msg => ({
+		id: msg.id || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+		role: msg.role,
+		content: msg.content
+	}));
+
 	// Create the stream with callbacks
 	const stream = streamText({
 		model: anthropic('claude-3-7-sonnet-latest'),
-		system: generateSystemPrompt(body),
-		messages,
+		system: generateSystemPrompt({
+			documentId,
+			schemaType,
+			documentData,
+			serializableSchema
+		}),
+		messages: aiMessages,
 		tools: availableTools,
 		maxSteps: 5,
 		onFinish: async (result) => {
@@ -467,15 +476,25 @@ export async function POST(req: Request) {
 }
 
 // Generate a system prompt based on the document context
-function generateSystemPrompt(body: ContentCopilotRequest): string {
-	const { documentId, schemaType, document } = body;
+function generateSystemPrompt(params: {
+	documentId: string;
+	schemaType: string;
+	documentData: Record<string, any>;
+	serializableSchema: SerializableSchema;
+}): string {
+	const { documentId, schemaType, documentData } = params;
+
+	// Create the document structure expected by the schema analysis functions
+	const document = {
+		displayed: documentData
+	};
 
 	// Extract simplified schema information for the prompt
 	const schemaInfo = extractSchemaInfo(schemaType);
 	const schemaFieldsDescription = formatSchemaFieldsForPrompt(schemaInfo);
 
 	// Get document completion status
-	const completionStatus = analyzeDocumentCompletion(document.displayed, schemaInfo);
+	const completionStatus = analyzeDocumentCompletion(documentData, schemaInfo);
 
 	return `
 <identity>
@@ -496,13 +515,13 @@ Your primary purpose is to:
 </purpose>
 
 <document_info>
-You are currently editing a Sanity document of type: ${schemaType.name}
+You are currently editing a Sanity document of type: ${schemaType}
   Document ID: ${documentId}
-  Document Title: ${document.displayed?.title || 'Untitled'}
+  Document Title: ${documentData.title || 'Untitled'}
 Completion Status: ${completionStatus.requiredFieldsComplete}/${completionStatus.totalRequiredFields} required fields complete
 
   Current document data:
-  ${JSON.stringify(document.displayed, null, 2)}
+  ${JSON.stringify(documentData, null, 2)}
 </document_info>
 
 <document_schema>
@@ -569,13 +588,13 @@ Remember to keep your interactions helpful, natural, and focused on making conte
 }
 
 // Helper function to analyze document completion status
-function analyzeDocumentCompletion(document: any, schemaInfo: any) {
+function analyzeDocumentCompletion(document: any, schemaInfo: SchemaInfo) {
 	// Count total required fields and how many are completed
 	let totalRequiredFields = 0;
 	let requiredFieldsComplete = 0;
 
 	if (schemaInfo.fields && Array.isArray(schemaInfo.fields)) {
-		schemaInfo.fields.forEach((field: any) => {
+		schemaInfo.fields.forEach((field) => {
 			if (field.required) {
 				totalRequiredFields++;
 
@@ -602,59 +621,6 @@ function analyzeDocumentCompletion(document: any, schemaInfo: any) {
 			? Math.round((requiredFieldsComplete / totalRequiredFields) * 100)
 			: 100
 	};
-}
-
-// Helper function to extract schema information without circular references
-function extractSchemaInfo(schemaType: any) {
-	// Basic schema info extraction
-	const info = {
-		name: schemaType.name,
-		title: schemaType.title || schemaType.name,
-		type: schemaType.type,
-		fields: []
-	};
-
-	// Extract fields if available
-	if (schemaType.fields && Array.isArray(schemaType.fields)) {
-		info.fields = schemaType.fields.map((field: any) => ({
-			name: field.name,
-			type: field.type,
-			title: field.title || field.name,
-			description: field.description || '',
-			required: getIsRequired(field)
-		}));
-	}
-
-	return info;
-}
-
-// Helper to format schema fields for the prompt
-function formatSchemaFieldsForPrompt(schemaInfo: any): string {
-	if (!schemaInfo.fields || schemaInfo.fields.length === 0) {
-		return '';
-	}
-
-	return `
-Document schema fields:
-${schemaInfo.fields.map((field: any) =>
-		`- ${field.name} (${field.type}): ${field.title}${field.required ? ' (required)' : ''}${field.description ? `\n  Description: ${field.description}` : ''}`
-	).join('\n')}
-`;
-}
-
-// Helper to determine if a field is required
-function getIsRequired(field: any): boolean {
-	if (!field.validation) return false;
-
-	// Check various validation patterns
-	if (Array.isArray(field.validation)) {
-		return field.validation.some((rule: any) =>
-			(rule._rules && rule._rules.some((r: any) => r.flag === 'required')) ||
-			(typeof rule === 'function' && rule.toString().includes('required()'))
-		);
-	}
-
-	return false;
 }
 
 // Helper function to get the next sequence number for messages
