@@ -36,21 +36,37 @@ const writeFieldTool = tool({
 		value: z.any().describe('The new value to set for the field'),
 
 	}),
-	execute: async ({ documentId, fieldPath, value }, { }) => {
+	execute: async ({ documentId, fieldPath, value }, { toolCallId }) => {
 		try {
+			// Get the current document to understand field structure
+			const document = await sanityClient.getDocument(documentId);
+			if (!document) {
+				const error = `Document not found: ${documentId}`;
+				await logToolCall(toolCallId, 'writeField', { documentId, fieldPath, value }, { success: false, message: error }, true);
+				return {
+					success: false,
+					message: error
+				};
+			}
+
 			// Create the patch object based on the field path
 			const patch: Record<string, any> = {};
 			const parts = fieldPath.split('.');
 
+			// Verify field type and format value accordingly before patching
+			// Handle arrays properly by checking structure
+			const currentField = getFieldValue(document, parts);
+			const formattedValue = formatValueForField(fieldPath, value, currentField);
+
 			// Handle simple field
 			if (parts.length === 1) {
-				patch[fieldPath] = value;
+				patch[fieldPath] = formattedValue;
 			}
 			// Handle nested fields with set patch
 			else {
 				patch[`${parts[0]}`] = {
 					_type: 'set',
-					value: buildNestedValue(parts.slice(1), value)
+					value: buildNestedValue(parts.slice(1), formattedValue)
 				};
 			}
 
@@ -60,14 +76,29 @@ const writeFieldTool = tool({
 				.set(patch)
 				.commit();
 
+			// Log successful tool call
+			await logToolCall(toolCallId, 'writeField', { documentId, fieldPath, value }, {
+				success: true,
+				message: `Successfully updated field ${fieldPath}`,
+				value: formattedValue
+			}, false);
+
 			return {
 				success: true,
 				message: `Successfully updated field ${fieldPath}`,
-				value
+				value: formattedValue,
+				fieldPath
 			};
 
 		} catch (error) {
 			console.error('Error writing field:', error);
+
+			// Log failed tool call
+			await logToolCall(toolCallId, 'writeField', { documentId, fieldPath, value }, {
+				success: false,
+				message: `Failed to update field ${fieldPath}: ${error instanceof Error ? error.message : String(error)}`
+			}, true);
+
 			return {
 				success: false,
 				message: `Failed to update field ${fieldPath}: ${error instanceof Error ? error.message : String(error)}`
@@ -75,6 +106,68 @@ const writeFieldTool = tool({
 		}
 	}
 });
+
+// Helper functions for field handling
+function getFieldValue(document: Record<string, any>, pathParts: string[]): any {
+	let current = document;
+	for (const part of pathParts) {
+		if (current === undefined || current === null) return undefined;
+		current = current[part];
+	}
+	return current;
+}
+
+function formatValueForField(fieldPath: string, value: any, currentField: any): any {
+	// If the current field is an array, make sure we're formatting correctly
+	if (Array.isArray(currentField)) {
+		// If value is already an array, ensure each item has the right structure
+		if (Array.isArray(value)) {
+			// For project schema's challenges field, ensure proper structure
+			if (fieldPath === 'challenges') {
+				return value.map((item, index) => {
+					// Ensure each challenge has a title, description and _key
+					if (typeof item === 'object') {
+						return {
+							...item,
+							_key: item._key || `${Date.now()}_${index}`
+						};
+					}
+					// If it's just a string, assume it's a description and create proper structure
+					else if (typeof item === 'string') {
+						return {
+							title: `Challenge ${index + 1}`,
+							description: item,
+							_key: `${Date.now()}_${index}`
+						};
+					}
+					return item;
+				});
+			}
+			// For general array items, ensure each has a _key
+			return value.map((item, index) => {
+				if (typeof item === 'object' && !item._key) {
+					return { ...item, _key: `${Date.now()}_${index}` };
+				}
+				return item;
+			});
+		}
+		// If the value is a string but the field is an array, convert to array
+		// This handles when the AI tries to write a string to an array field
+		else if (typeof value === 'string') {
+			// For challenges array specifically
+			if (fieldPath === 'challenges') {
+				return [{
+					title: 'Challenge',
+					description: value,
+					_key: `${Date.now()}_0`
+				}];
+			}
+			// For simple arrays (like tags or technologies)
+			return [value];
+		}
+	}
+	return value;
+}
 
 // Tool to suggest content for a field without applying it
 const suggestContentTool = tool({
@@ -86,46 +179,141 @@ const suggestContentTool = tool({
 		fieldType: z.string().describe('The type of the field (e.g., "string", "text", "array")'),
 		requirements: z.string().optional().describe('Specific requirements or guidance for the content'),
 	}),
-	execute: async ({ documentId, fieldPath, currentValue, fieldType, requirements }, { }) => {
+	execute: async ({ documentId, fieldPath, currentValue, fieldType, requirements }, { toolCallId }) => {
 		try {
-			// Note: This doesn't actually modify the document, just returns suggestions
-			// The AI model will generate the content suggestions, this just provides a structured
-			// way to present those suggestions to the user
+			// First, get the document to determine the actual field structure
+			const document = await sanityClient.getDocument(documentId);
+			if (!document) {
+				const error = `Document not found: ${documentId}`;
+				await logToolCall(toolCallId, 'suggestContent', { documentId, fieldPath, currentValue, fieldType, requirements }, { success: false, message: error }, true);
+				return {
+					success: false,
+					message: error
+				};
+			}
 
-			return {
+			// Determine the actual field type from the document structure
+			const parts = fieldPath.split('.');
+			const actualField = getFieldValue(document, parts);
+			const actualFieldType = detectFieldType(fieldPath, actualField);
+
+			// For the challenges field specifically, format suggestions as an array of challenge objects
+			// rather than as text
+			let formattedOptions: string[] = [];
+			if (fieldPath === 'challenges') {
+				// We'll let the AI generate content but ensure it's properly formatted for the UI
+				// The suggestedOptions will be processed in the ResponseContent
+				formattedOptions = [];
+			}
+
+			// Log tool call and return result
+			const result = {
 				success: true,
 				message: `Generated suggestions for ${fieldPath}`,
 				fieldPath,
 				currentValue: currentValue || null,
-				// The actual suggestions will be generated by the AI model
-				// This is just the structure to organize them in the response
+				actualFieldType, // Include the actual field type for better client-side handling
 				suggestions: {
 					original: currentValue || null,
-					fieldType,
+					fieldType: actualFieldType, // Use the detected field type
 					requirements: requirements || null,
 					// The AI will generate these values based on the context
-					suggestedOptions: [] // This will be filled by the AI model with actual suggestions
+					suggestedOptions: formattedOptions
 				}
 			};
+
+			await logToolCall(toolCallId, 'suggestContent', {
+				documentId, fieldPath, currentValue, fieldType, requirements
+			}, result, false);
+
+			return result;
 		} catch (error) {
 			console.error('Error generating suggestions:', error);
-			return {
+
+			const errorResult = {
 				success: false,
 				message: `Failed to generate suggestions for ${fieldPath}: ${error instanceof Error ? error.message : String(error)}`
 			};
+
+			await logToolCall(toolCallId, 'suggestContent', {
+				documentId, fieldPath, currentValue, fieldType, requirements
+			}, errorResult, true);
+
+			return errorResult;
 		}
 	}
 });
 
-// Define interface for incomplete field
-interface IncompleteField {
-	name: string;
-	type: string;
-	title: string;
-	required: boolean;
+// Helper function to detect the proper field type
+function detectFieldType(fieldPath: string, field: any): string {
+	// For known complex fields, hardcode the correct type
+	if (fieldPath === 'challenges') {
+		return 'challenges-array';
+	}
+
+	// Otherwise infer from the field value
+	if (field === undefined || field === null) {
+		// If field doesn't exist in document yet, use some known mappings
+		const knownFields: Record<string, string> = {
+			'title': 'string',
+			'description': 'text',
+			'problem': 'text',
+			'solution': 'text',
+			'challenges': 'challenges-array',
+			'approach': 'approach-array',
+			'technologies': 'technologies-array',
+			'tags': 'string-array',
+			'categories': 'string-array',
+			'learnings': 'string-array',
+			'achievements': 'string-array',
+		};
+
+		return knownFields[fieldPath] || 'text';
+	}
+
+	// Detect type from actual field value
+	if (Array.isArray(field)) {
+		if (field.length === 0) {
+			return 'array';
+		}
+
+		const firstItem = field[0];
+		if (typeof firstItem === 'string') {
+			return 'string-array';
+		}
+		if (typeof firstItem === 'object') {
+			if (fieldPath === 'challenges') {
+				return 'challenges-array';
+			}
+			if (fieldPath === 'approach') {
+				return 'approach-array';
+			}
+			if (fieldPath === 'technologies') {
+				return 'technologies-array';
+			}
+			return 'object-array';
+		}
+		return 'array';
+	}
+
+	if (typeof field === 'string') {
+		return field.length > 100 ? 'text' : 'string';
+	}
+
+	if (typeof field === 'number') {
+		return 'number';
+	}
+
+	if (typeof field === 'boolean') {
+		return 'boolean';
+	}
+
+	if (typeof field === 'object') {
+		return 'object';
+	}
+
+	return 'string';
 }
-
-
 
 // Tool to read a field from a referenced document
 const readSubFieldTool = tool({
@@ -136,15 +324,19 @@ const readSubFieldTool = tool({
 		referencedFieldPath: z.string().describe('The path to the field in the referenced document you want to read'),
 		referenceIndex: z.number().optional().describe('For array references, the index of the reference to use'),
 	}),
-	execute: async ({ documentId, referenceFieldPath, referencedFieldPath, referenceIndex }, { }) => {
+	execute: async ({ documentId, referenceFieldPath, referencedFieldPath, referenceIndex }, { toolCallId }) => {
 		try {
 			// First get the main document
 			const document = await sanityClient.getDocument(documentId);
 			if (!document) {
-				return {
+				const errorResult = {
 					success: false,
 					message: `Document not found: ${documentId}`
 				};
+				await logToolCall(toolCallId, 'readSubField', {
+					documentId, referenceFieldPath, referencedFieldPath, referenceIndex
+				}, errorResult, true);
+				return errorResult;
 			}
 
 			// Get the reference value
@@ -207,7 +399,7 @@ const readSubFieldTool = tool({
 				fieldValue = fieldValue[part];
 			}
 
-			return {
+			const result = {
 				success: true,
 				message: `Successfully read referenced field data`,
 				referencedDocumentId: refId,
@@ -215,12 +407,25 @@ const readSubFieldTool = tool({
 				referencedFieldPath,
 				value: fieldValue,
 			};
+
+			await logToolCall(toolCallId, 'readSubField', {
+				documentId, referenceFieldPath, referencedFieldPath, referenceIndex
+			}, result, false);
+
+			return result;
 		} catch (error) {
 			console.error('Error reading referenced field:', error);
-			return {
+
+			const errorResult = {
 				success: false,
 				message: `Failed to read referenced field: ${error instanceof Error ? error.message : String(error)}`
 			};
+
+			await logToolCall(toolCallId, 'readSubField', {
+				documentId, referenceFieldPath, referencedFieldPath, referenceIndex
+			}, errorResult, true);
+
+			return errorResult;
 		}
 	}
 });
@@ -231,8 +436,6 @@ const availableTools = {
 	suggestContent: suggestContentTool,
 	readSubField: readSubFieldTool
 };
-
-
 
 // Request interface that matches what we receive from the frontend
 interface ContentCopilotRequest {
@@ -749,5 +952,68 @@ async function updateConversationAnalytics(supabase: any, conversationId: string
 		}
 	} catch (error) {
 		console.error('Failed to update analytics:', error);
+	}
+}
+
+// Function to log tool calls to the database
+async function logToolCall(
+	toolCallId: string,
+	toolName: string,
+	args: Record<string, any>,
+	result: Record<string, any>,
+	isError: boolean
+): Promise<void> {
+	try {
+		const supabase = await createClient();
+
+		// Find the related message
+		const { data: messages, error: messageError } = await supabase
+			.from('messages')
+			.select('id, conversation_id')
+			.order('created_at', { ascending: false })
+			.limit(1);
+
+		if (messageError) {
+			console.error('Error finding message for tool call:', messageError);
+			return;
+		}
+
+		// If message found, log the tool call
+		if (messages && messages.length > 0) {
+			const { error } = await supabase
+				.from('tool_calls')
+				.insert({
+					message_id: messages[0].id,
+					tool_call_id: toolCallId,
+					tool_name: toolName,
+					arguments: args,
+					result: result,
+					is_error: isError
+				});
+
+			if (error) {
+				console.error('Error logging tool call:', error);
+			}
+
+			// Get current tool call count
+			const { data: analytics } = await supabase
+				.from('conversation_analytics')
+				.select('tool_call_count')
+				.eq('conversation_id', messages[0].conversation_id)
+				.single();
+
+			// Update tool call count in analytics
+			await supabase
+				.from('conversation_analytics')
+				.upsert({
+					conversation_id: messages[0].conversation_id,
+					tool_call_count: (analytics?.tool_call_count || 0) + 1,
+					updated_at: new Date().toISOString()
+				}, {
+					onConflict: 'conversation_id'
+				});
+		}
+	} catch (error) {
+		console.error('Failed to log tool call:', error);
 	}
 }
