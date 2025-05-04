@@ -1,9 +1,9 @@
 "use client";
 
+import MatrixButton from "@/components/custom/deprecated/matrixButton";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, CheckCircle2, Code, Coffee, Linkedin, Mail, MessageCircle, Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
-import MatrixButton from "./matrixButton";
 
 interface ContactCTAProps {
 	heading: string;

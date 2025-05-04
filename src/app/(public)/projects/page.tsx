@@ -1,4 +1,4 @@
-import ProjectGrid from '@/components/custom/projectGrid';
+import ProjectGrid from '@/components/custom/projectShowcase/projectGrid';
 import { getAllProjects } from '@/sanity/lib/client';
 import { Loader2 } from 'lucide-react';
 import { Suspense } from 'react';

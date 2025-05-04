@@ -1,11 +1,11 @@
 "use client";
-import { ContactCTA } from '@/components/custom/contactCTA';
-import { DeveloperJourney } from '@/components/custom/developerJourney';
-import { Hero as HeroRefactored } from '@/components/custom/hero-refactored';
+import { ContactCTA } from '@/components/custom/homePage/contactCTA';
+import { DeveloperJourney } from '@/components/custom/homePage/developerJourney';
+import { Hero as HeroRefactored } from '@/components/custom/homePage/hero-refactored';
+import { Testimonials } from '@/components/custom/homePage/testimonials';
+import { ThingsILove } from '@/components/custom/homePage/thingsILove';
+import WelcomeIntro from '@/components/custom/homePage/welcomeIntro';
 import ProjectSection from '@/components/custom/projectShowcase/ProjectSection';
-import { Testimonials } from '@/components/custom/testimonials';
-import { ThingsILove } from '@/components/custom/thingsILove';
-import WelcomeIntro from '@/components/custom/welcomeIntro';
 import { getFeaturedProjects } from '@/sanity/lib/client';
 import { Project } from '@/sanity/sanity.types';
 import Link from 'next/link';

@@ -1,3 +1,4 @@
+import TerminalContainer from "@/components/custom/homePage/terminalContainer";
 import { Card } from "@/components/ui/card";
 import {
 	Brain,
@@ -8,7 +9,6 @@ import {
 	Scale,
 	Video
 } from "lucide-react";
-import TerminalContainer from "./terminalContainer";
 
 interface Domain {
 	title: string;

@@ -2,6 +2,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { urlFor } from '@/sanity/lib/image';
 import { Project } from '@/sanity/sanity.types';
 import { ExternalLink, Github } from 'lucide-react';
 import Image from 'next/image';
@@ -12,12 +13,29 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-	// Find thumbnail image for the project
-	const thumbnailMedia = project.media?.find(m => m.isThumbnail) || project.media?.[0];
-	const thumbnailUrl = thumbnailMedia?.url || '/placeholder-project.jpg';
-	const isVideo = thumbnailMedia?.type === 'video';
-	// Get poster URL (if available)
-	const posterUrl = thumbnailMedia?.poster as string | undefined;
+	// Handle thumbnail image using proper Sanity asset references
+	const getThumbnailUrl = () => {
+		console.log(`Getting thumbnail URL for project: ${project.title}`);
+		// Default fallback
+		let thumbnailUrl = '/placeholder-project.png';
+
+		// 1. Check for dedicated thumbnail
+
+		if (project.thumbnail && project.thumbnail.asset) {
+			thumbnailUrl = urlFor(project.thumbnail).url();
+			console.log('Found dedicated thumbnail:', thumbnailUrl);
+		}
+		return thumbnailUrl;
+
+
+	};
+
+	// Get thumbnail URL once
+	const thumbnailUrl = getThumbnailUrl();
+	console.log('thumbnailUrl', thumbnailUrl);
+
+	// Determine if the project has video content
+	const hasVideoShowcase = project.media?.some(m => m.type === 'video');
 
 	// Get project status
 	const status = project.timeline?.status || 'active';
@@ -44,30 +62,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 					<div className="w-4"></div>
 				</div>
 
-				{/* Project thumbnail image or video */}
+				{/* Project thumbnail image */}
 				<div className="aspect-video relative overflow-hidden bg-black/60">
-					{isVideo ? (
-						// Video element for video thumbnails
-						<video
-							src={thumbnailUrl}
-							poster={posterUrl}
-							className="absolute inset-0 w-full h-full object-cover"
-							autoPlay={false}
-							loop
-							muted
-							playsInline
-							controls={false}
-						/>
-					) : thumbnailUrl && (
-						// Image component for image thumbnails
-						<Image
-							src={thumbnailUrl}
-							alt={project.title || 'Project thumbnail'}
-							fill
-							className="object-cover transition-transform group-hover:scale-105 opacity-80 group-hover:opacity-100"
-							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-						/>
-					)}
+					<Image
+						src={thumbnailUrl}
+						alt={project.thumbnail?.alt || project.title || 'Project thumbnail'}
+						fill
+						className="object-cover transition-transform group-hover:scale-105 opacity-80 group-hover:opacity-100"
+						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+					/>
 
 					{/* Terminal scan lines overlay */}
 					<div className="absolute inset-0 terminal-scan-lines pointer-events-none"></div>
@@ -82,8 +85,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 						</Badge>
 					</div>
 
-					{/* Video indicator if it's a video */}
-					{isVideo && (
+					{/* Video indicator if the project has videos in its media gallery */}
+					{hasVideoShowcase && (
 						<div className="absolute top-3 right-3 z-10">
 							<Badge variant="outline" className="bg-black/80 border-primary/40 text-primary">
 								VIDEO

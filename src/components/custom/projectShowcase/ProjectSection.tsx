@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from '@/components/ui/button';
+import { urlFor } from '@/sanity/lib/image';
 import { Project } from '@/sanity/sanity.types';
 import { Code, FileBadge, Terminal, Trophy } from 'lucide-react';
 import React, { useEffect, useId, useRef, useState } from 'react';
@@ -50,6 +51,26 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 			}
 		};
 	}, []);
+
+	// Function to get media items for carousel
+	const getMediaItems = () => {
+		// If no media items exist, return an empty array
+		if (!project.media || project.media.length === 0) {
+			return [];
+		}
+
+		return project.media.map(m => ({
+			type: m.type || 'image',
+			url: m.type === 'image' && m.image?.asset ? urlFor(m.image).url() :
+				m.type === 'video' && m.videoSource === 'upload' && m.videoFile?.asset ?
+					`https://cdn.sanity.io/files/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/${process.env.NEXT_PUBLIC_SANITY_DATASET}/${m.videoFile.asset._ref.replace('file-', '').replace('-mp4', '.mp4')}` :
+					m.url || '',
+			alt: m.alt || m.image?.alt || '',
+			poster: m.type === 'video' && m.poster?.asset ? urlFor(m.poster).url() : undefined,
+			featured: m.featured || false,
+			caption: m.caption
+		}));
+	};
 
 	return (
 		<section
@@ -135,12 +156,7 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ project }) => {
 											transform: isInView ? 'translateX(0)' : 'translateX(-20px)'
 										}}>
 										<ProjectMediaCarousel
-											media={project.media?.map(m => ({
-												type: m.type || 'image',
-												url: m.url || '',
-												alt: m.alt || '',
-												poster: typeof m.poster === 'string' ? m.poster : undefined
-											})) || []}
+											media={getMediaItems()}
 											primaryColor={project.primaryColor || '#00FF41'}
 										/>
 									</div>

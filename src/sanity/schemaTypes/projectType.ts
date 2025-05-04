@@ -347,6 +347,24 @@ export const projectType = defineType({
 
 		// Media
 		defineField({
+			name: 'thumbnail',
+			title: 'Project Thumbnail',
+			description: 'The main image used for project cards and listings (separate from media gallery)',
+			type: 'image',
+			options: {
+				hotspot: true,
+			},
+			fields: [
+				{
+					name: 'alt',
+					type: 'string',
+					title: 'Alternative Text',
+					validation: Rule => Rule.required(),
+				},
+			],
+			validation: Rule => Rule.required(),
+		}),
+		defineField({
 			name: 'media',
 			title: 'Project Media',
 			description: 'Images, videos, or demos showcasing the project',
@@ -437,15 +455,21 @@ export const projectType = defineType({
 							name: 'poster',
 							title: 'Poster Image',
 							type: 'image',
-							description: 'Thumbnail for videos',
+							description: 'Thumbnail for videos (shown before video playback begins)',
 							hidden: ({ parent }) => parent?.type !== 'video',
 						},
 						{
-							name: 'isThumbnail',
-							title: 'Use as Thumbnail',
-							description: 'Use this as the main thumbnail for the project',
+							name: 'featured',
+							title: 'Featured Media',
+							description: 'Feature this item prominently in the media gallery',
 							type: 'boolean',
 							initialValue: false,
+						},
+						{
+							name: 'caption',
+							title: 'Caption',
+							description: 'Optional caption describing this media item',
+							type: 'string',
 						},
 					],
 				},
@@ -503,7 +527,7 @@ export const projectType = defineType({
 			title: 'title',
 			company: 'company',
 			status: 'timeline.status',
-			media: 'media.0.image',
+			media: 'thumbnail',
 		},
 		prepare({ title, company, status, media }) {
 			const subtitleParts = [];

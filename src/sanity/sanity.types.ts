@@ -265,6 +265,19 @@ export type Project = {
 	categories?: Array<string>;
 	tags?: Array<string>;
 	complexity?: "simple" | "medium" | "complex" | "enterprise";
+	thumbnail?: {
+		asset?: {
+			_ref: string;
+			_type: "reference";
+			_weak?: boolean;
+			[internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+		};
+		media?: unknown;
+		hotspot?: SanityImageHotspot;
+		crop?: SanityImageCrop;
+		alt?: string;
+		_type: "image";
+	};
 	media?: Array<{
 		type?: "image" | "video" | "demo" | "3d";
 		videoSource?: "upload" | "url";
@@ -305,7 +318,8 @@ export type Project = {
 			crop?: SanityImageCrop;
 			_type: "image";
 		};
-		isThumbnail?: boolean;
+		featured?: boolean;
+		caption?: string;
 		_key: string;
 	}>;
 	github?: string;
