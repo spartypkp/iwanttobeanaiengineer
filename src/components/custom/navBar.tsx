@@ -18,7 +18,7 @@ const NavBar = () => {
 					<NavigationMenuItem>
 						<Link href="/projects" legacyBehavior passHref>
 							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
-								Projects
+								All Projects
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
@@ -32,7 +32,7 @@ const NavBar = () => {
 					<NavigationMenuItem>
 						<Link href="/dave" legacyBehavior passHref>
 							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
-								Talk to My AI
+								My AI Assistant
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>

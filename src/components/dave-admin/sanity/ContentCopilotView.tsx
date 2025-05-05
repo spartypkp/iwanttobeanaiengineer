@@ -37,10 +37,6 @@ interface CustomSanityComponentProps {
 	schemaType: ObjectSchemaType;
 }
 
-
-
-
-
 // Extract the input form to prevent unnecessary re-renders
 const ChatInputForm = ({
 	input,
@@ -95,42 +91,110 @@ const ChatInputForm = ({
 };
 
 export const ContentCopilotView = (props: CustomSanityComponentProps) => {
-	// Move all hooks to the top level
-	const [isLoading, setIsLoading] = useState(false);
-	const hasInitialized = useRef(false);
-
-	const [conversationId, setConversationId] = useState<string | null>(null);
-	const [error, setError] = useState<string | null>(null);
-	const [isTyping, setIsTyping] = useState(false);
-
-	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-	// Extract these values outside of early returns
-	const documentId: string = props.documentId;
-	const schemaType: string = props.schemaType?.name;
-	const documentData = props.document.displayed;
-
-	// Initialize with empty values if not available
+	// --- STATE MANAGEMENT ---
+	// Document-related state
 	const [validDocumentId, setValidDocumentId] = useState<string | null>(null);
 	const [validSchemaType, setValidSchemaType] = useState<string | null>(null);
 	const [validDocumentData, setValidDocumentData] = useState<Record<string, any> | null>(null);
 
-	// Use useMemo without conditions
+	// Conversation state
+	const [conversationId, setConversationId] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [loadingPhase, setLoadingPhase] = useState<'initializing' | 'loading-conversation' | 'ready'>('initializing');
+	const [error, setError] = useState<string | null>(null);
+	const [isTyping, setIsTyping] = useState(false);
+
+	// Refs
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+	// --- DATA EXTRACTION AND VALIDATION ---
+	// Extract values from props immediately
+	const documentId = props.documentId;
+	const schemaType = props.schemaType?.name;
+	const documentData = props.document.displayed;
+
+	// Memoize the schema serialization to prevent expensive recalculations
 	const serializableSchema = useMemo(() => {
 		if (!props.schemaType) return null;
 		return createSerializableSchema(props.schemaType);
 	}, [props.schemaType]);
 
-	// Set valid values in an effect
+	// Validate and set document properties
 	useEffect(() => {
-		setValidDocumentId(documentId || null);
-		setValidSchemaType(schemaType || null);
-		setValidDocumentData(documentData || null);
+		if (documentId && schemaType && documentData) {
+			setValidDocumentId(documentId);
+			setValidSchemaType(schemaType);
+			setValidDocumentData(documentData);
+			setLoadingPhase('loading-conversation');
+		} else {
+			setError('Missing required document properties');
+		}
 	}, [documentId, schemaType, documentData]);
 
-	// Use the AI SDK's useChat hook without conditions
-	const { messages, input, setInput, setMessages, handleInputChange, handleSubmit, addToolResult } = useChat({
+	// --- CONVERSATION LOADING ---
+	// Load conversation data when document is validated
+	useEffect(() => {
+		// Only proceed if we're in the loading-conversation phase
+		if (loadingPhase !== 'loading-conversation' || !validDocumentId) return;
+
+		const loadConversation = async () => {
+			try {
+				console.log("Loading conversation for document:", validDocumentId);
+
+				const response = await fetch('/api/content-copilot/get-conversation', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						documentId: validDocumentId,
+					}),
+				});
+
+				const data = await response.json();
+
+				if (!response.ok) {
+					console.error("Error response from API:", data);
+					throw new Error(`Failed to load conversation: ${data.error || response.status}`);
+				}
+
+				console.log("Conversation loaded:", data);
+
+				// Set conversation ID if available
+				if (data.conversation) {
+					setConversationId(data.conversation.id);
+
+					// Set messages if available
+					if (data.messages && data.messages.length > 0) {
+						chatActions.setMessages(data.messages);
+					}
+				}
+
+				// Mark loading as complete
+				setLoadingPhase('ready');
+			} catch (error) {
+				console.error('Failed to load conversation:', error);
+				setError(`Error: ${error instanceof Error ? error.message : String(error)}`);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		loadConversation();
+	}, [validDocumentId, loadingPhase]);
+
+	// --- CHAT INTEGRATION ---
+	// Initialize chat hooks with available data
+	const {
+		messages,
+		input,
+		handleInputChange,
+		handleSubmit,
+		setMessages,
+		setInput,
+		addToolResult
+	} = useChat({
 		api: '/api/content-copilot',
 		body: {
 			documentId: validDocumentId || '',
@@ -139,8 +203,8 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 			serializableSchema,
 			documentData: validDocumentData || {}
 		},
-		id: conversationId || undefined, // Use existing conversation ID if available
-		experimental_throttle: 50, // Add throttling to reduce re-renders
+		id: conversationId || undefined,
+		experimental_throttle: 50,
 		onResponse: (response) => {
 			// Extract conversation ID from headers if available
 			const newConversationId = response.headers.get('X-Conversation-Id');
@@ -162,6 +226,13 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		}
 	});
 
+	// Provide chat actions in a single object to avoid recreating functions
+	const chatActions = useMemo(() => ({
+		setMessages,
+		setInput
+	}), [setMessages, setInput]);
+
+	// --- UI EFFECTS ---
 	// Auto-scroll to the bottom when new messages arrive
 	useEffect(() => {
 		if (messagesEndRef.current) {
@@ -176,68 +247,8 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		}
 	}, []);
 
-	// Load conversation when document changes
-	useEffect(() => {
-		// If no valid documentId, don't load conversation
-		if (!validDocumentId) return;
-
-		const loadConversation = async () => {
-			setIsLoading(true);
-			setError(null);
-
-			try {
-				console.log("Loading conversation for document:", validDocumentId);
-
-				const response = await fetch('/api/content-copilot/get-conversation', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						documentId: validDocumentId,
-					}),
-				});
-
-				const data = await response.json();
-
-				if (!response.ok) {
-					console.error("Error response from API:", data);
-					setError(`Failed to load conversation: ${data.error || response.status}`);
-					return;
-				}
-
-				//console.log("Conversation loaded:", data);
-				if (data.conversation) {
-					setConversationId(data.conversation.id);
-					// If there are previous messages, set them in the chat
-					//console.log("Messages:", data.messages);
-					if (data.messages && data.messages.length > 0) {
-						// Reset and load the conversation history
-						setMessages(data.messages);
-					} else {
-						// No messages in existing conversation
-						setMessages([]);
-					}
-				} else {
-					// No existing conversation, which is fine for new documents
-					setConversationId(null);
-					setMessages([]);
-				}
-
-				// Mark as initialized
-				hasInitialized.current = true;
-			} catch (error) {
-				console.error('Failed to load conversation:', error);
-				setError(`Error: ${error instanceof Error ? error.message : String(error)}`);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		loadConversation();
-	}, [validDocumentId, setMessages]);
-
-	// Auto-grow textarea
+	// --- HELPER FUNCTIONS ---
+	// Auto-grow textarea function
 	const handleTextAreaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		handleInputChange(e);
 		adjustTextAreaHeight(e.target);
@@ -250,19 +261,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		// Set height based on scrollHeight (plus small buffer)
 		target.style.height = `${Math.min(target.scrollHeight + 2, 200)}px`;
 	};
-
-	// Now render conditionally after all hooks have been called
-	if (!documentId) {
-		return (<div>Fetching documentId</div>);
-	}
-
-	if (!schemaType) {
-		return (<div>Fetching schemaType!</div>);
-	}
-
-	if (!documentData) {
-		return (<div>No actual document data!</div>);
-	}
 
 	// Handle form submission with improved UX
 	const handleFormSubmit = (e: React.FormEvent) => {
@@ -283,10 +281,13 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		}, 0);
 	};
 
+	// Helper function to get document title
 	const getDocumentTitle = () => {
-		return documentData.title || documentData.name || `Untitled ${schemaType}`;
+		return documentData?.title || documentData?.name || `Untitled ${schemaType}`;
 	};
 
+	// --- RENDERING ---
+	// Handle error state
 	if (error) {
 		return (
 			<Card className="w-full p-4 bg-red-50 border border-red-100">
@@ -299,120 +300,109 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		);
 	}
 
-	// Try-catch only around rendering
-	try {
-		return (
-			<div className="flex flex-col w-full h-full max-h-screen border rounded-md ">
-				{/* Header */}
-				<div className="border-b p-3 flex items-center justify-between shrink-0">
-					<div className="flex items-center gap-2">
-
-						<div className="space-y-1">
-							<h3 className="text-sm font-semibold">Content Copilot Mode</h3>
-							<p className="text-xs text-green-700">Working with: {getDocumentTitle()}</p>
-						</div>
+	// Main component render
+	return (
+		<div className="flex flex-col w-full h-full max-h-screen border rounded-md ">
+			{/* Header */}
+			<div className="border-b p-3 flex items-center justify-between shrink-0">
+				<div className="flex items-center gap-2">
+					<div className="space-y-1">
+						<h3 className="text-sm font-semibold">Content Copilot Mode</h3>
+						<p className="text-xs text-green-700">Working with: {getDocumentTitle()}</p>
 					</div>
-					{conversationId && (
-						<Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Conversation Active</Badge>
-					)}
 				</div>
+				{conversationId && (
+					<Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Conversation Active</Badge>
+				)}
+			</div>
 
-				{/* Message area */}
-				<div className="flex-1 p-4 overflow-y-auto overflow-x-hidden">
-					{isLoading ? (
-						<div className="h-full flex flex-col items-center justify-center gap-3">
-							<Loader2 className="h-8 w-8 animate-spin text-primary" />
-							<p className="text-sm text-muted-foreground">Loading conversation...</p>
-						</div>
-					) : messages.length === 0 ? (
-						<div className="h-full flex flex-col items-center justify-center text-center max-w-[500px] mx-auto gap-3">
-							{!hasInitialized.current ? (
-								<>
-									<Loader2 className="h-8 w-8 animate-spin text-primary" />
-									<p className="text-sm text-muted-foreground">Starting conversation...</p>
-								</>
-							) : (
-								<>
-									<Avatar className="h-12 w-12">
-										<AvatarFallback className="text-lg">D</AvatarFallback>
-									</Avatar>
-									<h3 className="text-lg font-semibold">Ready to help with your content</h3>
-									<p className="text-sm text-muted-foreground max-w-[400px]">
-										Dave will help you create and edit content through natural conversation.
-										Say hello to get started!
-									</p>
-								</>
-							)}
-						</div>
-					) : (
-						<>
-							{messages.map((message) => (
+			{/* Message area */}
+			<div className="flex-1 p-4 overflow-y-auto overflow-x-hidden">
+				{isLoading ? (
+					<div className="h-full flex flex-col items-center justify-center gap-3">
+						<Loader2 className="h-8 w-8 animate-spin text-primary" />
+						<p className="text-sm text-muted-foreground">
+							{loadingPhase === 'initializing'
+								? 'Initializing content...'
+								: 'Loading conversation...'}
+						</p>
+					</div>
+				) : messages.length === 0 ? (
+					<div className="h-full flex flex-col items-center justify-center text-center max-w-[500px] mx-auto gap-3">
+						<Avatar className="h-12 w-12">
+							<AvatarFallback className="text-lg">D</AvatarFallback>
+						</Avatar>
+						<h3 className="text-lg font-semibold">Ready to help with your content</h3>
+						<p className="text-sm text-muted-foreground max-w-[400px]">
+							Dave will help you create and edit content through natural conversation.
+							Say hello to get started!
+						</p>
+					</div>
+				) : (
+					<>
+						{messages.map((message) => (
+							<div
+								key={message.id}
+								className={cn(
+									"flex gap-2 mb-4 max-w-full",
+									message.role === 'user' ? "flex-row-reverse" : "flex-row"
+								)}
+							>
 								<div
-									key={message.id}
 									className={cn(
-										"flex gap-2 mb-4 max-w-full",
-										message.role === 'user' ? "flex-row-reverse" : "flex-row"
+										"px-4 py-3 rounded-xl max-w-[85%] break-words",
+										message.role === 'user'
+											? "bg-emerald-100 text-emerald-900 rounded-br-sm ml-auto"
+											: "bg-gray-100 text-gray-900 rounded-bl-sm mr-auto"
 									)}
 								>
-									<div
-										className={cn(
-											"px-4 py-3 rounded-xl max-w-[85%] break-words",
-											message.role === 'user'
-												? "bg-emerald-100 text-emerald-900 rounded-br-sm ml-auto"
-												: "bg-gray-100 text-gray-900 rounded-bl-sm mr-auto"
-										)}
-									>
-										{message.role === 'user' ? (
-											<p>{message.content}</p>
-										) : (
-											<div className="w-full">
-												{message.parts?.map((part, index) => (
-													<div key={index} className="w-full mb-2 last:mb-0">
-														<MessagePart part={part} addToolResult={addToolResult} />
-													</div>
-												))}
-											</div>
-										)}
-									</div>
+									{message.role === 'user' ? (
+										<p>{message.content}</p>
+									) : (
+										<div className="w-full">
+											{message.parts?.map((part, index) => (
+												<div key={index} className="w-full mb-2 last:mb-0">
+													<MessagePart part={part} addToolResult={addToolResult} />
+												</div>
+											))}
+										</div>
+									)}
 								</div>
-							))}
+							</div>
+						))}
 
-							{isTyping && (
-								<div className="flex gap-2 mb-4">
-									<div className="px-4 py-3 rounded-xl rounded-bl-sm bg-gray-100 text-gray-900 max-w-[85%]">
-										<div className="flex items-center gap-2">
-											<p className="text-sm text-gray-600">Content Copilot is thinking</p>
-											<div className="flex items-center h-4">
-												<span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0ms]"></span>
-												<span className="mx-0.75 h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:150ms]"></span>
-												<span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:300ms]"></span>
-											</div>
+						{isTyping && (
+							<div className="flex gap-2 mb-4">
+								<div className="px-4 py-3 rounded-xl rounded-bl-sm bg-gray-100 text-gray-900 max-w-[85%]">
+									<div className="flex items-center gap-2">
+										<p className="text-sm text-gray-600">Content Copilot is thinking</p>
+										<div className="flex items-center h-4">
+											<span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0ms]"></span>
+											<span className="mx-0.75 h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:150ms]"></span>
+											<span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:300ms]"></span>
 										</div>
 									</div>
 								</div>
-							)}
+							</div>
+						)}
 
-							<div ref={messagesEndRef} />
-						</>
-					)}
-				</div>
-
-				{/* Input area */}
-				<div className="border-t p-3 shrink-0 bg-white">
-					<ChatInputForm
-						input={input}
-						handleInputChange={handleTextAreaInput}
-						handleFormSubmit={handleFormSubmit}
-						isLoading={isLoading}
-						textAreaRef={textAreaRef}
-					/>
-				</div>
+						<div ref={messagesEndRef} />
+					</>
+				)}
 			</div>
-		);
-	} catch (error) {
-		console.error("Unexpected error in ContentCopilotView:", error);
-		return <div>{`Unexpected error: ${error instanceof Error ? error.message : String(error)}`}</div>;
-	}
+
+			{/* Input area */}
+			<div className="border-t p-3 shrink-0 bg-white">
+				<ChatInputForm
+					input={input}
+					handleInputChange={handleTextAreaInput}
+					handleFormSubmit={handleFormSubmit}
+					isLoading={isLoading}
+					textAreaRef={textAreaRef}
+				/>
+			</div>
+		</div>
+	);
 };
 
 // Updated MessagePart component

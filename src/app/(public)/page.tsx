@@ -79,7 +79,17 @@ export default function HomePage() {
 		const loadProjects = async () => {
 			try {
 				const projects = await getFeaturedProjects();
-				setFeaturedProjects(projects);
+
+
+				// Sort projects by _id field
+				const sortedProjects = [...projects].sort((a, b) => {
+					//console.log(`Comparing: ${a.id} vs ${b.id}`);
+					return a.id!.localeCompare(b.id!);
+				});
+
+
+
+				setFeaturedProjects(sortedProjects);
 			} catch (error) {
 				console.error("Error loading projects:", error);
 			} finally {
