@@ -15,7 +15,7 @@ interface ProjectCardProps {
 export default function ProjectCard({ project }: ProjectCardProps) {
 	// Handle thumbnail image using proper Sanity asset references
 	const getThumbnailUrl = () => {
-		console.log(`Getting thumbnail URL for project: ${project.title}`);
+		//console.log(`Getting thumbnail URL for project: ${project.title}`);
 		// Default fallback
 		let thumbnailUrl = '/placeholder-project.png';
 
@@ -23,7 +23,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
 		if (project.thumbnail && project.thumbnail.asset) {
 			thumbnailUrl = urlFor(project.thumbnail).url();
-			console.log('Found dedicated thumbnail:', thumbnailUrl);
+			//console.log('Found dedicated thumbnail:', thumbnailUrl);
 		}
 		return thumbnailUrl;
 

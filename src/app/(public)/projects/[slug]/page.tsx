@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { getAllProjects, getProjectBySlug } from '@/sanity/lib/client';
+import { getAllProjects, getProjectBySlug, urlForImage } from '@/sanity/lib/client';
 import { ArrowLeft, ExternalLink, Film, Github, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -39,21 +39,30 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 		notFound();
 	}
 
-	// Find main media - first check for thumbnail, then take the first media item
-	const mainMedia = project.media?.find(m => m.isThumbnail) ||
-		project.media?.[0] ||
-		null;
+	// Find main media - prefer a featured video, then any featured media, then thumbnail
+	const featuredVideo = project.media?.find(m => m.featured && m.type === 'video');
+	const featuredMedia = !featuredVideo ? project.media?.find(m => m.featured) : null;
+
+	// Use featured video or media if available, otherwise use thumbnail
+	const mainMedia = featuredVideo || featuredMedia || null;
+
+	// Get thumbnail URL from Sanity
+	const thumbnailUrl = project.thumbnail ? urlForImage(project.thumbnail).url() : null;
 
 	// Check if main media is a video
 	const isMainVideo = mainMedia?.type === 'video';
 
-	// Get poster URL for video if available
-	const posterUrl = isMainVideo ? (mainMedia?.poster as string | undefined) : undefined;
+	// Determine main media URL - URLs should already be processed by the GROQ query
+	const mainMediaUrl = mainMedia?.url || thumbnailUrl;
+
+	// Get poster URL - should be a string from GROQ or fall back to thumbnail
+	// In the client.ts GROQ query, poster is already transformed to a URL string
+	const posterUrl = (isMainVideo && typeof mainMedia?.poster === 'string')
+		? mainMedia.poster
+		: thumbnailUrl;
 
 	// Other media items (excluding the main one)
-	const otherMedia = mainMedia
-		? project.media?.filter(m => m !== mainMedia)
-		: project.media?.slice(1);
+	const otherMedia = project.media?.filter(m => m !== mainMedia) || [];
 
 	// Get timeline information
 	const startDate = project.timeline?.startDate
@@ -166,13 +175,13 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 				{/* Left column - main content */}
 				<div className="lg:col-span-2 space-y-12">
 					{/* Main media (image or video) */}
-					{mainMedia?.url && (
+					{mainMediaUrl && (
 						<div className="rounded-md overflow-hidden border border-primary/20 shadow-lg">
 							{isMainVideo ? (
 								<div className="relative aspect-video">
 									<video
-										src={mainMedia.url}
-										poster={posterUrl}
+										src={mainMediaUrl}
+										poster={posterUrl || undefined}
 										className="w-full h-full object-cover"
 										controls
 										playsInline
@@ -182,8 +191,8 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 								</div>
 							) : (
 								<Image
-									src={mainMedia.url}
-									alt={mainMedia.alt || project.title || 'Project image'}
+									src={mainMediaUrl}
+									alt={mainMedia?.alt || project.thumbnail?.alt || project.title || 'Project image'}
 									width={900}
 									height={500}
 									className="w-full object-cover"
@@ -289,7 +298,7 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 					)}
 
 					{/* Additional Media (Images & Videos) */}
-					{otherMedia && otherMedia.length > 0 && (
+					{otherMedia.length > 0 && (
 						<section>
 							<h2 className="text-2xl font-bold mb-4 flex items-center">
 								<span className="text-primary mr-2">&gt;</span>
@@ -298,14 +307,21 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								{otherMedia.map((media, index) => {
 									const isVideo = media.type === 'video';
-									const mediaPoster = isVideo ? (media.poster as string | undefined) : undefined;
+									const mediaUrl = media.url;
+
+									if (!mediaUrl) return null;
+
+									// Handle poster for video using type check
+									const mediaPoster = isVideo && typeof media.poster === 'string'
+										? media.poster
+										: undefined;
 
 									return (
-										<div key={index} className="rounded-md overflow-hidden border border-primary/20 relative group">
+										<div key={media._key || index} className="rounded-md overflow-hidden border border-primary/20 relative group">
 											{isVideo ? (
 												<div className="aspect-video relative">
 													<video
-														src={media.url || ''}
+														src={mediaUrl}
 														poster={mediaPoster}
 														className="w-full h-full object-cover"
 														controls
@@ -323,7 +339,7 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 											) : (
 												<>
 													<Image
-														src={media.url || ''}
+														src={mediaUrl}
 														alt={media.alt || `Project image ${index + 1}`}
 														width={500}
 														height={300}
@@ -336,6 +352,9 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 														</Badge>
 													</div>
 												</>
+											)}
+											{media.caption && (
+												<div className="p-2 text-sm text-muted-foreground">{media.caption}</div>
 											)}
 										</div>
 									);

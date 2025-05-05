@@ -106,37 +106,38 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-	// The current document being edited
+	// Extract these values outside of early returns
 	const documentId: string = props.documentId;
-	if (!documentId) {
-		return (<div>Fetching documentId</div>);
-	}
-	// Type name of the current document 
 	const schemaType: string = props.schemaType?.name;
-	if (!schemaType) {
-		return (<div>Fetching schemaType!</div>);
-	}
-
-	// Current actual data
 	const documentData = props.document.displayed;
-	if (!documentData) {
-		return (<div>No actual document data!</div>);
-	}
 
-	const serializableSchema = useMemo(() =>
-		createSerializableSchema(props.schemaType),
-		[props.schemaType]
-	);
+	// Initialize with empty values if not available
+	const [validDocumentId, setValidDocumentId] = useState<string | null>(null);
+	const [validSchemaType, setValidSchemaType] = useState<string | null>(null);
+	const [validDocumentData, setValidDocumentData] = useState<Record<string, any> | null>(null);
 
-	// Use the AI SDK's useChat hook with our specific setup
+	// Use useMemo without conditions
+	const serializableSchema = useMemo(() => {
+		if (!props.schemaType) return null;
+		return createSerializableSchema(props.schemaType);
+	}, [props.schemaType]);
+
+	// Set valid values in an effect
+	useEffect(() => {
+		setValidDocumentId(documentId || null);
+		setValidSchemaType(schemaType || null);
+		setValidDocumentData(documentData || null);
+	}, [documentId, schemaType, documentData]);
+
+	// Use the AI SDK's useChat hook without conditions
 	const { messages, input, setInput, setMessages, handleInputChange, handleSubmit, addToolResult } = useChat({
 		api: '/api/content-copilot',
 		body: {
-			documentId,
+			documentId: validDocumentId || '',
 			conversationId,
-			schemaType,
+			schemaType: validSchemaType || '',
 			serializableSchema,
-			documentData
+			documentData: validDocumentData || {}
 		},
 		id: conversationId || undefined, // Use existing conversation ID if available
 		experimental_throttle: 50, // Add throttling to reduce re-renders
@@ -177,15 +178,15 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 
 	// Load conversation when document changes
 	useEffect(() => {
-		// If no documentId, don't load conversation
-		if (!documentId) return;
+		// If no valid documentId, don't load conversation
+		if (!validDocumentId) return;
 
 		const loadConversation = async () => {
 			setIsLoading(true);
 			setError(null);
 
 			try {
-				console.log("Loading conversation for document:", documentId);
+				console.log("Loading conversation for document:", validDocumentId);
 
 				const response = await fetch('/api/content-copilot/get-conversation', {
 					method: 'POST',
@@ -193,7 +194,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						documentId,
+						documentId: validDocumentId,
 					}),
 				});
 
@@ -234,7 +235,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		};
 
 		loadConversation();
-	}, [documentId, setMessages]);
+	}, [validDocumentId, setMessages]);
 
 	// Auto-grow textarea
 	const handleTextAreaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -249,6 +250,19 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		// Set height based on scrollHeight (plus small buffer)
 		target.style.height = `${Math.min(target.scrollHeight + 2, 200)}px`;
 	};
+
+	// Now render conditionally after all hooks have been called
+	if (!documentId) {
+		return (<div>Fetching documentId</div>);
+	}
+
+	if (!schemaType) {
+		return (<div>Fetching schemaType!</div>);
+	}
+
+	if (!documentData) {
+		return (<div>No actual document data!</div>);
+	}
 
 	// Handle form submission with improved UX
 	const handleFormSubmit = (e: React.FormEvent) => {

@@ -34,8 +34,7 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 			(entries) => {
 				if (entries[0].isIntersecting) {
 					setIsInView(true);
-				} else {
-					setIsInView(false);
+					observer.unobserve(entries[0].target);
 				}
 			},
 			{
@@ -44,13 +43,16 @@ const ProjectMediaCarousel: React.FC<ProjectMediaCarouselProps> = ({
 			}
 		);
 
-		if (mediaRef.current) {
-			observer.observe(mediaRef.current);
+		// Store ref value in a variable
+		const currentRef = mediaRef.current;
+
+		if (currentRef) {
+			observer.observe(currentRef);
 		}
 
 		return () => {
-			if (mediaRef.current) {
-				observer.unobserve(mediaRef.current);
+			if (currentRef) {
+				observer.unobserve(currentRef);
 			}
 		};
 	}, []);

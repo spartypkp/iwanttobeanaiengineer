@@ -38,6 +38,7 @@ export async function getFeaturedProjects(): Promise<Project[]> {
       results,
       metrics,
       technologies,
+      thumbnail,
       "media": media[] {
         type,
         videoSource,
@@ -51,7 +52,7 @@ export async function getFeaturedProjects(): Promise<Project[]> {
           defined(poster) => poster.asset->url,
           null
         ),
-        isThumbnail
+        featured
       },
       primaryColor,
       github,
@@ -83,6 +84,7 @@ export async function getProjectById(id: string): Promise<Project | null> {
       results,
       metrics,
       technologies,
+      thumbnail,
       "media": media[] {
         type,
         videoSource,
@@ -96,7 +98,8 @@ export async function getProjectById(id: string): Promise<Project | null> {
           defined(poster) => poster.asset->url,
           null
         ),
-        isThumbnail
+        featured,
+        caption
       },
       primaryColor,
       github,
@@ -135,6 +138,7 @@ export async function getAllProjects(): Promise<Project[]> {
       results,
       metrics,
       technologies,
+      thumbnail,
       "media": media[] {
         type,
         videoSource,
@@ -148,7 +152,8 @@ export async function getAllProjects(): Promise<Project[]> {
           defined(poster) => poster.asset->url,
           null
         ),
-        isThumbnail
+        featured,
+        caption
       },
       primaryColor,
       github,
@@ -184,6 +189,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
       results,
       metrics,
       technologies,
+      thumbnail,
       "media": media[] {
         type,
         videoSource,
@@ -197,7 +203,8 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
           defined(poster) => poster.asset->url,
           null
         ),
-        isThumbnail
+        featured,
+        caption
       },
       primaryColor,
       github,
