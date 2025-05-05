@@ -1,70 +1,111 @@
 import { createClient } from '@/lib/utils/supabase/server';
-import { Message } from 'ai';
+import { NextResponse } from 'next/server';
 
-interface GetConversationRequest {
-	documentId: string;
+// Define proper types for message parts
+interface TextPart {
+	type: 'text';
+	text: string;
 }
 
-export async function POST(req: Request) {
+interface ToolInvocation {
+	toolName: string;
+	toolCallId: string;
+	state: 'partial-call' | 'call' | 'result';
+	args: Record<string, any>;
+	result?: any;
+}
+
+interface ToolInvocationPart {
+	type: 'tool-invocation';
+	toolInvocation: ToolInvocation;
+}
+
+type MessagePart = TextPart | ToolInvocationPart;
+
+export async function POST(request: Request) {
 	try {
-		const { documentId }: GetConversationRequest = await req.json();
+		const { documentId } = await request.json() as { documentId: string; };
 
 		if (!documentId) {
-			return Response.json({ error: 'Document ID is required' }, { status: 400 });
+			return NextResponse.json({ error: 'Missing documentId' }, { status: 400 });
 		}
 
 		// Initialize Supabase client
 		const supabase = await createClient();
 
-		// Use a simpler approach to query the JSONB field
-		// The containsObject filter checks if the JSON object has the specified field with the specified value
-		const { data: conversations, error: conversationError } = await supabase
+		// Find conversation for this document
+		const { data: conversationData, error: conversationError } = await supabase
 			.from('conversations')
 			.select('*')
 			.contains('context', { documentId })
-			.limit(1);
+			.order('updated_at', { ascending: false })
+			.limit(1)
+			.single();
 
-		if (conversationError) {
+		if (conversationError && conversationError.code !== 'PGRST116') {
 			console.error('Error fetching conversation:', conversationError);
-			return Response.json({ error: 'Failed to fetch conversation' }, { status: 500 });
+			return NextResponse.json({ error: 'Failed to fetch conversation' }, { status: 500 });
 		}
 
-		// If no conversation exists yet
-		if (!conversations || conversations.length === 0) {
-			console.log('No conversation found for document:', documentId);
-			return Response.json({ conversation: null, messages: [] });
+		if (!conversationData) {
+			// No conversation found for this document
+			return NextResponse.json({ conversation: null, messages: [] });
 		}
 
-		const conversation = conversations[0];
-		console.log('Found conversation:', conversation.id);
-
-		// Get messages for this conversation
+		// Fetch messages for this conversation including join with tool_calls
 		const { data: messagesData, error: messagesError } = await supabase
 			.from('messages')
-			.select('*')
-			.eq('conversation_id', conversation.id)
+			.select(`
+				*,
+				tool_calls(*)
+			`)
+			.eq('conversation_id', conversationData.id)
 			.order('sequence', { ascending: true });
 
 		if (messagesError) {
 			console.error('Error fetching messages:', messagesError);
-			return Response.json({ error: 'Failed to fetch messages' }, { status: 500 });
+			return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 });
 		}
 
-		console.log(`Found ${messagesData?.length || 0} messages for conversation ${conversation.id}`);
+		// Transform messages to include proper parts structure for rendering
+		const transformedMessages = messagesData.map(message => {
+			// If message already has content_parts, use that
+			if (message.content_parts) {
+				return {
+					...message,
+					parts: message.content_parts as MessagePart[]
+				};
+			}
 
-		// Convert to the format expected by AI SDK
-		const messages: Message[] = messagesData.map(msg => ({
-			id: msg.external_id || msg.id,
-			role: msg.role as 'user' | 'assistant' | 'system',
-			content: msg.content,
-		}));
+			// Otherwise, reconstruct parts from message content and tool_calls
+			const parts: MessagePart[] = [{ type: 'text', text: message.content }];
 
-		return Response.json({
-			conversation,
-			messages,
+			// Add tool calls if there are any
+			if (message.tool_calls && message.tool_calls.length > 0) {
+				message.tool_calls.forEach((toolCall: any) => {
+					const toolInvocationPart: ToolInvocationPart = {
+						type: 'tool-invocation',
+						toolInvocation: {
+							toolName: toolCall.tool_name,
+							toolCallId: toolCall.tool_call_id,
+							state: 'result',
+							args: toolCall.arguments,
+							result: toolCall.result
+						}
+					};
+					parts.push(toolInvocationPart);
+				});
+			}
+
+			return {
+				...message,
+				parts
+			};
 		});
+
+		return NextResponse.json({ conversation: conversationData, messages: transformedMessages });
 	} catch (error) {
-		console.error('Unexpected error:', error);
-		return Response.json({ error: 'An unexpected error occurred' }, { status: 500 });
+		console.error('Error in GET conversation:', error);
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 } 

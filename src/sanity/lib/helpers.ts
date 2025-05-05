@@ -76,8 +76,37 @@ export async function addItemToArray(
 	item: any
 ): Promise<void> {
 	try {
-		// Add _key for Sanity arrays if not present
-		const itemToInsert = item._key ? item : { ...item, _key: generateKey() };
+		// First get the current document to check field type
+		const document = await client.getDocument(documentId);
+		if (!document) {
+			throw new Error(`Document not found: ${documentId}`);
+		}
+
+		// Get the current array if it exists to determine the field type
+		const pathParts = arrayPath.split('.');
+		const currentArray = getFieldValue(document, pathParts);
+
+		// Different handling based on if this is a primitive array or object array
+		let itemToInsert;
+
+		// Check if this is a primitive array (strings, numbers)
+		const isPrimitiveArray = Array.isArray(currentArray) &&
+			currentArray.length > 0 &&
+			typeof currentArray[0] !== 'object';
+
+		// If we can't determine from existing array, try to infer from the item type
+		const shouldBePrimitiveItem = typeof item !== 'object' ||
+			// Common string array fields
+			['tags', 'categories', 'learnings', 'achievements', 'results'].includes(arrayPath);
+
+		if (isPrimitiveArray || shouldBePrimitiveItem) {
+			// For arrays of primitives, just add the value directly
+			// Sanity will handle generating _keys for primitive arrays
+			itemToInsert = item;
+		} else {
+			// For arrays of objects, ensure there's a _key
+			itemToInsert = item._key ? item : { ...item, _key: generateKey() };
+		}
 
 		// Use setIfMissing first to ensure the array exists
 		const patch = client.patch(documentId).setIfMissing({ [arrayPath]: [] });

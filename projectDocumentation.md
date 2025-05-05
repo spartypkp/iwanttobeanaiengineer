@@ -630,6 +630,7 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - Implemented markdown formatting for chat messages
    - Added welcome messages tailored to content type and edit mode
    - Included copy-to-clipboard functionality for messages
+   - Fixed the "Start Conversation" functionality for improved user experience
 
 3. **Content Management**
    - Created a comprehensive sidebar for content selection and preview
@@ -651,6 +652,7 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - Created detailed type definitions for content items and fields
    - Added automatic field detection based on AI responses
    - Developed content type-specific API routes with specialized processing
+   - Improved message persistence with structured content parts storage
 
 6. **MVP Technical Achievements** 
    - **Schema Serialization**: Created a sophisticated schema serialization system to transform Sanity schema objects into JSON-serializable formats that can be passed to the API while preserving type information and validation rules
@@ -658,10 +660,10 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - **API Integration**: Built a robust API route using Claude 3.7 Sonnet via AI SDK with streaming support and proper tool calling
    - **Tool Implementation**: Created specialized tools for content operations:
      - `writeField`: Updates document fields with proper nested path handling
-     - `suggestContent`: Generates content suggestions without applying them
-     - `listIncompleteFields`: Analyzes document completion status
-     - `readSubField`: Retrieves data from referenced documents
-   - **Message History**: Implemented robust message storage with sequence tracking to maintain conversation order
+     - `addToArray`: Adds items to array fields with automatic type detection for primitive vs object arrays
+     - `removeFromArray`: Removes specific items from array fields
+  
+   - **Message History**: Implemented robust message storage with sequence tracking and structured message parts to maintain conversation order and tool call visibility
    - **Real-time Responses**: Added streaming support with typing indicators for a natural chat experience
    - **Error Handling**: Implemented comprehensive error handling with graceful degradation
    - **Context Awareness**: Developed a system prompt that provides document awareness and schema understanding
@@ -670,10 +672,20 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - **Schema Complexity**: Solved the challenge of serializing complex Sanity schema objects with circular references by creating a custom serialization approach
    - **Document Structure Awareness**: Enabled the AI to understand document structure, required fields, and current completion status
    - **Nested Field Updates**: Implemented support for updating deeply nested fields using a recursive patching approach
+   - **Tool Call Persistence**: Enhanced message storage to maintain tool call information across page refreshes by storing structured message parts
+   - **Array Type Detection**: Fixed an issue with adding items to arrays by implementing automatic detection of primitive arrays (strings, numbers) vs object arrays
    - **Conversation Persistence**: Created a reliable system for saving and loading conversation state across sessions
    - **Tool Result Integration**: Developed a seamless way to incorporate tool execution results back into the conversation
    - **UI Component Rendering**: Created specialized components for different tool invocations that provide appropriate visual feedback
    - **Real-time Updates**: Implemented efficient updates to Sanity documents with optimistic UI updates
+
+8. **Recent Enhancements**
+   - **Tool Call Rendering Persistence**: Fixed an issue where tool call UI components would disappear after page refreshes by properly storing and retrieving structured message parts
+   - **Array Handling Improvements**: Fixed a critical bug in `addToArrayTool` that incorrectly handled arrays of strings, causing validation errors in Sanity
+   - **Smart Array Type Detection**: Implemented intelligent detection of array field types in Sanity documents to properly handle both primitive arrays (strings, numbers) and complex object arrays
+   - **Chat Initialization**: Improved the "Start Conversation" experience with a more fluid and responsive interaction
+   - **Message History Integrity**: Enhanced message storage and retrieval to ensure completeness and consistency of conversation history
+   - **Tool Call UI Components**: Refined the visual display of tool call status with clearer success/failure indicators and more consistent styling
 
 This feature significantly enhances content management workflows by allowing administrators to create and update content through natural conversation rather than traditional form interfaces.
 

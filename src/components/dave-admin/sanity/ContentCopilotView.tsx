@@ -43,13 +43,23 @@ const ChatInputForm = ({
 	handleInputChange,
 	handleFormSubmit,
 	isLoading,
-	textAreaRef
+	textAreaRef,
+	hasMessages,
+	documentData,
+	validSchemaType,
+	setIsTyping,
+	setInput
 }: {
 	input: string;
 	handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 	handleFormSubmit: (e: React.FormEvent) => void;
 	isLoading: boolean;
 	textAreaRef: React.RefObject<HTMLTextAreaElement>;
+	hasMessages: boolean;
+	documentData?: Record<string, any> | null;
+	validSchemaType?: string | null;
+	setIsTyping?: (isTyping: boolean) => void;
+	setInput?: (value: string) => void;
 }) => {
 	// Handle keyboard shortcuts
 	const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -60,6 +70,51 @@ const ChatInputForm = ({
 		}
 	};
 
+	// Function to start a new conversation
+	const startConversation = () => {
+		// Create a context-aware initial message
+		const docType = validSchemaType || 'document';
+		const docTitle = documentData?.title || 'this content';
+		const initialMessage = `Let's work on ${docTitle} together. Please help me flesh out the details for this ${docType}. What kind of information should I include?`;
+
+		if (setIsTyping) setIsTyping(true);
+
+		// Set the input value directly
+		if (setInput) setInput(initialMessage);
+
+		// Submit after a short delay to ensure the input is set
+		setTimeout(() => {
+			const syntheticEvent = { preventDefault: () => { } } as React.FormEvent;
+			handleFormSubmit(syntheticEvent);
+		}, 100);
+	};
+
+	// If there are no messages yet, show the start button instead of the input
+	if (!hasMessages) {
+		return (
+			<div className="flex flex-col gap-3 items-center justify-center p-4 text-center">
+				<p className="text-sm text-black">
+					Content Copilot will help you create and edit content through natural conversation.
+				</p>
+				<Button
+					onClick={startConversation}
+					className="mt-1"
+					disabled={isLoading}
+				>
+					{isLoading ? (
+						<>
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							Starting...
+						</>
+					) : (
+						"Start Conversation"
+					)}
+				</Button>
+			</div>
+		);
+	}
+
+	// Regular input form when conversation is already started
 	return (
 		<form onSubmit={handleFormSubmit} className="flex gap-2 items-end">
 			<div className="relative flex-1 text-black">
@@ -68,7 +123,10 @@ const ChatInputForm = ({
 					value={input}
 					onChange={handleInputChange}
 					onKeyDown={handleKeyDown}
-					placeholder={isLoading ? "Loading conversation..." : "Message Dave about this content... (Enter to send)"}
+					placeholder={isLoading
+						? "Loading conversation..."
+						: "Message Content Copilot about this content... (Enter to send)"
+					}
 					rows={1}
 					disabled={isLoading}
 					className="resize-none min-h-[44px] max-h-[200px] w-full p-3 text-sm text-black bg-white"
@@ -90,25 +148,56 @@ const ChatInputForm = ({
 	);
 };
 
+// Interface for conversation API response
+interface ConversationResponse {
+	conversation: {
+		id: string;
+		title: string;
+		[key: string]: any;
+	} | null;
+	messages: Array<{
+		id: string;
+		external_id?: string;
+		role: string;
+		content: string;
+		parts?: Array<{
+			type: string;
+			[key: string]: any;
+		}>;
+		[key: string]: any;
+	}>;
+	error?: string;
+}
+
 export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 	// --- STATE MANAGEMENT ---
-	// Document-related state
-	const [validDocumentId, setValidDocumentId] = useState<string | null>(null);
-	const [validSchemaType, setValidSchemaType] = useState<string | null>(null);
-	const [validDocumentData, setValidDocumentData] = useState<Record<string, any> | null>(null);
+	// Document state - consolidated into a single object
+	const [document, setDocument] = useState<{
+		id: string | null;
+		type: string | null;
+		data: Record<string, any> | null;
+		isValid: boolean;
+	}>({
+		id: null,
+		type: null,
+		data: null,
+		isValid: false
+	});
+
+	// Simplified loading state using a single enum
+	const [status, setStatus] = useState<'initializing' | 'loading' | 'ready' | 'error'>('initializing');
+	const [error, setError] = useState<string | null>(null);
 
 	// Conversation state
 	const [conversationId, setConversationId] = useState<string | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [loadingPhase, setLoadingPhase] = useState<'initializing' | 'loading-conversation' | 'ready'>('initializing');
-	const [error, setError] = useState<string | null>(null);
 	const [isTyping, setIsTyping] = useState(false);
+	const [loadedMessages, setLoadedMessages] = useState<any[]>([]);
+	const [conversationLoaded, setConversationLoaded] = useState(false);
 
 	// Refs
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-	// --- DATA EXTRACTION AND VALIDATION ---
 	// Extract values from props immediately
 	const documentId = props.documentId;
 	const schemaType = props.schemaType?.name;
@@ -120,46 +209,51 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		return createSerializableSchema(props.schemaType);
 	}, [props.schemaType]);
 
-	// Validate and set document properties
+	// --- DOCUMENT VALIDATION ---
+	// Single effect to validate document and set initial state
 	useEffect(() => {
+		// Validate document properties
 		if (documentId && schemaType && documentData) {
-			setValidDocumentId(documentId);
-			setValidSchemaType(schemaType);
-			setValidDocumentData(documentData);
-			setLoadingPhase('loading-conversation');
+			// Set document state
+			setDocument({
+				id: documentId,
+				type: schemaType,
+				data: documentData,
+				isValid: true
+			});
+
+			// Move to loading state
+			setStatus('loading');
 		} else {
 			setError('Missing required document properties');
+			setStatus('error');
 		}
-	}, [documentId, schemaType, documentData]);
+	}, [documentId]);
 
 	// --- CONVERSATION LOADING ---
-	// Load conversation data when document is validated
+	// Effect to handle conversation loading
 	useEffect(() => {
-		// Only proceed if we're in the loading-conversation phase
-		if (loadingPhase !== 'loading-conversation' || !validDocumentId) return;
+		// Only proceed if we're in the loading state and have a valid document
+		if (status !== 'loading' || !document.isValid) return;
 
+		// Async function to load conversation
 		const loadConversation = async () => {
 			try {
-				console.log("Loading conversation for document:", validDocumentId);
-
 				const response = await fetch('/api/content-copilot/get-conversation', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						documentId: validDocumentId,
+						documentId: document.id,
 					}),
 				});
 
-				const data = await response.json();
+				const data: ConversationResponse = await response.json();
 
 				if (!response.ok) {
-					console.error("Error response from API:", data);
 					throw new Error(`Failed to load conversation: ${data.error || response.status}`);
 				}
-
-				//console.log("Conversation loaded:", data);
 
 				// Set conversation ID if available
 				if (data.conversation) {
@@ -167,22 +261,32 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 
 					// Set messages if available
 					if (data.messages && data.messages.length > 0) {
-						chatActions.setMessages(data.messages);
+						// Transform messages to ensure they have the proper structure
+						const formattedMessages = data.messages.map((msg) => ({
+							id: msg.external_id || msg.id,
+							role: msg.role,
+							content: msg.content,
+							// Ensure parts are properly formatted for AI SDK consumption
+							...(msg.parts ? { parts: msg.parts } : {})
+						}));
+
+						setLoadedMessages(formattedMessages);
 					}
 				}
 
-				// Mark loading as complete
-				setLoadingPhase('ready');
+				// Mark conversation as loaded
+				setConversationLoaded(true);
+				setStatus('ready');
+
 			} catch (error) {
 				console.error('Failed to load conversation:', error);
 				setError(`Error: ${error instanceof Error ? error.message : String(error)}`);
-			} finally {
-				setIsLoading(false);
+				setStatus('error');
 			}
 		};
 
 		loadConversation();
-	}, [validDocumentId, loadingPhase]);
+	}, [document, status]);
 
 	// --- CHAT INTEGRATION ---
 	// Initialize chat hooks with available data
@@ -191,25 +295,25 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		input,
 		handleInputChange,
 		handleSubmit,
-		setMessages,
 		setInput,
-		addToolResult
+		addToolResult,
+		isLoading: chatIsLoading
 	} = useChat({
 		api: '/api/content-copilot',
 		body: {
-			documentId: validDocumentId || '',
+			documentId: document.id || '',
 			conversationId,
-			schemaType: validSchemaType || '',
+			schemaType: document.type || '',
 			serializableSchema,
-			documentData: validDocumentData || {}
+			documentData: document.data || {}
 		},
 		id: conversationId || undefined,
+		initialMessages: loadedMessages,
 		experimental_throttle: 50,
 		onResponse: (response) => {
 			// Extract conversation ID from headers if available
 			const newConversationId = response.headers.get('X-Conversation-Id');
 			if (newConversationId && (!conversationId || newConversationId !== conversationId)) {
-				console.log('Setting conversation ID from response:', newConversationId);
 				setConversationId(newConversationId);
 			}
 			// Show typing indicator
@@ -223,14 +327,9 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 			console.error("Chat API error:", error);
 			setError(`API error: ${error.message}`);
 			setIsTyping(false);
+			setStatus('error');
 		}
 	});
-
-	// Provide chat actions in a single object to avoid recreating functions
-	const chatActions = useMemo(() => ({
-		setMessages,
-		setInput
-	}), [setMessages, setInput]);
 
 	// --- UI EFFECTS ---
 	// Auto-scroll to the bottom when new messages arrive
@@ -251,24 +350,38 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 	// Auto-grow textarea function
 	const handleTextAreaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		handleInputChange(e);
-		adjustTextAreaHeight(e.target);
+		// Use the input event target or fall back to the ref
+		const textArea = e.target || textAreaRef.current;
+		if (textArea) {
+			adjustTextAreaHeight(textArea);
+		}
 	};
 
 	// Helper function to adjust textarea height
 	const adjustTextAreaHeight = (target: HTMLTextAreaElement) => {
-		// Reset height to auto to get proper scrollHeight measurement
-		target.style.height = 'auto';
-		// Set height based on scrollHeight (plus small buffer)
-		target.style.height = `${Math.min(target.scrollHeight + 2, 200)}px`;
+		// Skip if target is undefined or doesn't have style property
+		if (!target || typeof target.style === 'undefined') {
+			console.warn('Invalid textarea element for height adjustment');
+			return;
+		}
+
+		try {
+			// Reset height to auto to get proper scrollHeight measurement
+			target.style.height = 'auto';
+			// Set height based on scrollHeight (plus small buffer)
+			target.style.height = `${Math.min(target.scrollHeight + 2, 200)}px`;
+		} catch (err) {
+			console.warn('Error adjusting textarea height:', err);
+		}
 	};
 
 	// Handle form submission with improved UX
 	const handleFormSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!input.trim()) return;
-		console.log(`Handling form submit with input: ${input}`);
+		if (!input.trim()) {
+			return;
+		}
 
-		// If this is the first message, we'll get a conversation ID from the response
 		handleSubmit(e);
 
 		// Focus back on textarea after sending
@@ -283,7 +396,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 
 	// Helper function to get document title
 	const getDocumentTitle = () => {
-		return documentData?.title || documentData?.name || `Untitled ${schemaType}`;
+		return document.data?.title || document.data?.name || `Untitled ${document.type}`;
 	};
 
 	// --- RENDERING ---
@@ -318,25 +431,19 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 
 			{/* Message area */}
 			<div className="flex-1 p-4 overflow-y-auto overflow-x-hidden">
-				{isLoading ? (
+				{status !== 'ready' ? (
 					<div className="h-full flex flex-col items-center justify-center gap-3">
 						<Loader2 className="h-8 w-8 animate-spin text-primary" />
 						<p className="text-sm text-muted-foreground">
-							{loadingPhase === 'initializing'
-								? 'Initializing content...'
-								: 'Loading conversation...'}
+							{status === 'initializing' ? 'Initializing content...' : 'Loading conversation...'}
 						</p>
 					</div>
 				) : messages.length === 0 ? (
-					<div className="h-full flex flex-col items-center justify-center text-center max-w-[500px] mx-auto gap-3">
+					<div className="h-full flex flex-col items-center justify-center text-center max-w-[500px] mx-auto gap-4">
 						<Avatar className="h-12 w-12">
 							<AvatarFallback className="text-lg">D</AvatarFallback>
 						</Avatar>
 						<h3 className="text-lg font-semibold">Ready to help with your content</h3>
-						<p className="text-sm text-muted-foreground max-w-[400px]">
-							Dave will help you create and edit content through natural conversation.
-							Say hello to get started!
-						</p>
 					</div>
 				) : (
 					<>
@@ -371,19 +478,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 							</div>
 						))}
 
-						{isTyping && (
-							// <div className="flex gap-2 mb-4">
-							// 	<div className="px-4 py-3 rounded-xl rounded-bl-sm bg-gray-100 text-gray-900 max-w-[85%]">
-							// 		<div className="flex items-center gap-2">
-							// 			<p className="text-sm text-gray-600">Content Copilot is thinking</p>
-							// 			<div className="flex items-center gap-1">
-							<Loader2 className="h-3 w-3 animate-spin text-emerald-600" />
-							// 			</div>
-							// 		</div>
-							// 	</div>
-							// </div>
-						)}
-
 						<div ref={messagesEndRef} />
 					</>
 				)}
@@ -395,8 +489,13 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 					input={input}
 					handleInputChange={handleTextAreaInput}
 					handleFormSubmit={handleFormSubmit}
-					isLoading={isLoading}
+					isLoading={status !== 'ready' || chatIsLoading}
 					textAreaRef={textAreaRef}
+					hasMessages={messages.length > 0}
+					documentData={document.data}
+					validSchemaType={document.type}
+					setIsTyping={setIsTyping}
+					setInput={setInput}
 				/>
 			</div>
 		</div>
@@ -412,6 +511,10 @@ const MessagePart = ({ part, addToolResult }: {
 	};
 	addToolResult?: (result: { toolCallId: string; result: any; }) => void;
 }) => {
+	// This component handles rendering different types of message parts
+	// When the conversation is loaded from the database, tool calls are
+	// reconstructed from the tool_calls table and added to the message
+	// as proper message parts with 'tool-invocation' type
 	switch (part.type) {
 		case 'text':
 			return part.text ? (
