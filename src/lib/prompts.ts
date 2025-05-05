@@ -1,5 +1,4 @@
-import { extractSchemaInfo, formatSchemaFieldsForPrompt, SerializableSchema } from "@/utils/schema-serialization";
-
+import { SerializableField, SerializableSchema } from "@/utils/schema-serialization";
 
 // Generate a system prompt based on the document context
 export function generateContentCopilotSystemPrompt(params: {
@@ -8,17 +7,16 @@ export function generateContentCopilotSystemPrompt(params: {
 	documentData: Record<string, any>;
 	serializableSchema: SerializableSchema;
 }): string {
-	const { documentId, schemaType, documentData } = params;
+	const { documentId, schemaType, documentData, serializableSchema } = params;
 
 	// Create the document structure expected by the schema analysis functions
 	const document = {
 		displayed: documentData
 	};
 
-	// Extract simplified schema information for the prompt
-	const schemaInfo = extractSchemaInfo(schemaType);
-	const schemaFieldsDescription = formatSchemaFieldsForPrompt(schemaInfo);
-
+	// Format the schema directly from the serializable schema
+	const schemaFieldsDescription = formatSerializableSchemaForPrompt(serializableSchema);
+	//console.log('Schema fields description:', schemaFieldsDescription);
 
 	// Document title
 	const documentTitle = documentData.title || documentData.name || `Untitled ${schemaType}`;
@@ -281,4 +279,83 @@ AI: "Time zone handling is definitely a common but complex challenge in applicat
 
 Remember to keep your interactions helpful, natural, and focused on understanding the complete story first. Treat the conversation as an engaging discussion between colleagues rather than a form-filling exercise.
 `;
+}
+
+// Helper function to format serializable schema for prompt display
+function formatSerializableSchemaForPrompt(schema: SerializableSchema | null): string {
+	if (!schema || !schema.fields || schema.fields.length === 0) {
+		return 'No schema information available';
+	}
+
+	// Convert schema to a more structured, JSON-friendly format
+	const schemaJSON = {
+		name: schema.name,
+		title: schema.title,
+		type: schema.type,
+		fields: schema.fields.map(field => convertFieldToJSON(field))
+	};
+
+	return `
+\`\`\`json
+${JSON.stringify(schemaJSON, null, 2)}
+\`\`\`
+`;
+}
+
+// Helper function to convert a field to a JSON-friendly structure
+function convertFieldToJSON(field: SerializableField): any {
+	const result: any = {
+		name: field.name,
+		type: field.type,
+		title: field.title || field.name
+	};
+
+	// Add optional properties if they exist
+	if (field.description) {
+		result.description = field.description;
+	}
+
+	if (field.isRequired) {
+		result.required = true;
+	}
+
+	// Handle array fields
+	if (field.arrayOf && field.arrayOf.length > 0) {
+		result.arrayOf = field.arrayOf.map(itemType => {
+			const arrayItemType: any = {
+				type: itemType.type
+			};
+
+			if (itemType.title) {
+				arrayItemType.title = itemType.title;
+			}
+
+			// Include fields for object types in arrays
+			if (itemType.type === 'object' && itemType.fields) {
+				arrayItemType.fields = itemType.fields.map(f => convertFieldToJSON(f));
+			}
+
+			return arrayItemType;
+		});
+	}
+
+	// Handle nested object fields
+	if (field.fields && field.fields.length > 0) {
+		result.fields = field.fields.map(f => convertFieldToJSON(f));
+	}
+
+	// Handle reference fields
+	if (field.reference && field.reference.to && field.reference.to.length > 0) {
+		result.references = field.reference.to.map(refType => ({
+			type: refType.type || 'document',
+			title: refType.title
+		}));
+	}
+
+	// Include options if they exist
+	if (field.options && Object.keys(field.options).length > 0) {
+		result.options = field.options;
+	}
+
+	return result;
 }

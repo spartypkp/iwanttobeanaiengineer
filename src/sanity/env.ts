@@ -14,6 +14,8 @@ export const projectId = assertValue(
 // Use CDN for production, disable for development (for fresher content)
 export const useCdn = process.env.NODE_ENV === 'production';
 
+export const token = process.env.SANITY_API_TOKEN;
+
 function assertValue<T>(v: T | undefined, errorMessage: string): T {
 	if (v === undefined) {
 		throw new Error(errorMessage);

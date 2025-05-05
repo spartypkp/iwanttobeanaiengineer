@@ -79,10 +79,14 @@ export async function addItemToArray(
 		// Add _key for Sanity arrays if not present
 		const itemToInsert = item._key ? item : { ...item, _key: generateKey() };
 
-		await client
-			.patch(documentId)
-			.insert('after', `${arrayPath}[-1]`, [itemToInsert])
-			.commit();
+		// Use setIfMissing first to ensure the array exists
+		const patch = client.patch(documentId).setIfMissing({ [arrayPath]: [] });
+
+		// Then append to the array
+		patch.append(arrayPath, [itemToInsert]);
+
+		// Commit both operations
+		await patch.commit();
 
 		console.log(`Successfully added item to ${arrayPath} in document ${documentId}`);
 	} catch (error) {

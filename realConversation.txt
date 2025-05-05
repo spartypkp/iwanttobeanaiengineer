@@ -1,0 +1,55 @@
+Will: Hi!
+
+Dave: Hello again, Will! I'm curious about your AI Aviation Copilot project. What inspired you to create this tool for student pilots? I'd love to hear the story behind how you came up with the idea to use AI to help with aviation regulations and manuals.
+
+Will: My brother is a pilot himself. He's a CFI and teaches many students to learn to fly. I have experience in the legal field and am an AI engineer. I previously had experience building an LLM chatbot called 'Ask Abe' (another one of these projects!) that could answer legal questions with primary source legislation. Some of the source data (Title 14 of the CFR) overlapped with what my brother teaches his students. I also specifically scraped and cleaned data from the AIM. So I wanted to help my brother out
+
+Dave: You mentioned you created this to help your brother who's a Certified Flight Instructor (CFI) teaching student pilots, and that you leveraged your AI engineering and legal background to build it. You also mentioned scraping data from the AIM (Aeronautical Information Manual) and using Title 14 CFR regulations.
+
+I'm curious - what were some of the specific challenges you faced when building this aviation-focused LLM application? And how did your brother and his students respond when they first started using it?
+
+Will: One of the considerable challenges was actually getting pilots interested. Many were dismissive of AI technology. As for me - challenges were mostly with making it a useful LLM tool. One of the big challenges I faced was with RAG similarity search. A lot of pilot terms are very similar. A lot of definitions and acronyms are used - which make it difficult for accurate querying to find relevant pieces of legislation or regulations.
+
+Dave: You mentioned two key challenges: getting pilots to adopt AI technology due to their skepticism, and the technical challenge of RAG similarity search with aviation terminology, where similar acronyms and specialized terms made accurate retrieval difficult.
+
+I'm curious how you overcame these challenges. Did you find any effective strategies to increase pilot acceptance? And for the technical side, did you develop any special approaches to handle the aviation-specific terminology in your retrieval system?
+
+Also, I'd love to hear about any particular success stories or feedback you received from your brother or his students after they started using the tool. Did it help them in ways you expected, or were there any surprising benefits?
+Try adding challenges again please - use the addArray tool call
+
+I'd be happy to add those challenges to your project using the addToArray tool. Let me do that for you.
+Added to challenges
+Added to challenges
+I've added both challenges to your project:
+
+1. Pilot Skepticism Toward AI - capturing how pilots were initially dismissive of AI technology
+2. RAG Similarity Search with Aviation Terminology - documenting the technical challenge with similar aviation terms and acronyms
+
+Is there anything else you'd like to add about how you approached solving these challenges? Or would you like to add any other aspects of the project, such as specific technologies used or approaches you took to improve the system?
+Let's just continue talking normally. What do you want to talk about
+
+I'd love to hear more about the actual impact of your Aviation Copilot on student pilots. Did your brother share any feedback about how it changed his teaching approach or how his students benefited from having this AI assistant? 
+
+I'm also curious about the scope of aviation regulations you covered. Beyond Title 14 CFR and the AIM, did you include other sources like Advisory Circulars or practical test standards? 
+
+And on a more personal note, did working on this project spark any interest in aviation for you? It must be fascinating to deep dive into such a specialized field, especially when it connects to your family.
+Well I had my brother use some of the MVP I built. This is one of those side projects that I consider 'archived' in that it didn't end up working out fully. He's not a huge user of AI - but did find it semi useful for quick information lookup. Although he has concerns with reliability and accuracy of answers. The scope of aviation regulations was just title 14 and AIM. We did plan to include other sources in the future. The idea would be basically an AI teacher that could help a student practice for written exams for pilots licenses tests of all levels. I have a little bit of interest in aviation - because of my brother. I am not a pilot myself. This was more just to help my brother out, and apply my skills with legal and AI to help him out
+
+Thanks for sharing that honest perspective. It's refreshing to hear about the real journey of a side project, including when things don't fully take off as initially hoped. That's often where the best learning happens.
+
+Your brother's concerns about reliability and accuracy are completely valid, especially in aviation where precision is critical. I imagine there's a significant challenge in getting an AI system to be trustworthy enough for something as regulated and safety-critical as pilot education.
+
+The concept of an AI teacher for pilot license exam preparation is really interesting though. There's definitely a gap there that AI could potentially fill, helping students practice with a wider variety of questions and scenarios than traditional study methods might offer.
+
+Even though this project is now archived, do you think there were valuable lessons or techniques you developed that you've been able to apply to other AI projects? Sometimes these "stepping stone" projects end up informing our approach to future work in unexpected ways.
+Added to challenges
+Added to challenges
+Yeah definitely. The valuable lesson that you need to verify that people want what you're building. I believed it would be more useful than my brother did. It turned out that the market for this was kind of small and the niche wasn't really there. Really valuable lesson to learn. As for techniques, I continued to develop my full stack AI Engineering toolkit. Making RAG chat apps is a full stack endeavor and takes some time and effort. Continued to hone that skill (even though nowadays it's seen as more of a basic AI engineering skill!)
+
+That's such a valuable insight about validating market need before diving too deep into development. It's a classic entrepreneurial lesson that applies just as much to AI projects as any other venture. Sometimes we get excited about what technology *can* do without fully exploring if it's what users *want* or *need*.
+
+The small, specialized nature of the aviation education market probably added another layer of challenge too. Niche markets can be great if the need is strong, but they also limit your potential user base.
+
+I appreciate your perspective on RAG chat apps becoming more of a "basic" AI engineering skill now. The field moves so quickly! What was cutting-edge a year ago becomes table stakes today. That said, having that full stack experience - from data preparation to retrieval engineering to frontend implementation - gives you a solid foundation that's applicable across many AI projects.
+
+Do you think there's a particular aspect of AI engineering that you're most interested in focusing on next, now that these RAG applications have become more standardized? Or are there other domains beyond legal and aviation where you're looking to apply your AI skills?

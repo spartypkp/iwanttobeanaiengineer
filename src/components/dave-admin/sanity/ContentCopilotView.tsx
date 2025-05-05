@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { createSerializableSchema } from '@/utils/schema-serialization';
 import { useChat } from '@ai-sdk/react';
 import { type ObjectSchemaType } from '@sanity/types';
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Check, Loader2, Minus, Pencil, Plus, X } from "lucide-react";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -159,7 +159,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 					throw new Error(`Failed to load conversation: ${data.error || response.status}`);
 				}
 
-				console.log("Conversation loaded:", data);
+				//console.log("Conversation loaded:", data);
 
 				// Set conversation ID if available
 				if (data.conversation) {
@@ -372,18 +372,16 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 						))}
 
 						{isTyping && (
-							<div className="flex gap-2 mb-4">
-								<div className="px-4 py-3 rounded-xl rounded-bl-sm bg-gray-100 text-gray-900 max-w-[85%]">
-									<div className="flex items-center gap-2">
-										<p className="text-sm text-gray-600">Content Copilot is thinking</p>
-										<div className="flex items-center h-4">
-											<span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0ms]"></span>
-											<span className="mx-0.75 h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:150ms]"></span>
-											<span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:300ms]"></span>
-										</div>
-									</div>
-								</div>
-							</div>
+							// <div className="flex gap-2 mb-4">
+							// 	<div className="px-4 py-3 rounded-xl rounded-bl-sm bg-gray-100 text-gray-900 max-w-[85%]">
+							// 		<div className="flex items-center gap-2">
+							// 			<p className="text-sm text-gray-600">Content Copilot is thinking</p>
+							// 			<div className="flex items-center gap-1">
+							<Loader2 className="h-3 w-3 animate-spin text-emerald-600" />
+							// 			</div>
+							// 		</div>
+							// 	</div>
+							// </div>
 						)}
 
 						<div ref={messagesEndRef} />
@@ -414,15 +412,8 @@ const MessagePart = ({ part, addToolResult }: {
 	};
 	addToolResult?: (result: { toolCallId: string; result: any; }) => void;
 }) => {
-	// Use a stable ID based on the first few characters of the content
-	const getStableId = (text: string) => {
-		// Create a stable ID based on the first 20 chars of the content
-		return `text-${text.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`;
-	};
-
 	switch (part.type) {
 		case 'text':
-			//console.log(`Text right before rendering: ${part.text}`);
 			return part.text ? (
 				<div className="whitespace-pre-wrap prose prose-sm max-w-none prose-p:text-gray-800 prose-headings:text-gray-900 prose-a:text-emerald-600 prose-ol:pl-5 prose-ul:pl-5 prose-li:my-0 prose-ol:my-2 prose-ul:my-2 prose-ol:list-decimal prose-ul:list-disc">
 					{part.text}
@@ -430,271 +421,105 @@ const MessagePart = ({ part, addToolResult }: {
 			) : null;
 
 		case 'tool-invocation':
-			return part.toolInvocation ?
-				<ToolInvocationDisplay toolInvocation={part.toolInvocation} addToolResult={addToolResult} /> :
-				null;
+			return part.toolInvocation ? (
+				<div className="my-0.5 inline-block">
+					<ToolInvocationDisplay toolInvocation={part.toolInvocation} addToolResult={addToolResult} />
+				</div>
+			) : null;
+
 		case 'step-start':
-			return <div className="my-2.5"><hr className="border-t border-gray-200" /></div>;
-		default:
-			return null;
-	}
-};
-
-// Improve the ReferencedFieldTool to handle text overflow better
-const ReferencedFieldTool = ({ toolInvocation }: { toolInvocation: ToolInvocation; }) => {
-	const { state, args, result } = toolInvocation;
-
-	switch (state) {
-		case 'partial-call':
-			return (
-				<Card className="my-3 bg-blue-50 border border-blue-100">
-					<CardContent className="p-3">
-						<div className="flex items-center gap-2">
-							<p className="text-blue-800">Fetching referenced content...</p>
-							<Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-						</div>
-					</CardContent>
-				</Card>
-			);
-		case 'call':
-			return (
-				<Card className="my-3 bg-blue-50 border border-blue-100">
-					<CardContent className="p-3">
-						<p className="text-blue-800">Looking up referenced content from {args.referenceFieldPath}...</p>
-					</CardContent>
-				</Card>
-			);
-		case 'result':
-			if (!result || !result.success) {
-				return (
-					<Card className="my-3 bg-amber-50 border border-amber-100">
-						<CardContent className="p-3">
-							<p className="text-amber-800">Failed to fetch referenced content: {result?.message || 'Unknown error'}</p>
-						</CardContent>
-					</Card>
-				);
-			}
-
-			// Format the value for display
-			let displayValue = '';
-			if (typeof result.value === 'object') {
-				try {
-					displayValue = JSON.stringify(result.value, null, 2);
-				} catch (e) {
-					displayValue = '[Complex object]';
-				}
-			} else {
-				displayValue = String(result.value);
-			}
-
-			return (
-				<Card className="my-3 bg-blue-50 border border-blue-100">
-					<CardContent className="p-3 space-y-3">
-						<div className="flex items-center gap-2">
-							<p className="font-semibold text-blue-800">Referenced Content</p>
-							<Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200">
-								{result.referencedDocumentType}
-							</Badge>
-						</div>
-
-						<Card className="border border-gray-200 bg-white">
-							<CardContent className="p-2 space-y-2">
-								<p className="text-xs text-gray-600">
-									From document: {result.referencedDocumentId.substring(0, 6)}...
-								</p>
-								<p className="text-xs text-gray-600">
-									Field: {result.referencedFieldPath}
-								</p>
-								<div className="p-2 bg-gray-50 border border-gray-100 rounded max-w-full overflow-auto">
-									<pre className="text-xs font-mono whitespace-pre-wrap break-words">
-										{displayValue}
-									</pre>
-								</div>
-							</CardContent>
-						</Card>
-					</CardContent>
-				</Card>
-			);
-		default:
-			return null;
-	}
-};
-
-const WriteFieldTool = ({ toolInvocation }: { toolInvocation: ToolInvocation; }) => {
-	const { state, args, result } = toolInvocation;
-
-	switch (state) {
-		case 'partial-call':
-		case 'call':
-			return (
-				<Card className="my-3 bg-emerald-50 border border-emerald-100">
-					<CardContent className="p-3">
-						<div className="flex items-center gap-2">
-							<p className="text-emerald-800">Updating {args?.fieldPath || 'document field'}...</p>
-							<Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
-						</div>
-					</CardContent>
-				</Card>
-			);
-		case 'result':
-			if (!result || !result.success) {
-				return (
-					<Card className="my-3 bg-red-50 border border-red-100">
-						<CardContent className="p-3">
-							<p className="text-red-800">Failed to update field: {result?.message || 'Unknown error'}</p>
-						</CardContent>
-					</Card>
-				);
-			}
-
-			const fieldPath = result.fieldPath || args.fieldPath;
-
-			// Simple UI that just shows the field was updated
-			return (
-				<Card className="my-3 bg-emerald-50 border border-emerald-100">
-					<CardContent className="p-2">
-						<div className="flex items-center gap-2">
-							<Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-200">
-								✓ Updated
-							</Badge>
-							<p className="text-sm text-emerald-800 font-medium">{fieldPath}</p>
-						</div>
-					</CardContent>
-				</Card>
-			);
+			return <div className="my-1.5"><hr className="border-t border-gray-200" /></div>;
 		default:
 			return null;
 	}
 };
 
 // Tool-specific components for handling tool invocations
-const ContentSuggestionTool = ({ toolInvocation, addToolResult }: { toolInvocation: ToolInvocation, addToolResult?: (result: { toolCallId: string; result: any; }) => void; }) => {
-	const { toolCallId, state, args, result } = toolInvocation;
-
-	switch (state) {
-		case 'partial-call':
-			return (
-				<Card className="my-3 bg-emerald-50 border border-emerald-100">
-					<CardContent className="p-3">
-						<div className="flex items-center gap-2">
-							<p className="text-emerald-800">Generating content suggestions...</p>
-							<Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
-						</div>
-					</CardContent>
-				</Card>
-			);
-		case 'call':
-			return (
-				<Card className="my-3 bg-emerald-50 border border-emerald-100">
-					<CardContent className="p-3">
-						<div className="flex items-center gap-2">
-							<p className="font-semibold text-emerald-800">Generating suggestions for: </p>
-							<Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-200">{args.fieldPath}</Badge>
-							<Loader2 className="h-4 w-4 animate-spin text-emerald-600 ml-auto" />
-						</div>
-					</CardContent>
-				</Card>
-			);
-		case 'result':
-			if (!result || !result.suggestions || !result.suggestions.suggestedOptions) {
-				return (
-					<Card className="my-3 bg-amber-50 border border-amber-100">
-						<CardContent className="p-3">
-							<p className="text-amber-800">No suggestions were generated.</p>
-						</CardContent>
-					</Card>
-				);
-			}
-
-			const fieldPath = result.fieldPath || args.fieldPath;
-
-			return (
-				<Card className="my-3 border border-emerald-100">
-					<CardContent className="p-3 space-y-3">
-						<div className="flex items-center gap-2">
-							<p className="font-semibold">Suggestions for: </p>
-							<Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-200">{fieldPath}</Badge>
-						</div>
-
-						{result.suggestions.suggestedOptions.map((suggestion: string, index: number) => (
-							<Card key={index} className="border border-gray-200 bg-white">
-								<CardContent className="p-3">
-									<div className="flex flex-col space-y-3">
-										<div className="bg-gray-50 border border-gray-100 rounded p-2 text-sm whitespace-pre-wrap break-words max-h-[120px] overflow-y-auto">
-											{suggestion}
-										</div>
-
-										{addToolResult && (
-											<div className="flex justify-end gap-2">
-												<Button
-													variant="outline"
-													size="sm"
-													className="h-8 text-xs bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-													onClick={() => {
-														// Reject suggestion
-														addToolResult({
-															toolCallId,
-															result: { success: false, rejected: true, fieldPath }
-														});
-													}}
-												>
-													Reject
-												</Button>
-												<Button
-													variant="outline"
-													size="sm"
-													className="h-8 text-xs bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-													onClick={() => {
-														// Accept suggestion
-														addToolResult({
-															toolCallId,
-															result: { success: true, selection: suggestion, fieldPath }
-														});
-													}}
-												>
-													Accept
-												</Button>
-											</div>
-										)}
-									</div>
-								</CardContent>
-							</Card>
-						))}
-					</CardContent>
-				</Card>
-			);
-		default:
-			return null;
-	}
-};
-
-// Component to handle all tool invocations
 const ToolInvocationDisplay = ({ toolInvocation, addToolResult }: { toolInvocation: ToolInvocation, addToolResult?: (result: { toolCallId: string; result: any; }) => void; }) => {
 	switch (toolInvocation.toolName) {
-		case 'suggestContent':
-			return <ContentSuggestionTool toolInvocation={toolInvocation} addToolResult={addToolResult} />;
-		case 'readSubField':
-			return <ReferencedFieldTool toolInvocation={toolInvocation} />;
 		case 'writeField':
-			return <WriteFieldTool toolInvocation={toolInvocation} />;
+			return <ToolCallNotification toolInvocation={toolInvocation} />;
+		case 'addToArray':
+			return <ToolCallNotification toolInvocation={toolInvocation} />;
+		case 'removeFromArray':
+			return <ToolCallNotification toolInvocation={toolInvocation} />;
 		default:
 			// Fallback for any tool we don't have a specific component for
 			return (
-				<Card className="my-3 border border-gray-200 bg-white">
-					<CardContent className="p-3 space-y-2">
-						<p className="font-semibold">Tool: {toolInvocation.toolName}</p>
-						<div className="p-2 bg-gray-50 border border-gray-100 rounded">
-							<div className="max-w-full overflow-auto">
-								<pre className="text-xs font-mono whitespace-pre-wrap break-words">
-									{JSON.stringify(toolInvocation, null, 2)}
-								</pre>
-							</div>
-						</div>
+				<Card className="my-2 border border-gray-200 bg-white">
+					<CardContent className="p-2 text-xs">
+						<p className="font-semibold">Unknown tool: {toolInvocation.toolName}</p>
 					</CardContent>
 				</Card>
 			);
 	}
 };
 
+// Unified tool notification component that works for all tool types
+const ToolCallNotification = ({ toolInvocation }: { toolInvocation: ToolInvocation; }) => {
+	const { toolName, state, args, result } = toolInvocation;
+
+	// Define tool-specific properties
+	const getToolDetails = () => {
+		switch (toolName) {
+			case 'writeField':
+				return {
+					icon: Pencil,
+					fieldName: args.fieldPath || result?.fieldPath,
+					action: 'Updated',
+					value: args.value || result?.value
+				};
+			case 'addToArray':
+				return {
+					icon: Plus,
+					fieldName: args.arrayPath || result?.arrayPath,
+					action: 'Added to',
+					value: args.item || result?.item
+				};
+			case 'removeFromArray':
+				return {
+					icon: Minus,
+					fieldName: args.arrayPath || result?.arrayPath,
+					action: 'Removed from',
+					value: args.itemKey || result?.itemKey
+				};
+			default:
+				return {
+					icon: AlertCircle,
+					fieldName: 'unknown field',
+					action: 'Modified',
+					value: null
+				};
+		}
+	};
+
+	const { icon: Icon, fieldName, action, value } = getToolDetails();
+
+	if (state === 'partial-call' || state === 'call') {
+		return (
+			<div className="inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 text-xs bg-blue-50 border border-blue-100 rounded-md text-blue-700">
+				<Loader2 className="h-3 w-3 animate-spin" />
+				<span className="text-blue-800 font-medium">{action} {fieldName}</span>
+			</div>
+		);
+	}
+
+	if (!result || !result.success) {
+		return (
+			<div className="inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 text-xs bg-red-50 border border-red-100 rounded-md text-red-700">
+				<X className="h-3 w-3" />
+				<span className="text-red-800 font-medium">Failed to {action.toLowerCase()} {fieldName}</span>
+			</div>
+		);
+	}
+
+	return (
+		<div className="inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 text-xs bg-emerald-50 border border-emerald-100 rounded-md text-emerald-700">
+			<Check className="h-3 w-3" />
+			<span className="text-emerald-800 font-medium">{action} {fieldName}</span>
+			<Icon className="h-3 w-3 ml-0.5 text-emerald-600" />
+		</div>
+	);
+};
 
 export default ContentCopilotView;

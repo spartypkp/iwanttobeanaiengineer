@@ -117,7 +117,7 @@ export async function POST(req: Request) {
 		documentData,
 		serializableSchema
 	});
-	console.log('System prompt:', systemPrompt);
+	//'console.log('System prompt:', systemPrompt);
 
 
 	// Create the stream with callbacks
