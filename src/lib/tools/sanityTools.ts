@@ -2,13 +2,17 @@ import { logToolCall } from '@/lib/tools/utils';
 import { client as sanityClient } from '@/sanity/lib/client';
 import {
 	addItemToArray,
+	deleteFromPath,
 	fetchReferencedDocuments,
 	fetchRelatedDocument,
 	getAllDocumentTypes,
 	listDocumentsByType,
+	performArrayOperation,
+	queryDocuments,
 	removeItemFromArray,
 	resolveDocumentReferences,
-	updateDocumentField
+	updateDocumentField,
+	writeToPath
 } from '@/sanity/lib/helpers';
 import { tool } from 'ai';
 import { z } from 'zod';
@@ -485,5 +489,241 @@ function serializeDocument(doc: Record<string, any>): Record<string, any> {
 		return value;
 	}));
 }
+
+// New primitive operation tools
+
+/**
+ * Generic write tool - works for any field, nested object, or array element
+ */
+export const writeTool = tool({
+	description: 'Write/set a value at any path in a Sanity document. Handles simple fields, nested objects, and array items. This is a more flexible alternative to writeFieldTool that can update any part of a document structure.',
+	parameters: z.object({
+		documentId: z.string().describe('The Sanity document ID'),
+		path: z.string().describe('Path to the field (e.g., "title", "content.blocks[0].text", "metadata.tags[_key==\"abc123\"].value")'),
+		value: z.any().describe('The value to set at the specified path'),
+		createIfMissing: z.boolean().optional().describe('Create parent objects/arrays if they don\'t exist (default: true)')
+	}),
+	execute: async ({ documentId, path, value, createIfMissing = true }, { toolCallId }) => {
+		try {
+			// Get the current document to verify it exists
+			const document = await sanityClient.getDocument(documentId);
+			if (!document) {
+				const error = `Document not found: ${documentId}`;
+				await logToolCall(toolCallId, 'writeTool', { documentId, path, value }, { success: false, message: error }, true);
+				return {
+					success: false,
+					message: error
+				};
+			}
+
+			// Use the helper function to write to the path
+			await writeToPath(documentId, path, value, createIfMissing);
+
+			// Log successful tool call
+			const result = {
+				success: true,
+				message: `Successfully wrote value at path "${path}"`,
+				path,
+				value
+			};
+
+			await logToolCall(toolCallId, 'writeTool', { documentId, path, value }, result, false);
+			return result;
+
+		} catch (error) {
+			console.error('Error using writeTool:', error);
+
+			// Log failed tool call
+			const errorResult = {
+				success: false,
+				message: `Failed to write value at path "${path}": ${error instanceof Error ? error.message : String(error)}`
+			};
+
+			await logToolCall(toolCallId, 'writeTool', { documentId, path, value }, errorResult, true);
+			return errorResult;
+		}
+	}
+});
+
+/**
+ * Generic delete tool - can delete any field, object, or array element
+ */
+export const deleteTool = tool({
+	description: 'Delete/unset a value at any path in a Sanity document. Works for simple fields, nested objects, and array items. Use this to remove content from documents.',
+	parameters: z.object({
+		documentId: z.string().describe('The Sanity document ID'),
+		path: z.string().describe('Path to delete (e.g., "title", "content.blocks[0]", "tags[_key==\"abc123\"]")')
+	}),
+	execute: async ({ documentId, path }, { toolCallId }) => {
+		try {
+			// Get the current document to verify it exists
+			const document = await sanityClient.getDocument(documentId);
+			if (!document) {
+				const error = `Document not found: ${documentId}`;
+				await logToolCall(toolCallId, 'deleteTool', { documentId, path }, { success: false, message: error }, true);
+				return {
+					success: false,
+					message: error
+				};
+			}
+
+			// Use the helper function to delete the path
+			await deleteFromPath(documentId, path);
+
+			// Log successful tool call
+			const result = {
+				success: true,
+				message: `Successfully deleted value at path "${path}"`,
+				path
+			};
+
+			await logToolCall(toolCallId, 'deleteTool', { documentId, path }, result, false);
+			return result;
+
+		} catch (error) {
+			console.error('Error using deleteTool:', error);
+
+			// Log failed tool call
+			const errorResult = {
+				success: false,
+				message: `Failed to delete value at path "${path}": ${error instanceof Error ? error.message : String(error)}`
+			};
+
+			await logToolCall(toolCallId, 'deleteTool', { documentId, path }, errorResult, true);
+			return errorResult;
+		}
+	}
+});
+
+/**
+ * Comprehensive array operations tool
+ */
+export const arrayTool = tool({
+	description: 'Perform operations on arrays in a Sanity document - add, remove, or replace items. This is a more powerful alternative to addToArrayTool and removeFromArrayTool that handles all array operations.',
+	parameters: z.object({
+		documentId: z.string().describe('The Sanity document ID'),
+		path: z.string().describe('Path to the array (e.g., "tags", "content.blocks")'),
+		operation: z.enum(['append', 'prepend', 'insert', 'remove', 'replace']).describe('The operation to perform on the array'),
+		items: z.array(z.any()).optional().describe('Items to add/insert/replace (required for append, prepend, insert, replace)'),
+		at: z.union([
+			z.number().describe('Index position for insert/replace/remove operations'),
+			z.string().describe('Key (_key value) for insert/replace/remove operations in keyed arrays')
+		]).optional().describe('Position or key where to perform the operation (required for insert, replace, remove)'),
+		position: z.enum(['before', 'after', 'replace']).optional()
+			.describe('Position for insert operations - before/after the specified index or key (default: after)')
+	}),
+	execute: async ({ documentId, path, operation, items = [], at, position }, { toolCallId }) => {
+		try {
+			// Get the current document to verify it exists
+			const document = await sanityClient.getDocument(documentId);
+			if (!document) {
+				const error = `Document not found: ${documentId}`;
+				await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, { success: false, message: error }, true);
+				return {
+					success: false,
+					message: error
+				};
+			}
+
+			// Validate parameters based on operation
+			if (['append', 'prepend', 'insert', 'replace'].includes(operation) && (!items || items.length === 0)) {
+				const error = `Items array is required for '${operation}' operation`;
+				await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, { success: false, message: error }, true);
+				return {
+					success: false,
+					message: error
+				};
+			}
+
+			if (['insert', 'remove', 'replace'].includes(operation) && at === undefined) {
+				const error = `'at' parameter is required for '${operation}' operation`;
+				await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, { success: false, message: error }, true);
+				return {
+					success: false,
+					message: error
+				};
+			}
+
+			// Use the helper function to perform the array operation
+			await performArrayOperation(documentId, path, operation, items, at, position);
+
+			// Log successful tool call
+			const result = {
+				success: true,
+				message: `Successfully performed "${operation}" on array at "${path}"`,
+				path,
+				operation,
+				items: items.length
+			};
+
+			await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, result, false);
+			return result;
+
+		} catch (error) {
+			console.error('Error using arrayTool:', error);
+
+			// Log failed tool call
+			const errorResult = {
+				success: false,
+				message: `Array operation failed: ${error instanceof Error ? error.message : String(error)}`
+			};
+
+			await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, errorResult, true);
+			return errorResult;
+		}
+	}
+});
+
+/**
+ * Flexible document query tool
+ */
+export const queryTool = tool({
+	description: 'Query Sanity documents using simple criteria or full GROQ syntax. Use this to find documents before modifying them.',
+	parameters: z.object({
+		type: z.string().optional().describe('Filter by document type'),
+		id: z.string().optional().describe('Find document by ID'),
+		field: z.string().optional().describe('Filter by a specific field value'),
+		value: z.any().optional().describe('Value to match for the field'),
+		limit: z.number().optional().describe('Maximum number of results (default: 10)'),
+		groq: z.string().optional().describe('Custom GROQ query (overrides other parameters)'),
+		projection: z.string().optional().describe('Fields to include in results (e.g., "title,description,_id" or "*")')
+	}),
+	execute: async ({ type, id, field, value, limit = 10, groq, projection = '*' }, { toolCallId }) => {
+		try {
+			// Use helper function to query documents
+			const results = await queryDocuments({
+				type,
+				id,
+				field,
+				value,
+				limit,
+				groq,
+				projection
+			});
+
+			// Log successful tool call
+			const result = {
+				success: true,
+				count: results.length,
+				results
+			};
+
+			await logToolCall(toolCallId, 'queryTool', { type, id, field, value, limit, groq, projection }, result, false);
+			return result;
+
+		} catch (error) {
+			console.error('Error using queryTool:', error);
+
+			// Log failed tool call
+			const errorResult = {
+				success: false,
+				message: `Query failed: ${error instanceof Error ? error.message : String(error)}`
+			};
+
+			await logToolCall(toolCallId, 'queryTool', { type, id, field, value, limit, groq, projection }, errorResult, true);
+			return errorResult;
+		}
+	}
+});
 
 

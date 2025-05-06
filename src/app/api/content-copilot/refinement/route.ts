@@ -1,13 +1,15 @@
 import { generateContentCopilotRefinementPrompt } from '@/lib/prompts';
 import { githubTools } from '@/lib/tools/github';
 import {
-	addToArrayTool,
+	arrayTool,
+	deleteTool,
 	getAllDocumentTypesTool,
 	getRelatedDocumentTool,
 	listDocumentsByTypeTool,
-	removeFromArrayTool,
-	writeFieldTool
-} from '@/lib/tools/sanityTools';
+	queryTool,
+	// Improved tools
+	writeTool
+} from '@/lib/tools/index';
 import { createClient } from '@/lib/utils/supabase/server';
 import { SerializableSchema } from '@/utils/schema-serialization';
 import { anthropic } from '@ai-sdk/anthropic';
@@ -30,9 +32,18 @@ const githubToolsConfig = githubTools(
 
 // Define available tools
 const availableTools: Record<string, Tool> = {
-	writeField: writeFieldTool,
-	addToArray: addToArrayTool,
-	removeFromArray: removeFromArrayTool,
+	// Legacy tools
+	// writeField: writeFieldTool,
+	// addToArray: addToArrayTool,
+	// removeFromArray: removeFromArrayTool,
+
+	// New more powerful primitive tools
+	write: writeTool,
+	delete: deleteTool,
+	array: arrayTool,
+	query: queryTool,
+
+	// Other tools
 	getRelatedDocument: getRelatedDocumentTool,
 	getAllDocumentTypes: getAllDocumentTypesTool,
 	listDocumentsByType: listDocumentsByTypeTool,

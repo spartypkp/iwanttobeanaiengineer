@@ -1,4 +1,4 @@
-import { AutoPreviewPane } from '@/components/dave-admin/sanity/AutoPreviewPane';
+import { AutoPreviewPane } from '@/components/content-copilot/AutoPreviewPane';
 import { BookIcon } from '@sanity/icons';
 import { defineField, defineType } from 'sanity';
 

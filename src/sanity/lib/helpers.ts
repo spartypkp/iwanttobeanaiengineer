@@ -465,3 +465,204 @@ export async function listDocumentsByType(
 	}
 }
 
+/**
+ * Generic helper for writing any value at any path in a document
+ * Provides more flexibility than updateDocumentField
+ */
+export async function writeToPath(
+	documentId: string,
+	path: string,
+	value: any,
+	createIfMissing: boolean = true
+): Promise<void> {
+	try {
+		const patch = client.patch(documentId);
+
+		// Handle missing parent paths if needed
+		if (createIfMissing) {
+			const pathSegments = path.split(/\.|\[|\]\.?/).filter(Boolean);
+			let currentPath = '';
+
+			// Set missing parent objects/arrays
+			for (let i = 0; i < pathSegments.length - 1; i++) {
+				currentPath = currentPath ? `${currentPath}.${pathSegments[i]}` : pathSegments[i];
+				patch.setIfMissing({ [currentPath]: isArrayIndex(pathSegments[i + 1]) ? [] : {} });
+			}
+		}
+
+		// Set the value
+		patch.set(createNestedPathObject(path, value));
+		await patch.commit();
+
+		console.log(`Successfully wrote value at path "${path}" in document ${documentId}`);
+	} catch (error) {
+		console.error(`Error writing to path ${path}:`, error);
+		throw error;
+	}
+}
+
+/**
+ * Helper to check if a path segment is an array index
+ */
+function isArrayIndex(segment: string): boolean {
+	return /^\d+$/.test(segment) || segment.startsWith('_key==');
+}
+
+/**
+ * Delete/unset a value at any path
+ */
+export async function deleteFromPath(
+	documentId: string,
+	path: string
+): Promise<void> {
+	try {
+		await client
+			.patch(documentId)
+			.unset([path])
+			.commit();
+
+		console.log(`Successfully deleted value at path "${path}" in document ${documentId}`);
+	} catch (error) {
+		console.error(`Error deleting from path ${path}:`, error);
+		throw error;
+	}
+}
+
+/**
+ * Perform operations on arrays
+ */
+export async function performArrayOperation(
+	documentId: string,
+	path: string,
+	operation: 'append' | 'prepend' | 'insert' | 'remove' | 'replace',
+	items: any[] = [],
+	at?: number | string,
+	position?: 'before' | 'after' | 'replace'
+): Promise<void> {
+	try {
+		let patch = client.patch(documentId);
+
+		// Create array if it doesn't exist
+		patch = patch.setIfMissing({ [path]: [] });
+
+		// Handle the requested operation
+		switch (operation) {
+			case 'append':
+				patch = patch.append(path, items.map(ensureItemKey));
+				break;
+
+			case 'prepend':
+				patch = patch.prepend(path, items.map(ensureItemKey));
+				break;
+
+			case 'insert':
+				if (typeof at === 'number') {
+					// Using index
+					patch = patch.insert(position || 'after', `${path}[${at}]`, items.map(ensureItemKey));
+				} else if (typeof at === 'string') {
+					// Using _key
+					patch = patch.insert(position || 'after', `${path}[_key=="${at}"]`, items.map(ensureItemKey));
+				}
+				break;
+
+			case 'remove':
+				if (typeof at === 'number') {
+					patch = patch.unset([`${path}[${at}]`]);
+				} else if (typeof at === 'string') {
+					patch = patch.unset([`${path}[_key=="${at}"]`]);
+				}
+				break;
+
+			case 'replace':
+				if (typeof at === 'number') {
+					patch = patch.insert('replace', `${path}[${at}]`, items.map(ensureItemKey));
+				} else if (typeof at === 'string') {
+					patch = patch.insert('replace', `${path}[_key=="${at}"]`, items.map(ensureItemKey));
+				}
+				break;
+		}
+
+		await patch.commit();
+
+		console.log(`Successfully performed "${operation}" on array at "${path}" in document ${documentId}`);
+	} catch (error) {
+		console.error(`Error performing array operation on ${path}:`, error);
+		throw error;
+	}
+}
+
+/**
+ * Enhanced query function that handles both simple queries and custom GROQ
+ */
+export async function queryDocuments(
+	options: {
+		type?: string;
+		id?: string;
+		field?: string;
+		value?: any;
+		limit?: number;
+		groq?: string;
+		projection?: string;
+	}
+): Promise<any[]> {
+	try {
+		const { type, id, field, value, limit = 10, groq, projection = '*' } = options;
+		let query;
+		let params: Record<string, any> = {};
+
+		// Allow custom GROQ or build simple query
+		if (groq) {
+			query = groq;
+		} else if (id) {
+			query = projection === '*'
+				? `*[_id == $id][0]`
+				: `*[_id == $id][0]{${projection}}`;
+			params.id = id;
+		} else {
+			// Build query from parameters
+			let filters = [];
+			if (type) {
+				filters.push('_type == $type');
+				params.type = type;
+			}
+			if (field && value !== undefined) {
+				filters.push(`${field} == $value`);
+				params.value = value;
+			}
+
+			const filterStr = filters.length > 0 ? `[${filters.join(' && ')}]` : '';
+			query = `*${filterStr}`;
+
+			// Add projection
+			if (projection === '*') {
+				query += ``;
+			} else {
+				query += `{${projection}}`;
+			}
+
+			// Add limit
+			if (limit) {
+				query += `[0...${limit}]`;
+			}
+		}
+
+		const results = await client.fetch(query, params);
+
+		// Ensure results is always an array
+		return Array.isArray(results) ? results : [results].filter(Boolean);
+	} catch (error) {
+		console.error(`Error querying documents:`, error);
+		throw error;
+	}
+}
+
+/**
+ * Helper to ensure array items have _key for object arrays
+ */
+function ensureItemKey(item: any): any {
+	if (typeof item === 'object' && item !== null && !item._key) {
+		return { ...item, _key: Math.random().toString(36).substring(2, 9) };
+	}
+	return item;
+}
+

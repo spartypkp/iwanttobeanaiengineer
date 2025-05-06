@@ -6,8 +6,9 @@ import {
 	getRelatedDocumentTool,
 	listDocumentsByTypeTool,
 	removeFromArrayTool,
+	// Only import legacy tools
 	writeFieldTool
-} from '@/lib/tools/sanityTools';
+} from '@/lib/tools/index';
 import { createClient } from '@/lib/utils/supabase/server';
 import { SerializableSchema } from '@/utils/schema-serialization';
 import { anthropic } from '@ai-sdk/anthropic';
@@ -28,11 +29,14 @@ const githubToolsConfig = githubTools(
 	}
 );
 
-// Define available tools
+// Define available tools - only use legacy tools for regular mode
 const availableTools: Record<string, Tool> = {
+	// Legacy tools only
 	writeField: writeFieldTool,
 	addToArray: addToArrayTool,
 	removeFromArray: removeFromArrayTool,
+
+	// Other tools
 	getRelatedDocument: getRelatedDocumentTool,
 	getAllDocumentTypes: getAllDocumentTypesTool,
 	listDocumentsByType: listDocumentsByTypeTool,
@@ -95,7 +99,8 @@ export async function POST(req: Request) {
 					source: 'sanity',
 					documentId,
 					schemaType,
-					documentTitle: documentData.title || 'Untitled'
+					documentTitle: documentData.title || 'Untitled',
+					mode: 'regular'
 				},
 				system_prompt: generateContentCopilotSystemPrompt({
 					documentId,
