@@ -133,6 +133,7 @@ export type Skill = {
 	_createdAt: string;
 	_updatedAt: string;
 	_rev: string;
+	contentCopilotPreview?: string;
 	name?: string;
 	slug?: Slug;
 	category?:
@@ -203,6 +204,7 @@ export type Project = {
 	_createdAt: string;
 	_updatedAt: string;
 	_rev: string;
+	contentCopilotPreview?: string;
 	title?: string;
 	slug?: Slug;
 	id?: string;
@@ -361,6 +363,7 @@ export type KnowledgeBase = {
 	_createdAt: string;
 	_updatedAt: string;
 	_rev: string;
+	contentCopilotPreview?: string;
 	title?: string;
 	slug?: Slug;
 	category?:

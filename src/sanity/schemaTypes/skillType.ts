@@ -1,3 +1,4 @@
+import { AutoPreviewPane } from '@/components/dave-admin/sanity/AutoPreviewPane';
 import { StarIcon } from '@sanity/icons';
 import { defineField, defineType } from 'sanity';
 
@@ -7,6 +8,15 @@ export const skillType = defineType({
 	type: 'document',
 	icon: StarIcon,
 	fields: [
+		// Hidden field for auto-preview pane
+		defineField({
+			name: 'contentCopilotPreview',
+			type: 'string',
+			hidden: true,
+			components: {
+				field: AutoPreviewPane,
+			},
+		}),
 		defineField({
 			name: 'name',
 			title: 'Skill Name',

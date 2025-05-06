@@ -725,6 +725,13 @@
           "type": "string"
         }
       },
+      "contentCopilotPreview": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "name": {
         "type": "objectAttribute",
         "value": {
@@ -1192,6 +1199,13 @@
         "value": {
           "type": "string"
         }
+      },
+      "contentCopilotPreview": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
       },
       "title": {
         "type": "objectAttribute",
@@ -2256,6 +2270,13 @@
         "value": {
           "type": "string"
         }
+      },
+      "contentCopilotPreview": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
       },
       "title": {
         "type": "objectAttribute",

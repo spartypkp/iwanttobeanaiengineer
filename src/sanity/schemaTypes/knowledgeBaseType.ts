@@ -1,3 +1,4 @@
+import { AutoPreviewPane } from '@/components/dave-admin/sanity/AutoPreviewPane';
 import { BookIcon } from '@sanity/icons';
 import { defineField, defineType } from 'sanity';
 
@@ -7,6 +8,15 @@ export const knowledgeBaseType = defineType({
 	type: 'document',
 	icon: BookIcon,
 	fields: [
+		// Hidden field for auto-preview pane
+		defineField({
+			name: 'contentCopilotPreview',
+			type: 'string',
+			hidden: true,
+			components: {
+				field: AutoPreviewPane,
+			},
+		}),
 		defineField({
 			name: 'title',
 			title: 'Title',

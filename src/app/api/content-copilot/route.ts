@@ -1,16 +1,47 @@
 import { generateContentCopilotSystemPrompt } from '@/lib/prompts';
-import { addToArrayTool, removeFromArrayTool, writeFieldTool } from '@/lib/tools/sanityTools';
+import { githubTools } from '@/lib/tools/github';
+import {
+	addToArrayTool,
+	getAllDocumentTypesTool,
+	getRelatedDocumentTool,
+	listDocumentsByTypeTool,
+	removeFromArrayTool,
+	writeFieldTool
+} from '@/lib/tools/sanityTools';
 import { createClient } from '@/lib/utils/supabase/server';
 import { SerializableSchema } from '@/utils/schema-serialization';
 import { anthropic } from '@ai-sdk/anthropic';
-import { Message, streamText } from 'ai';
+import { Message, streamText, type Tool } from 'ai';
+
+// Configure GitHub tools with authentication
+const githubToolsConfig = githubTools(
+	{
+		token: process.env.GITHUB_TOKEN || ''
+	},
+	{
+		// Only include tools we need
+		excludeTools: [
+			// Exclude all GitHub tools except getRepositoryDetails
+			'getRepository',
+			'getRepositoryLanguages',
+		]
+	}
+);
 
 // Define available tools
-const availableTools = {
+const availableTools: Record<string, Tool> = {
 	writeField: writeFieldTool,
 	addToArray: addToArrayTool,
-	removeFromArray: removeFromArrayTool
+	removeFromArray: removeFromArrayTool,
+	getRelatedDocument: getRelatedDocumentTool,
+	getAllDocumentTypes: getAllDocumentTypesTool,
+	listDocumentsByType: listDocumentsByTypeTool,
 };
+
+// Add the GitHub repository details tool if available
+if (githubToolsConfig.getRepositoryDetails) {
+	availableTools.getRepositoryDetails = githubToolsConfig.getRepositoryDetails;
+}
 
 // Request interface that matches what we receive from the frontend
 interface ContentCopilotRequest {

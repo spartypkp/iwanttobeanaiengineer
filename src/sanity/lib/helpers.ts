@@ -216,3 +216,252 @@ function formatValueForField(fieldPath: string, value: any, currentField: any): 
 	return value;
 }
 
+/**
+ * Fetches a related document by ID
+ * @param documentId The ID of the document to fetch
+ * @param projection Optional GROQ projection for specific fields
+ * @returns The document data or null if not found
+ */
+export async function fetchRelatedDocument(
+	documentId: string,
+	projection: string = '*'
+): Promise<Record<string, any> | null> {
+	try {
+		// Use proper GROQ syntax with parameterization
+		// The projection needs to be properly formatted based on whether it's a '*' or a custom projection
+		const query = projection === '*'
+			? `*[_id == $documentId][0]`
+			: `*[_id == $documentId][0]{${projection}}`;
+
+		const document = await client.fetch(
+			query,
+			{ documentId }
+		);
+
+		return document || null;
+	} catch (error) {
+		console.error(`Error fetching related document ${documentId}:`, error);
+		return null;
+	}
+}
+
+/**
+ * Fetches related documents based on references in a specific field
+ * @param documentId The ID of the source document
+ * @param referenceField The field containing references (e.g., "relatedProjects")
+ * @param projection Optional GROQ projection for the related documents
+ * @returns Array of related documents
+ */
+export async function fetchReferencedDocuments(
+	documentId: string,
+	referenceField: string,
+	projection: string = '*'
+): Promise<Record<string, any>[]> {
+	try {
+		// First get the source document to extract the references
+		const document = await client.fetch(
+			`*[_id == $documentId][0]{${referenceField}}`,
+			{ documentId }
+		);
+
+		if (!document || !document[referenceField]) {
+			return [];
+		}
+
+		// Get the array of references
+		const references = document[referenceField];
+
+		// If it's not an array or empty, return empty result
+		if (!Array.isArray(references) || references.length === 0) {
+			return [];
+		}
+
+		// Extract the reference IDs
+		const referenceIds = references
+			.filter(ref => ref._ref) // Make sure it has a _ref property
+			.map(ref => ref._ref);
+
+		if (referenceIds.length === 0) {
+			return [];
+		}
+
+		// Fetch all referenced documents in a single query
+		const referencedDocuments = await client.fetch(
+			`*[_id in $referenceIds]{${projection}}`,
+			{ referenceIds }
+		);
+
+		return referencedDocuments || [];
+	} catch (error) {
+		console.error(`Error fetching referenced documents for ${documentId}.${referenceField}:`, error);
+		return [];
+	}
+}
+
+/**
+ * Recursively resolves references in a document
+ * @param documentId The ID of the document to resolve references for
+ * @param depth Maximum depth to resolve (default 1)
+ * @param fieldsToResolve Array of field names to resolve references for
+ * @returns Document with resolved references
+ */
+export async function resolveDocumentReferences(
+	documentId: string,
+	depth: number = 1,
+	fieldsToResolve: string[] = []
+): Promise<Record<string, any> | null> {
+	if (depth < 1) {
+		return fetchRelatedDocument(documentId);
+	}
+
+	try {
+		// First get the document
+		const document = await fetchRelatedDocument(documentId);
+
+		if (!document) {
+			return null;
+		}
+
+		// Create a copy to avoid modifying the original
+		const result = { ...document };
+
+		// If no specific fields provided, try to find all reference fields
+		const fieldsToProcess = fieldsToResolve.length > 0
+			? fieldsToResolve
+			: Object.keys(document).filter(key =>
+				Array.isArray(document[key]) &&
+				document[key].length > 0 &&
+				document[key][0]?._ref
+			);
+
+		// Process each field with references
+		for (const field of fieldsToProcess) {
+			if (Array.isArray(document[field]) && document[field].some(item => item._ref)) {
+				// Fetch all referenced documents for this field
+				const referencedDocs = await fetchReferencedDocuments(documentId, field);
+
+				// Replace the references with the actual documents
+				if (referencedDocs.length > 0) {
+					// If we need to go deeper, resolve references in the referenced documents
+					if (depth > 1) {
+						const resolvedRefs = await Promise.all(
+							referencedDocs.map(doc =>
+								resolveDocumentReferences(doc._id, depth - 1, fieldsToResolve)
+							)
+						);
+						result[field] = resolvedRefs.filter(Boolean);
+					} else {
+						result[field] = referencedDocs;
+					}
+				}
+			}
+		}
+
+		return result;
+	} catch (error) {
+		console.error(`Error resolving references for document ${documentId}:`, error);
+		return null;
+	}
+}
+
+/**
+ * Gets all available document types from the Sanity schema
+ * @returns Array of document types with their metadata
+ */
+export async function getAllDocumentTypes(): Promise<Array<{
+	name: string;
+	title: string;
+	count: number;
+	description?: string;
+}>> {
+	try {
+		// First get the list of document types with counts
+		const typesWithCounts = await client.fetch(`
+			*[defined(_type)] {
+				_type
+			} | group by _type | {
+				"types": [
+					{
+						"name": _key,
+						"count": count(*[_type == _key])
+					}
+				]
+			}.types
+		`);
+
+		// Filter out system types
+		const systemTypes = ['sanity.imageAsset', 'sanity.fileAsset', 'media.tag'];
+		const filteredTypes = typesWithCounts.filter(
+			(type: { name: string; }) => !systemTypes.includes(type.name)
+		);
+
+		// Enhance with display titles if possible
+		// This is an approximation - for a complete solution, you'd reference
+		// the actual schema definition
+		const enhancedTypes = filteredTypes.map((type: { name: string; count: number; }) => {
+			// Convert camelCase or snake_case to Title Case
+			const formattedTitle = type.name
+				.replace(/([A-Z])/g, ' $1') // Insert space before capital letters
+				.replace(/_/g, ' ') // Replace underscores with spaces
+				.toLowerCase()
+				.split(' ')
+				.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(' ');
+
+			return {
+				name: type.name,
+				title: formattedTitle,
+				count: type.count,
+				description: `${formattedTitle} content type`
+			};
+		});
+
+		return enhancedTypes;
+	} catch (error) {
+		console.error('Error getting document types:', error);
+		return [];
+	}
+}
+
+/**
+ * Lists documents of a specific type with basic information
+ * @param documentType The type of documents to list (e.g., 'project', 'skill')
+ * @param limit Maximum number of documents to return (default: 100)
+ * @param offset Number of documents to skip (for pagination)
+ * @param orderBy Field to sort by, prepend with '-' for descending (e.g., '-_createdAt')
+ * @param filter Optional additional GROQ filter conditions
+ * @returns Array of documents with basic metadata
+ */
+export async function listDocumentsByType(
+	documentType: string,
+	limit: number = 100,
+	offset: number = 0,
+	orderBy: string = '_createdAt',
+	filter: string = ''
+): Promise<Array<Record<string, any>>> {
+	try {
+		// Build the filter string
+		const filterString = filter ? ` && ${filter}` : '';
+
+		// Create a GROQ query that gets essential fields
+		const query = `
+			*[_type == $documentType${filterString}] | order(${orderBy}) [${offset}...${offset + limit}] {
+				_id,
+				_type,
+				_createdAt,
+				_updatedAt,
+				"title": coalesce(title, name, slug.current, "Untitled"),
+				"description": coalesce(description, "No description"),
+				"slug": slug.current,
+				"status": timeline.status
+			}
+		`;
+
+		const documents = await client.fetch(query, { documentType });
+		return documents || [];
+	} catch (error) {
+		console.error(`Error listing documents of type ${documentType}:`, error);
+		return [];
+	}
+}
+

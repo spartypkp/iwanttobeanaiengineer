@@ -1,3 +1,4 @@
+import { AutoPreviewPane } from '@/components/dave-admin/sanity/AutoPreviewPane';
 import { DocumentIcon } from '@sanity/icons';
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
@@ -7,6 +8,17 @@ export const projectType = defineType({
 	type: 'document',
 	icon: DocumentIcon,
 	fields: [
+		// Hidden field for auto-preview pane
+		defineField({
+			name: 'contentCopilotPreview',
+			type: 'string',
+			hidden: false, // Make visible for debugging
+			description: 'This field enables auto-preview',
+			components: {
+				field: AutoPreviewPane,
+			},
+		}),
+
 		// Basic Project Information
 		defineField({
 			name: 'title',
