@@ -23,6 +23,12 @@ The primary goals of this personal website are:
 │   │   ├── about/      # About page
 │   │   ├── (admin)/    # Admin-only routes with protected layout
 │   │   │   └── contentCopilot/ # Content Copilot admin feature
+│   │   ├── api/        # API routes
+│   │   │   ├── content-copilot/  # Content Copilot API endpoints
+│   │   │   │   ├── regular/      # Regular content creation mode
+│   │   │   │   └── refinement/   # Content refinement mode
+│   │   │   └── conversation/     # Conversation management
+│   │   │       └── get/          # Conversation retrieval endpoint
 │   │   ├── dave/       # Public AI assistant page 
 │   │   ├── projects/   # Projects page and individual project pages
 │   │   │   └── [slug]/ # Dynamic project detail pages
@@ -32,17 +38,14 @@ The primary goals of this personal website are:
 │   │   ├── page.tsx    # Home page
 │   │   └── globals.css # Global styles
 │   ├── components/     # Reusable components
+│   │   ├── content-copilot/ # Content Copilot components
+│   │   │   ├── AutoPreviewPane.tsx      # Auto preview component
+│   │   │   └── ContentCopilotView.tsx   # Main Content Copilot view
 │   │   ├── custom/     # Custom components for the site
 │   │   │   ├── dave.tsx          # Dave icon component
 │   │   │   ├── projectCard.tsx   # Project card component
 │   │   │   ├── projectGrid.tsx   # Project grid with filtering
 │   │   │   └── // other custom components
-│   │   ├── dave-admin/ # Admin components for Dave features
-│   │   │   └── content-copilot/  # Content Copilot components
-│   │   │       ├── ChatPane.tsx           # Chat interface
-│   │   │       ├── ContentCopilot.tsx     # Main component
-│   │   │       ├── ContentSidebar.tsx     # Content selection panel
-│   │   │       └── types.ts               # Type definitions
 │   │   └── ui/         # ShadCN UI components
 │   ├── sanity/         # Sanity CMS configuration
 │   │   ├── lib/        # Sanity utility functions and client
@@ -624,7 +627,17 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - Added automatic field extraction from natural language conversations
    - Implemented real-time progress tracking for field completion
 
-2. **Chat Interface**
+2. **Architecture**
+   - **API Organization:**
+     - `/api/content-copilot/regular` - Handles standard content creation conversations
+     - `/api/content-copilot/refinement` - Handles content refinement conversations
+     - `/api/conversation/get` - Manages conversation retrieval and history
+   
+   - **Component Organization:**
+     - `/components/content-copilot/ContentCopilotView.tsx` - Main view component
+     - `/components/content-copilot/AutoPreviewPane.tsx` - Auto-preview of content changes
+
+3. **Chat Interface**
    - Developed a rich chat UI with message history, typing indicators, and user avatars
    - Added support for quick responses based on content type
    - Implemented markdown formatting for chat messages
@@ -632,27 +645,19 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - Included copy-to-clipboard functionality for messages
    - Fixed the "Start Conversation" functionality for improved user experience
 
-3. **Content Management**
+4. **Content Management**
    - Created a comprehensive sidebar for content selection and preview
    - Implemented tabs for different content types
    - Added search and filtering capabilities for existing content
    - Developed a detailed field preview for reviewing extracted information
    - Enabled seamless transitions between conversation and manual editing modes
 
-4. **Admin Architecture**
+5. **Admin Architecture**
    - Added dedicated route at `/contentCopilot` for admin access
    - Created a protected admin layout with authentication
    - Implemented a strongly-typed chat context for state management
    - Added API endpoints specific to each content type
    - Integrated with Sanity CMS for real-time content updates
-
-5. **Technical Implementation**
-   - Utilized AI SDK for streaming chat responses
-   - Implemented a shared context architecture for component communication
-   - Created detailed type definitions for content items and fields
-   - Added automatic field detection based on AI responses
-   - Developed content type-specific API routes with specialized processing
-   - Improved message persistence with structured content parts storage
 
 6. **MVP Technical Achievements** 
    - **Schema Serialization**: Created a sophisticated schema serialization system to transform Sanity schema objects into JSON-serializable formats that can be passed to the API while preserving type information and validation rules

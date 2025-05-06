@@ -1,4 +1,4 @@
-import { AutoPreviewPane } from '@/components/dave-admin/sanity/AutoPreviewPane';
+import { AutoPreviewPane } from '@/components/content-copilot/AutoPreviewPane';
 import { DocumentIcon } from '@sanity/icons';
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
@@ -49,7 +49,7 @@ export const projectType = defineType({
 			description: 'A brief overview of the project (1-2 sentences)',
 			type: 'text',
 			rows: 3,
-			validation: Rule => Rule.required().max(250),
+			validation: Rule => Rule.required().max(400),
 		}),
 		defineField({
 			name: 'company',

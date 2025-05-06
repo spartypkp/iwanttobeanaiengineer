@@ -72,3 +72,12 @@ CREATE TABLE conversation_analytics (
 );
 
 CREATE INDEX idx_analytics_conversation_id ON conversation_analytics(conversation_id);
+
+ALTER TABLE conversations 
+ADD COLUMN parent_conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL;
+
+-- Add refinement_type column to support different refinement focuses
+ADD COLUMN refinement_type TEXT;
+
+-- Add an index for faster lookups
+CREATE INDEX idx_conversations_parent_id ON conversations(parent_conversation_id);
