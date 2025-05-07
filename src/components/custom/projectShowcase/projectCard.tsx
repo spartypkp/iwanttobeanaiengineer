@@ -32,7 +32,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
 	// Get thumbnail URL once
 	const thumbnailUrl = getThumbnailUrl();
-	console.log('thumbnailUrl', thumbnailUrl);
+	//console.log('thumbnailUrl', thumbnailUrl);
 
 	// Determine if the project has video content
 	const hasVideoShowcase = project.media?.some(m => m.type === 'video');

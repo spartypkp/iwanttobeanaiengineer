@@ -490,7 +490,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 						<h3 className="text-lg font-semibold">Ready to help with your content</h3>
 						{mode === 'refinement' && (
 							<div className="text-sm text-muted-foreground">
-								<p>Refinement mode active. I'll help you improve your existing content by:</p>
+								<p>Refinement mode active. I&apos;ll help you improve your existing content by:</p>
 								<ul className="list-disc list-inside mt-2 text-left">
 									<li>Enhancing clarity and impact</li>
 									<li>Improving technical precision</li>
