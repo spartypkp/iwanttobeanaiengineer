@@ -1,27 +1,19 @@
-// Export tool interfaces
-export interface ToolInvocation {
-	toolName: string;
-	toolCallId: string;
-	state: 'partial-call' | 'call' | 'result';
-	args: Record<string, any>;
-	result?: any;
-}
+import { MessagePart, TextPart, ToolInvocation, ToolInvocationPart } from '@/lib/types';
 
-// Export main components
-export { MessagePart } from './MessagePart';
-export { ToolInvocationDisplay } from './ToolInvocationDisplay';
+// Re-export the shared types for convenience
+export type { MessagePart, TextPart, ToolInvocation, ToolInvocationPart };
 
-// Export legacy tool components
-export { DocumentListToolCard, DocumentToolCard, DocumentTypesToolCard } from './documents/DocumentCards';
+// Export main component
+export { ToolDisplay } from './ToolDisplay';
+
+// Export Github tools
 export { GitHubToolCard } from './github/GitHubToolCard';
-export { ToolCallNotification } from './notifications/ToolCallNotification';
-
-// Export new primitive tool components
+// Export legacy Sanity tools
+export { DocumentListToolCard, DocumentToolCard, DocumentTypesToolCard } from './documents/DocumentCards';
+// Export new Sanity primitive tool components
 export { ArrayToolDisplay } from './primitive/ArrayToolDisplay';
 export { DeleteToolDisplay } from './primitive/DeleteToolDisplay';
 export { QueryToolDisplay } from './primitive/QueryToolDisplay';
 export { WriteToolDisplay } from './primitive/WriteToolDisplay';
 
-// Export legacy wrapper component
-export { LegacyToolWrapper } from './legacy/LegacyToolWrapper';
 

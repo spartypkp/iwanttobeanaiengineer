@@ -635,6 +635,8 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    
    - **Component Organization:**
      - `/components/content-copilot/ContentCopilotView.tsx` - Main view component
+     - `/components/content-copilot/ToolDisplay.tsx` - Renders custom tool result components
+     - `/components/content-copilot/tools/` - Directory containing specialized tool result components
      - `/components/content-copilot/AutoPreviewPane.tsx` - Auto-preview of content changes
 
 3. **Chat Interface**
@@ -664,10 +666,11 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - **Conversation Management**: Implemented a complete conversation storage and retrieval system in Supabase that maintains context across sessions
    - **API Integration**: Built a robust API route using Claude 3.7 Sonnet via AI SDK with streaming support and proper tool calling
    - **Tool Implementation**: Created specialized tools for content operations:
-     - `writeField`: Updates document fields with proper nested path handling
-     - `addToArray`: Adds items to array fields with automatic type detection for primitive vs object arrays
-     - `removeFromArray`: Removes specific items from array fields
-  
+     - `writeTool`: Updates document fields with proper nested path handling
+     - `deleteTool`: Deletes values at any path
+     - `arrayTool`: Handles array operations (append, prepend, insert, remove, replace)
+     - `queryTool`: Finds documents to operate on
+
    - **Message History**: Implemented robust message storage with sequence tracking and structured message parts to maintain conversation order and tool call visibility
    - **Real-time Responses**: Added streaming support with typing indicators for a natural chat experience
    - **Error Handling**: Implemented comprehensive error handling with graceful degradation
@@ -685,14 +688,54 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - **Real-time Updates**: Implemented efficient updates to Sanity documents with optimistic UI updates
 
 8. **Recent Enhancements**
-   - **Tool Call Rendering Persistence**: Fixed an issue where tool call UI components would disappear after page refreshes by properly storing and retrieving structured message parts
-   - **Array Handling Improvements**: Fixed a critical bug in `addToArrayTool` that incorrectly handled arrays of strings, causing validation errors in Sanity
-   - **Smart Array Type Detection**: Implemented intelligent detection of array field types in Sanity documents to properly handle both primitive arrays (strings, numbers) and complex object arrays
-   - **Chat Initialization**: Improved the "Start Conversation" experience with a more fluid and responsive interaction
-   - **Message History Integrity**: Enhanced message storage and retrieval to ensure completeness and consistency of conversation history
-   - **Tool Call UI Components**: Refined the visual display of tool call status with clearer success/failure indicators and more consistent styling
+   - **API Restructuring**: Reorganized the API with separate routes for different functionality, improving code organization and maintainability
+   - **Tool Display Components**: Created a modular UI component system in `ToolDisplay.tsx` that renders different tool invocations with appropriate visual styles
+   - **Custom Tool Result Components**: Implemented dedicated components for each tool type that handle loading, error, and success states consistently
+   - **Database Saving Improvements**: Fixed a critical issue where assistant messages were being saved before tool calls finished, causing incomplete UI rendering when loading from the database
+   - **Vercel AI SDK Type Standardization**: Implemented consistent type definitions for the Vercel AI SDK on both frontend and backend
+   - **Refinement Chat Feature**: Added a powerful refinement mode that allows starting a new conversation focused on improving existing content
+     - Implemented a separate API route for refinement conversations
+     - Created a specialized system prompt for content refinement
+     - Added support for different refinement types (general, technical, narrative, SEO, voice)
+     - Maintained context between initial creation and refinement conversations
+     - Implemented UI for switching between conversation modes
+     - Added conversation relationship tracking in the database
 
-This feature significantly enhances content management workflows by allowing administrators to create and update content through natural conversation rather than traditional form interfaces.
+9. **Tool UI Component Structure**
+   - **Message Part Rendering**: Created a component hierarchy that renders different message parts:
+     - Text parts with rich typography
+     - Tool invocations with specialized UI components
+   - **Tool-specific Components**: Implemented specialized rendering for different tool types:
+     - `ToolCallNotification`: Compact notifications for document operations
+     - `GitHubToolCard`: Rich card for GitHub repository data
+     - `DocumentToolCard`: Card for document data display
+   - **State Handling**: Each tool component handles three primary states:
+     - Loading state with appropriate visual indicators
+     - Error state with clear error messages and suggestions
+     - Success state with operation results in user-friendly format
+   - **Integration**: The ContentCopilotView now delegates all tool-specific UI rendering to these specialized components, creating a cleaner, more maintainable codebase
+
+10. **Tool Response Format Standardization**
+    - **Consistent Structure**: All tools now return a consistent response format with:
+      - Success/error status
+      - Operation type
+      - Detailed success or error information
+    - **Rich Feedback**: Enhanced error information with categorized error types and suggestions
+    - **Operation-specific Details**: Each tool provides specialized success information related to its operation:
+      - Write tool shows previous and new values
+      - Delete tool shows what was removed
+      - Array tool provides operation details and array length
+      - Query tool includes result count and pagination information
+
+11. **Improved Database Operations**
+    - **Linked Conversations Model**: Implemented a database schema that supports linked conversations:
+      - Each document can have multiple conversations (initial and refinements)
+      - Refinement conversations reference their parent conversation
+      - Enhanced data model with parent_conversation_id and refinement_type fields
+    - **Conversation Switching**: Added UI components for switching between conversations related to the same document
+    - **Message Sequence Integrity**: Fixed issues with message ordering and persistence to ensure proper conversation flow
+
+This feature significantly enhances content management workflows by allowing administrators to create and update content through natural conversation rather than traditional form interfaces, with a new refinement mode that focuses on improving existing content.
 
 ### Projects System Overhaul
 

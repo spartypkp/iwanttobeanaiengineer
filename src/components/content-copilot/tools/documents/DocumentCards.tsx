@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ToolInvocation } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Loader2, Pencil, X } from "lucide-react";
 import { useState } from "react";
-import { ToolInvocation } from "../index";
 
 interface DocumentToolProps {
 	toolInvocation: ToolInvocation;

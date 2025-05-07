@@ -133,22 +133,6 @@ export async function POST(req: Request) {
 		console.log('Created new refinement conversation:', sessionId);
 	}
 
-	// Get the last user message to save
-	const userMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-
-	// If we have a user message, save it to the database
-	if (userMessage && userMessage.role === 'user') {
-		const nextSequence = await getNextSequence(supabase, sessionId);
-		await supabase.from('messages').insert({
-			conversation_id: sessionId,
-			external_id: userMessage.id || `msg_${Date.now()}`,
-			role: 'user',
-			content: userMessage.content,
-			sequence: nextSequence
-		});
-		console.log('Saved user message:', { conversationId: sessionId, sequence: nextSequence });
-	}
-
 	// Convert messages to the format expected by the streamText function
 	const aiMessages: Message[] = messages.map(msg => ({
 		id: msg.id || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`,
@@ -172,50 +156,6 @@ export async function POST(req: Request) {
 		tools: availableTools,
 		maxSteps: 20,
 		onFinish: async (result) => {
-			// Save the assistant's response
-			const nextSequence = await getNextSequence(supabase, sessionId);
-
-			// Extract parts from the response if available
-			const messageParts = result.steps?.[0]?.toolCalls?.length > 0 ?
-				[
-					{ type: 'text', text: result.text },
-					...result.steps[0].toolCalls.map(call => {
-						// Check if this is a result-state tool call
-						if ('result' in call) {
-							return {
-								type: 'tool-invocation',
-								toolInvocation: {
-									toolName: call.toolName,
-									toolCallId: call.toolCallId,
-									state: 'result',
-									args: call.args,
-									result: call.result
-								}
-							};
-						} else {
-							// Handle tool calls without results
-							return {
-								type: 'tool-invocation',
-								toolInvocation: {
-									toolName: call.toolName,
-									toolCallId: call.toolCallId,
-									state: 'call',
-									args: call.args
-								}
-							};
-						}
-					})
-				] : null;
-
-			await supabase.from('messages').insert({
-				conversation_id: sessionId,
-				role: 'assistant',
-				content: result.text,
-				content_parts: messageParts,
-				sequence: nextSequence
-			});
-			console.log('Saved assistant response:', { conversationId: sessionId, sequence: nextSequence });
-
 			// Update any analytics if needed
 			await updateConversationAnalytics(supabase, sessionId);
 		}

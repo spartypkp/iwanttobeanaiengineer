@@ -1,5 +1,5 @@
 'use client';
-import { MessagePart } from "@/components/content-copilot/tools";
+import { ToolDisplay } from "@/components/content-copilot/tools/ToolDisplay";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { createSerializableSchema } from '@/utils/schema-serialization';
 import { useChat } from '@ai-sdk/react';
 import { type ObjectSchemaType } from '@sanity/types';
+import { Message, UIMessage } from "ai";
 import { Loader2 } from "lucide-react";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -50,14 +51,7 @@ interface ConversationResponse {
 	error?: string;
 }
 
-// Define our own ToolInvocation interface that includes all properties we need
-interface ToolInvocation {
-	toolName: string;
-	toolCallId: string;
-	state: 'partial-call' | 'call' | 'result';
-	args: Record<string, any>;
-	result?: any;
-}
+
 
 // Define the conversation mode type
 type ConversationMode = 'regular' | 'refinement';
@@ -132,6 +126,8 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		}
 	}, [documentId]);
 
+
+
 	// --- CONVERSATION LOADING ---
 	// Effect to handle conversation loading
 	useEffect(() => {
@@ -183,8 +179,24 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 								id: msg.external_id || msg.id,
 								role: msg.role,
 								content: msg.content,
-								// Ensure parts are properly formatted for AI SDK consumption
-								...(msg.parts ? { parts: msg.parts } : {})
+								// Ensure parts are properly formatted with preserved state
+								...(msg.parts ? {
+									parts: msg.parts.map(part => {
+										if (part.type === 'tool-invocation' && part.toolInvocation) {
+											// Make sure the state and result are preserved
+											console.log(`[DEBUG] Preserving tool state: ${part.toolInvocation.toolName}, State: ${part.toolInvocation.state}, HasResult: ${!!part.toolInvocation.result}`);
+											return {
+												...part,
+												toolInvocation: {
+													...part.toolInvocation,
+													// Ensure state is 'result' if there's a result
+													state: part.toolInvocation.result ? 'result' : part.toolInvocation.state
+												}
+											};
+										}
+										return part;
+									})
+								} : {})
 							};
 						});
 
@@ -247,9 +259,17 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 			// Show typing indicator
 			setIsTyping(true);
 		},
-		onFinish: () => {
+		onFinish: async (message: Message) => {
 			// Hide typing indicator when response is complete
 			setIsTyping(false);
+			// Get the last message from the message array
+			const lastMessage = messages[messages.length - 1];
+			console.log(`Last message received from AI SDK:`, lastMessage);
+
+			// Save the assistant's message with standard format
+			if (conversationId) {
+				saveMessage(lastMessage);
+			}
 		},
 		onError: (error) => {
 			console.error("Chat API error:", error);
@@ -310,6 +330,9 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 			return;
 		}
 
+		// Save user message if we have a conversation ID
+
+
 		handleSubmit(e);
 
 		// Focus back on textarea after sending
@@ -320,6 +343,30 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 				textAreaRef.current.style.height = '44px';
 			}
 		}, 0);
+	};
+
+	// Helper function to save messages
+	const saveMessage = async (message: UIMessage) => {
+		if (!conversationId) return;
+
+		try {
+			const response = await fetch('/api/conversation/save-message', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					conversationId,
+					message
+				}),
+			});
+
+			if (!response.ok) {
+				console.error('Failed to save message:', await response.text());
+			}
+		} catch (error) {
+			console.error('Error saving message:', error);
+		}
 	};
 
 	// Handle switching to refinement mode
@@ -476,11 +523,29 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 										<p>{message.content}</p>
 									) : (
 										<div className="w-full">
-											{message.parts?.map((part, index) => (
-												<div key={index} className="w-full mb-2 last:mb-0">
-													<MessagePart part={part} addToolResult={addToolResult} />
+											{Array.isArray(message.content) ? (
+												message.content.map((part, partIndex) => (
+													<div key={`${message.id}-part-${partIndex}`} className="w-full mb-2 last:mb-0">
+														{part.type === 'text' ? (
+															<div className="whitespace-pre-wrap prose prose-sm max-w-none prose-p:text-black prose-headings:text-black prose-a:text-emerald-600 prose-ol:pl-5 prose-ul:pl-5 prose-li:my-0 prose-ol:my-2 prose-ul:my-2 prose-ol:list-decimal prose-ul:list-disc">
+																{part.text}
+															</div>
+														) : part.type === 'tool-invocation' ? (
+															<ToolDisplay toolCall={part.toolInvocation} addToolResult={addToolResult} />
+														) : part.type === 'tool-result' ? (
+															null // Don't render tool results separately, they get handled with the tool calls
+														) : part.type === 'step-start' || part.type === 'step-finish' ? (
+															null // Skip step events
+														) : (
+															<p className="text-xs text-red-600">Unsupported part type: {part.type}</p>
+														)}
+													</div>
+												))
+											) : (
+												<div className="whitespace-pre-wrap prose prose-sm max-w-none prose-p:text-black prose-headings:text-black prose-a:text-emerald-600 prose-ol:pl-5 prose-ul:pl-5 prose-li:my-0 prose-ol:my-2 prose-ul:my-2 prose-ol:list-decimal prose-ul:list-disc">
+													{message.content}
 												</div>
-											))}
+											)}
 										</div>
 									)}
 								</div>

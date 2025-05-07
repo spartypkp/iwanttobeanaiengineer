@@ -60,3 +60,54 @@ export interface ProjectShowcase {
 	};
 }
 
+// --- Message Part Types ---
+
+/**
+ * Represents a text part in a message
+ */
+export interface TextPart {
+	type: 'text';
+	text: string;
+}
+
+/**
+ * Represents a tool invocation with all required properties
+ */
+export interface ToolInvocation {
+	toolName: string;
+	toolCallId: string;
+	state: 'partial-call' | 'call' | 'result';
+	args: Record<string, any>;
+	result?: any;
+	hasResult?: boolean; // Tracks whether a result exists explicitly
+}
+
+/**
+ * Represents a tool invocation part in a message
+ */
+export interface ToolInvocationPart {
+	type: 'tool-invocation';
+	toolInvocation: ToolInvocation;
+}
+
+/**
+ * Union type representing all possible message parts
+ */
+export type MessagePart = TextPart | ToolInvocationPart;
+
+/**
+ * Type for a transformed message with parts
+ */
+export interface TransformedMessage {
+	id: string;
+	parts: MessagePart[];
+	role: string;
+	content: string;
+	[key: string]: any;
+}
+
+/**
+ * Type for conversation mode
+ */
+export type ConversationMode = 'regular' | 'refinement';
+

@@ -167,46 +167,6 @@ export async function POST(req: Request) {
 			// Save the assistant's response
 			const nextSequence = await getNextSequence(supabase, sessionId);
 
-			// Extract parts from the response if available
-			const messageParts = result.steps?.[0]?.toolCalls?.length > 0 ?
-				[
-					{ type: 'text', text: result.text },
-					...result.steps[0].toolCalls.map(call => {
-						// Check if this is a result-state tool call
-						if ('result' in call) {
-							return {
-								type: 'tool-invocation',
-								toolInvocation: {
-									toolName: call.toolName,
-									toolCallId: call.toolCallId,
-									state: 'result',
-									args: call.args,
-									result: call.result
-								}
-							};
-						} else {
-							// Handle tool calls without results
-							return {
-								type: 'tool-invocation',
-								toolInvocation: {
-									toolName: call.toolName,
-									toolCallId: call.toolCallId,
-									state: 'call',
-									args: call.args
-								}
-							};
-						}
-					})
-				] : null;
-
-			await supabase.from('messages').insert({
-				conversation_id: sessionId,
-				role: 'assistant',
-				content: result.text,
-				content_parts: messageParts,
-				sequence: nextSequence
-			});
-			console.log('Saved assistant response:', { conversationId: sessionId, sequence: nextSequence });
 
 			// Update any analytics if needed
 			await updateConversationAnalytics(supabase, sessionId);

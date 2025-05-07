@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { ToolInvocation } from "ai";
 import { Github, Loader2, X } from "lucide-react";
-import { ToolInvocation } from "../index";
 
 interface GitHubToolCardProps {
 	toolInvocation: ToolInvocation;
@@ -11,7 +11,7 @@ interface GitHubToolCardProps {
  * Card component for displaying GitHub repository data
  */
 export const GitHubToolCard = ({ toolInvocation }: GitHubToolCardProps) => {
-	const { toolName, state, args, result } = toolInvocation;
+	const { toolName, state, args } = toolInvocation;
 
 	// Get the appropriate icon and name based on tool type
 	const getToolInfo = () => {
@@ -26,7 +26,7 @@ export const GitHubToolCard = ({ toolInvocation }: GitHubToolCardProps) => {
 	const { icon: Icon, name, label } = getToolInfo();
 
 	// If the call is in progress
-	if (state === 'partial-call' || state === 'call' || !result) {
+	if (state === 'partial-call' || state === 'call') {
 		return (
 			<div className="my-2 flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-md text-blue-700 text-xs">
 				<Loader2 className="h-4 w-4 animate-spin" />
@@ -39,13 +39,13 @@ export const GitHubToolCard = ({ toolInvocation }: GitHubToolCardProps) => {
 	}
 
 	// If there was an error
-	if (result.error) {
+	if (toolInvocation.result?.error) {
 		return (
 			<div className="my-2 flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-100 rounded-md text-red-700 text-xs">
 				<X className="h-4 w-4" />
 				<div>
 					<span className="font-medium">Failed to fetch GitHub data</span>
-					<span className="ml-1 text-red-600">{result.error}</span>
+					<span className="ml-1 text-red-600">{toolInvocation.result?.error}</span>
 				</div>
 			</div>
 		);
@@ -60,54 +60,54 @@ export const GitHubToolCard = ({ toolInvocation }: GitHubToolCardProps) => {
 					GitHub Repository Details
 				</span>
 				<Badge className="ml-auto bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200">
-					{result.repository?.name}
+					{toolInvocation.result?.repository?.name}
 				</Badge>
 			</div>
 			<CardContent className="p-2 text-xs">
 				<div className="grid gap-2">
 					{/* Repository Info */}
 					<div className="grid gap-1.5 text-black">
-						<p className="font-medium">Repository: {result.repository?.name}</p>
-						{result.repository?.description && (
-							<p className="text-black">{result.repository.description}</p>
+						<p className="font-medium">Repository: {toolInvocation.result?.repository?.name}</p>
+						{toolInvocation.result?.repository?.description && (
+							<p className="text-black">{toolInvocation.result?.repository.description}</p>
 						)}
 						<div className="flex flex-wrap gap-2 mt-1">
-							{result.repository?.stars !== undefined && (
+							{toolInvocation.result?.repository?.stars !== undefined && (
 								<Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-									★ {result.repository.stars} stars
+									★ {toolInvocation.result?.repository.stars} stars
 								</Badge>
 							)}
-							{result.repository?.forks !== undefined && (
+							{toolInvocation.result?.repository?.forks !== undefined && (
 								<Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-									{result.repository.forks} forks
+									{toolInvocation.result?.repository.forks} forks
 								</Badge>
 							)}
-							{result.repository?.language && (
+							{toolInvocation.result?.repository?.language && (
 								<Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-									{result.repository.language}
+									{toolInvocation.result?.repository.language}
 								</Badge>
 							)}
-							{result.repository?.openIssues !== undefined && (
+							{toolInvocation.result?.repository?.openIssues !== undefined && (
 								<Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-									{result.repository.openIssues} issues
+									{toolInvocation.result?.repository.openIssues} issues
 								</Badge>
 							)}
 						</div>
 					</div>
 
 					{/* Languages */}
-					{result.languages && Object.keys(result.languages).length > 0 && (
+					{toolInvocation.result?.languages && Object.keys(toolInvocation.result?.languages).length > 0 && (
 						<div className="grid gap-1.5 mt-2 pt-2 border-t border-gray-100 text-black">
 							<p className="font-medium">Languages</p>
 							<div className="flex flex-wrap gap-1 mt-1">
-								{Object.entries(result.languages).slice(0, 8).map(([lang, bytes]: [string, any], index: number) => (
+								{Object.entries(toolInvocation.result?.languages).slice(0, 8).map(([lang, bytes]: [string, any], index: number) => (
 									<Badge key={index} variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
 										{lang}
 									</Badge>
 								))}
-								{Object.keys(result.languages).length > 8 && (
+								{Object.keys(toolInvocation.result?.languages).length > 8 && (
 									<Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
-										+ {Object.keys(result.languages).length - 8} more
+										+ {Object.keys(toolInvocation.result?.languages).length - 8} more
 									</Badge>
 								)}
 							</div>
@@ -115,12 +115,12 @@ export const GitHubToolCard = ({ toolInvocation }: GitHubToolCardProps) => {
 					)}
 
 					{/* README */}
-					{result.readme?.content && (
+					{toolInvocation.result?.readme?.content && (
 						<div className="grid gap-1.5 mt-2 pt-2 border-t border-gray-100 text-black">
 							<p className="font-medium">README</p>
 							<div className="mt-1 max-h-36 overflow-y-auto bg-slate-50 p-2 rounded text-xs font-mono whitespace-pre-wrap">
-								{result.readme.content.substring(0, 500)}
-								{result.readme.content.length > 500 && '...'}
+								{toolInvocation.result?.readme.content.substring(0, 500)}
+								{toolInvocation.result?.readme.content.length > 500 && '...'}
 							</div>
 						</div>
 					)}

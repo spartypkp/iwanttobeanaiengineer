@@ -1,0 +1,382 @@
+[
+    {
+        "type": "step-start"
+    },
+    {
+        "text": "I'll take a look at your GitHub repository to get a better understanding of your AI Blog Writer project!",
+        "type": "text"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "repoName": "spartypkp/daily-blog-builder"
+            },
+            "step": 0,
+            "state": "result",
+            "result": {
+                "readme": {
+                    "url": "https://github.com/spartypkp/daily-blog-builder/blob/main/README.md",
+                    "name": "README.md",
+                    "path": "README.md",
+                    "content": "# Blog Builder\n\n## Overview\nDaily-blog-builder was developed as a simple tool to help structure and write daily blogs. These daily blogs are intended to be equal parts technical documentation, daily progress reports for people working towards a greater goal, and a method for self reflection and improvement. The blog-builder tool is a completely local Flask application optimized for one thing: ease of use. I personally struggle with writing and documenting my progress, and developed this tool to help me overcome my fear of putting myself out there. The AI tool not only streamlines writing, but provides functionality for an AI editor to improve your writing.\n\nThe AI Editor will:\n1. Summarize your writing in each major section, providing humorous introductions/teasers for the day.\n2. Extract structured data from technical documentation, such as \"Tools Used\", \"Challenges Encountered\", \"Unanswered Questions\", and \"Interesting Bugs\".\n3. Help you stay motivated and on your goals by helping you reflect on the day. It can analyze your successes and failures, providing support and honest feedback.\n4. Add humor to the structured daily blog. The AI Editor has been prompted to provide a contrast to deeply technical work, by adopting a personality of a skeptical and seasoned editor. Honestly, I'm surprised by some of the humor it's capable of.\n5. Generate custom React components, which are intended to be rendered on the NextJS frontend. These components are intended to annotate original writing with humor and content, helping to break up long parts of writing.\n6. Automatically edit and publish your blogs.\n\n## Features\nSome of the key features of the blog include:\n- Rich text editing using Quill.js\n- AI-assisted content refinement\n- Automatic storage and management of daily blogs in Postgres and Supabase Storage for embedded images.\n- Export functionality to the main website, including AI annotations and additions.\n- Help you be more consistent in achieving your goals.\n\n## Getting Started\n\n### Prerequisites\nPostgresSQL is necessary. I recommend using Supabase free tier.\nCreate a table using the following SQL:\n```sql\ncreate table\n  daily_blogs (\n    date date not null,\n    introduction jsonb null,\n    tasks jsonb null,\n    reflection jsonb null,\n    created_at timestamp with time zone null default now(),\n    updated_at timestamp with time zone null default now(),\n    status text null,\n    day_count integer null,\n    blog_title text null,\n    blog_description text null,\n    blog_tags jsonb null,\n    constraint daily_blogs_pkey primary key (date)\n  );\n```\nCreate a public storage bucket called \"daily-blogs\".\nFill in the .env file with necessary values:\nPOSTGRES_URL=\nNEXT_PUBLIC_SUPABASE_ANON_KEY=\nNEXT_PUBLIC_SUPABASE_URL=\nOPENAI_API_KEY=\n\nEdit the prompts as needed, in order to change the personality of the AI Editor. (Unless you want the AI to call you Will for some reason)\n",
+                    "downloadUrl": "https://raw.githubusercontent.com/spartypkp/daily-blog-builder/main/README.md"
+                },
+                "languages": {
+                    "CSS": 18155,
+                    "HTML": 11867,
+                    "Python": 170433,
+                    "JavaScript": 34807,
+                    "TypeScript": 204175
+                },
+                "repository": {
+                    "url": "https://github.com/spartypkp/daily-blog-builder",
+                    "name": "spartypkp/daily-blog-builder",
+                    "forks": 0,
+                    "stars": 1,
+                    "language": "TypeScript",
+                    "openIssues": 0,
+                    "description": "Flask application designed to help write daily blogs documenting daily work, interesting technical problems, and personal reflection.  Integrates AI Editing Pipeline",
+                    "defaultBranch": "main"
+                }
+            },
+            "toolName": "getRepositoryDetails",
+            "toolCallId": "toolu_01BKThxAmg4MKJuWupnTSdet"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "text": "Thanks for sharing the repository! I've taken a look at your AI Blog Writer project, and it's really impressive. Based on the repository details, I can see that you've built a sophisticated tool to help overcome that common challenge of documenting your work.\n\nI see that you've created a Flask application that combines rich text editing with AI assistance to make blogging easier and more consistent. The project uses TypeScript, Python, JavaScript, CSS, and HTML, with TypeScript being the primary language.\n\nWhat stands out to me is how you've designed this as a personal solution to a real problem you were facing - the difficulty of putting yourself and your work out there. I love that you built a tool that not only helps with writing but also adds personality through the AI editor's humorous annotations.\n\nLet me update some of the project details based on what I've learned:",
+        "type": "text"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "value": "I struggled to consistently document and communicate my technical work and projects, which limited my ability to showcase my skills beyond just a resume. Writing regular blog posts about my work was challenging and time-consuming.",
+                "fieldPath": "problem",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 1,
+            "state": "result",
+            "result": {
+                "value": "I struggled to consistently document and communicate my technical work and projects, which limited my ability to showcase my skills beyond just a resume. Writing regular blog posts about my work was challenging and time-consuming.",
+                "message": "Successfully updated field problem",
+                "success": true,
+                "fieldPath": "problem"
+            },
+            "toolName": "writeField",
+            "toolCallId": "toolu_01Y2r4kwxfydoX7CQkUuj2ZY"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "value": "I developed a Flask application that combines rich text editing with AI assistance to streamline the blogging process. The tool helps structure daily blogs into sections for technical documentation, progress reports, and self-reflection, while an AI editor improves writing quality, extracts structured data, and adds personality through humorous annotations.",
+                "fieldPath": "solution",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 2,
+            "state": "result",
+            "result": {
+                "value": "I developed a Flask application that combines rich text editing with AI assistance to streamline the blogging process. The tool helps structure daily blogs into sections for technical documentation, progress reports, and self-reflection, while an AI editor improves writing quality, extracts structured data, and adds personality through humorous annotations.",
+                "message": "Successfully updated field solution",
+                "success": true,
+                "fieldPath": "solution"
+            },
+            "toolName": "writeField",
+            "toolCallId": "toolu_014tVuzNVytzXV4JTTamLxbW"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": {
+                    "name": "Python",
+                    "category": "backend",
+                    "proficiency": "advanced"
+                },
+                "arrayPath": "technologies",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 3,
+            "state": "result",
+            "result": {
+                "item": {
+                    "name": "Python",
+                    "category": "backend",
+                    "proficiency": "advanced"
+                },
+                "message": "Successfully added item to technologies",
+                "success": true,
+                "arrayPath": "technologies"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_01AmAEsfVdFbMnkHGJoX9v72"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": {
+                    "name": "TypeScript",
+                    "category": "frontend",
+                    "proficiency": "intermediate"
+                },
+                "arrayPath": "technologies",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 4,
+            "state": "result",
+            "result": {
+                "item": {
+                    "name": "TypeScript",
+                    "category": "frontend",
+                    "proficiency": "intermediate"
+                },
+                "message": "Successfully added item to technologies",
+                "success": true,
+                "arrayPath": "technologies"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_015pNdkrbcitLYdepdV9Q4mo"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": {
+                    "name": "OpenAI API",
+                    "category": "ai",
+                    "proficiency": "intermediate"
+                },
+                "arrayPath": "technologies",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 5,
+            "state": "result",
+            "result": {
+                "item": {
+                    "name": "OpenAI API",
+                    "category": "ai",
+                    "proficiency": "intermediate"
+                },
+                "message": "Successfully added item to technologies",
+                "success": true,
+                "arrayPath": "technologies"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_01Rrt9oyrWvwTaVUZbk8Lz6N"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": {
+                    "name": "PostgreSQL",
+                    "category": "data",
+                    "proficiency": "intermediate"
+                },
+                "arrayPath": "technologies",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 6,
+            "state": "result",
+            "result": {
+                "item": {
+                    "name": "PostgreSQL",
+                    "category": "data",
+                    "proficiency": "intermediate"
+                },
+                "message": "Successfully added item to technologies",
+                "success": true,
+                "arrayPath": "technologies"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_01Bg94zCgUz39NF3woTZy4B4"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": {
+                    "name": "Supabase",
+                    "category": "backend",
+                    "proficiency": "intermediate"
+                },
+                "arrayPath": "technologies",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 7,
+            "state": "result",
+            "result": {
+                "item": {
+                    "name": "Supabase",
+                    "category": "backend",
+                    "proficiency": "intermediate"
+                },
+                "message": "Successfully added item to technologies",
+                "success": true,
+                "arrayPath": "technologies"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_01VfmrLbV8XTeS3ZGASWvSZ4"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": {
+                    "name": "Quill.js",
+                    "category": "frontend",
+                    "proficiency": "intermediate"
+                },
+                "arrayPath": "technologies",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 8,
+            "state": "result",
+            "result": {
+                "item": {
+                    "name": "Quill.js",
+                    "category": "frontend",
+                    "proficiency": "intermediate"
+                },
+                "message": "Successfully added item to technologies",
+                "success": true,
+                "arrayPath": "technologies"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_01D1bbraB9hnHX33vsNFLcP8"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": "AI",
+                "arrayPath": "categories",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 9,
+            "state": "result",
+            "result": {
+                "item": "AI",
+                "message": "Successfully added item to categories",
+                "success": true,
+                "arrayPath": "categories"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_012rEhmu6rotN8KMRVECj2hy"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": "Web Development",
+                "arrayPath": "categories",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 10,
+            "state": "result",
+            "result": {
+                "item": "Web Development",
+                "message": "Successfully added item to categories",
+                "success": true,
+                "arrayPath": "categories"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_01B527TUxS7XgudszwUGJZpt"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "item": "Content Creation",
+                "arrayPath": "categories",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 11,
+            "state": "result",
+            "result": {
+                "item": "Content Creation",
+                "message": "Successfully added item to categories",
+                "success": true,
+                "arrayPath": "categories"
+            },
+            "toolName": "addToArray",
+            "toolCallId": "toolu_01KG8yUk1fqAZRGFDMw2xSeQ"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "type": "tool-invocation",
+        "toolInvocation": {
+            "args": {
+                "value": "medium",
+                "fieldPath": "complexity",
+                "documentId": "42c6720a-fd56-4e5f-8b6e-762f65fd0dd5"
+            },
+            "step": 12,
+            "state": "result",
+            "result": {
+                "value": "medium",
+                "message": "Successfully updated field complexity",
+                "success": true,
+                "fieldPath": "complexity"
+            },
+            "toolName": "writeField",
+            "toolCallId": "toolu_012J3RHrTa11RFjgEifyuWQh"
+        }
+    },
+    {
+        "type": "step-start"
+    },
+    {
+        "text": "I'm really intrigued by the AI editor functionality you built! Could you tell me more about the challenges you faced while developing this project? Were there any particular technical hurdles you had to overcome with the AI integration or the Flask application?",
+        "type": "text"
+    }
+]

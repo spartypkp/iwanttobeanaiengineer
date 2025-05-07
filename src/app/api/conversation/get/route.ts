@@ -1,35 +1,7 @@
+import { ConversationMode } from '@/lib/types';
 import { createClient } from '@/lib/utils/supabase/server';
+import { CoreAssistantMessage, CoreMessage, CoreUserMessage } from 'ai';
 import { NextResponse } from 'next/server';
-
-// Define proper types for message parts
-interface TextPart {
-	type: 'text';
-	text: string;
-}
-
-interface ToolInvocation {
-	toolName: string;
-	toolCallId: string;
-	state: 'partial-call' | 'call' | 'result';
-	args: Record<string, any>;
-	result?: any;
-}
-
-interface ToolInvocationPart {
-	type: 'tool-invocation';
-	toolInvocation: ToolInvocation;
-}
-
-type MessagePart = TextPart | ToolInvocationPart;
-
-type ConversationMode = 'regular' | 'refinement';
-
-// Define a type for transformed messages
-interface TransformedMessage {
-	id: string;
-	parts: MessagePart[];
-	[key: string]: any;
-}
 
 export async function POST(request: Request) {
 	try {
@@ -64,14 +36,10 @@ export async function POST(request: Request) {
 			return NextResponse.json({ conversation: null, messages: [] });
 		}
 
-		console.log(`[DEBUG] Found conversation: ${conversationData.id} for document: ${documentId}, mode: ${mode}`);
-
-		// Fetch messages for this conversation including join with tool_calls
 		const { data: messagesData, error: messagesError } = await supabase
 			.from('messages')
 			.select(`
-				*,
-				tool_calls(*)
+				*
 			`)
 			.eq('conversation_id', conversationData.id)
 			.order('sequence', { ascending: true });
@@ -81,79 +49,33 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 });
 		}
 
-		console.log(`[DEBUG] Found ${messagesData.length} messages for conversation: ${conversationData.id}`);
+		const messages: CoreMessage[] = [];
 
-		// Log the raw tool calls for inspection
-		const toolCallsCount = messagesData.reduce((count, msg) => count + (msg.tool_calls?.length || 0), 0);
-		console.log(`[DEBUG] Total tool calls found: ${toolCallsCount}`);
-
-		if (toolCallsCount > 0) {
-			// Log first message with tool calls for debugging
-			const firstMessageWithTools = messagesData.find(msg => msg.tool_calls && msg.tool_calls.length > 0);
-			if (firstMessageWithTools) {
-				console.log('[DEBUG] Sample tool_call from DB:', JSON.stringify(firstMessageWithTools.tool_calls[0]));
-			}
-		}
-
-		// Transform messages to include proper parts structure for rendering
-		const transformedMessages: TransformedMessage[] = messagesData.map(message => {
-			// If message already has content_parts, use that
-			if (message.content_parts) {
-				return {
-					...message,
-					parts: message.content_parts as MessagePart[]
+		for (const message of messagesData) {
+			if (message.role === 'user') {
+				let userMessage: CoreUserMessage = {
+					role: message.role,
+					content: message.content
 				};
-			}
-
-			// Otherwise, reconstruct parts from message content and tool_calls
-			const parts: MessagePart[] = [{ type: 'text', text: message.content }];
-
-			// Add tool calls if there are any
-			if (message.tool_calls && message.tool_calls.length > 0) {
-				message.tool_calls.forEach((toolCall: any) => {
-					const toolInvocationPart: ToolInvocationPart = {
-						type: 'tool-invocation',
-						toolInvocation: {
-							toolName: toolCall.tool_name,
-							toolCallId: toolCall.tool_call_id,
-							state: 'result', // This should mark all tool calls as completed
-							args: toolCall.arguments,
-							result: toolCall.result
-						}
-					};
-
-					// Log the transformed tool invocation for debugging
-					console.log(`[DEBUG] Transformed tool call - ID: ${toolCall.tool_call_id}, Name: ${toolCall.tool_name}, State: 'result'`);
-
-					parts.push(toolInvocationPart);
-				});
-			}
-
-			return {
-				...message,
-				parts
-			};
-		});
-
-		// Log the first transformed message with tool calls
-		const firstTransformedWithTools = transformedMessages.find(msg =>
-			msg.parts && msg.parts.some((part: MessagePart) => part.type === 'tool-invocation')
-		);
-
-		if (firstTransformedWithTools) {
-			const toolPart = firstTransformedWithTools.parts.find((p: MessagePart) => p.type === 'tool-invocation');
-			if (toolPart && toolPart.type === 'tool-invocation') {
-				console.log('[DEBUG] Sample transformed tool invocation:', JSON.stringify({
-					toolName: toolPart.toolInvocation.toolName,
-					state: toolPart.toolInvocation.state,
-					hasResult: !!toolPart.toolInvocation.result
-				}));
+				messages.push(userMessage);
+			} else if (message.role === 'assistant') {
+				let toAdd = message.content_parts;
+				if (!message.content_parts) {
+					toAdd = [{ type: 'text', text: message.content }];
+				}
+				let assistantMessage: CoreAssistantMessage = {
+					role: message.role,
+					content: toAdd
+				};
+				messages.push(assistantMessage);
 			}
 		}
+
+
 
 		return NextResponse.json({
 			conversation: conversationData,
-			messages: transformedMessages,
+			messages: messages,
 			mode
 		});
 	} catch (error) {
