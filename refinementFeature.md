@@ -16,19 +16,7 @@ The current conversation system uses a Supabase PostgreSQL database with these k
 
 The conversation context currently ties a conversation directly to a Sanity document via its `documentId`, but there is no relationship between multiple conversations about the same document.
 
-### Reorganized Code Structure
-
-The codebase has been reorganized for better separation of concerns:
-
-**API Routes:**
-- `/api/content-copilot/regular/route.ts` - Handles standard content creation conversations
-- `/api/content-copilot/refinement/route.ts` - Will handle content refinement conversations
-- `/api/conversation/get/route.ts` - Manages conversation retrieval and history
-
-**Components:**
-- `/components/content-copilot/ContentCopilotView.tsx` - Main view component
-- `/components/content-copilot/AutoPreviewPane.tsx` - Auto-preview of content changes
-
+3
 ### Current Conversation Flow
 
 The regular conversation flow (in `/api/content-copilot/regular/route.ts`):
