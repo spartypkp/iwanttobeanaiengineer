@@ -618,7 +618,7 @@ The project uses a comprehensive set of dependencies including:
 
 ### Content Copilot Implementation
 
-The website now includes Content Copilot, an admin-only feature designed to streamline content creation and editing through AI-assisted conversation:
+The website now includes Content Copilot, an admin-only feature designed to streamline content creation and editing through AI-assisted conversation. This feature is now considered **in production and finished**.
 
 1. **Core Functionality**
    - Implemented a conversational interface for managing Sanity CMS content
@@ -632,11 +632,12 @@ The website now includes Content Copilot, an admin-only feature designed to stre
      - `/api/content-copilot/regular` - Handles standard content creation conversations
      - `/api/content-copilot/refinement` - Handles content refinement conversations
      - `/api/conversation/get` - Manages conversation retrieval and history
+     - `/api/conversation/save-messages` - Manages persisting updated message lists to the database, crucial for features like "edit message".
    
    - **Component Organization:**
      - `/components/content-copilot/ContentCopilotView.tsx` - Main view component
-     - `/components/content-copilot/ToolDisplay.tsx` - Renders custom tool result components
-     - `/components/content-copilot/tools/` - Directory containing specialized tool result components
+     - `/components/content-copilot/ToolDisplay.tsx` - Renders custom tool result components. This has been significantly improved for better UI/UX when viewing tool calls.
+     - `/components/content-copilot/tools/` - Directory containing specialized tool result components for each of the advanced Sanity tools and other utilities.
      - `/components/content-copilot/AutoPreviewPane.tsx` - Auto-preview of content changes
 
 3. **Chat Interface**
@@ -646,6 +647,7 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - Added welcome messages tailored to content type and edit mode
    - Included copy-to-clipboard functionality for messages
    - Fixed the "Start Conversation" functionality for improved user experience
+   - Implemented an "edit message" feature, allowing users to modify their previous messages and resubmit the conversation flow.
 
 4. **Content Management**
    - Created a comprehensive sidebar for content selection and preview
@@ -663,15 +665,14 @@ The website now includes Content Copilot, an admin-only feature designed to stre
 
 6. **MVP Technical Achievements** 
    - **Schema Serialization**: Created a sophisticated schema serialization system to transform Sanity schema objects into JSON-serializable formats that can be passed to the API while preserving type information and validation rules
-   - **Conversation Management**: Implemented a complete conversation storage and retrieval system in Supabase that maintains context across sessions
+   - **Conversation Management**: Implemented a complete conversation storage and retrieval system in Supabase. Conversations, including all message parts (text, tool calls, tool results), are stored in a `JSONB` field, aligning with Vercel AI SDK best practices for structured message data. This fixed previous issues related to incomplete UI rendering when loading from the database.
    - **API Integration**: Built a robust API route using Claude 3.7 Sonnet via AI SDK with streaming support and proper tool calling
-   - **Tool Implementation**: Created specialized tools for content operations:
+   - **Tool Implementation**: Exclusively uses a suite of advanced Sanity tools for content operations:
      - `writeTool`: Updates document fields with proper nested path handling
      - `deleteTool`: Deletes values at any path
      - `arrayTool`: Handles array operations (append, prepend, insert, remove, replace)
      - `queryTool`: Finds documents to operate on
-
-   - **Message History**: Implemented robust message storage with sequence tracking and structured message parts to maintain conversation order and tool call visibility
+   - **Message History**: Implemented robust message storage with sequence tracking and structured message parts (using `JSONB`) to maintain conversation order and full tool call/result visibility.
    - **Real-time Responses**: Added streaming support with typing indicators for a natural chat experience
    - **Error Handling**: Implemented comprehensive error handling with graceful degradation
    - **Context Awareness**: Developed a system prompt that provides document awareness and schema understanding
@@ -680,19 +681,19 @@ The website now includes Content Copilot, an admin-only feature designed to stre
    - **Schema Complexity**: Solved the challenge of serializing complex Sanity schema objects with circular references by creating a custom serialization approach
    - **Document Structure Awareness**: Enabled the AI to understand document structure, required fields, and current completion status
    - **Nested Field Updates**: Implemented support for updating deeply nested fields using a recursive patching approach
-   - **Tool Call Persistence**: Enhanced message storage to maintain tool call information across page refreshes by storing structured message parts
+   - **Tool Call Persistence & Display**: Enhanced message storage (JSONB) to maintain full tool call and result information across page refreshes, enabling accurate and improved UI rendering.
    - **Array Type Detection**: Fixed an issue with adding items to arrays by implementing automatic detection of primitive arrays (strings, numbers) vs object arrays
-   - **Conversation Persistence**: Created a reliable system for saving and loading conversation state across sessions
+   - **Conversation Persistence**: Created a reliable system for saving and loading conversation state across sessions using Vercel AI SDK compliant structures in the database.
    - **Tool Result Integration**: Developed a seamless way to incorporate tool execution results back into the conversation
-   - **UI Component Rendering**: Created specialized components for different tool invocations that provide appropriate visual feedback
+   - **UI Component Rendering**: Created specialized components for different tool invocations that provide appropriate visual feedback, significantly improving the UI/UX for viewing tool calls.
    - **Real-time Updates**: Implemented efficient updates to Sanity documents with optimistic UI updates
 
 8. **Recent Enhancements**
    - **API Restructuring**: Reorganized the API with separate routes for different functionality, improving code organization and maintainability
-   - **Tool Display Components**: Created a modular UI component system in `ToolDisplay.tsx` that renders different tool invocations with appropriate visual styles
-   - **Custom Tool Result Components**: Implemented dedicated components for each tool type that handle loading, error, and success states consistently
-   - **Database Saving Improvements**: Fixed a critical issue where assistant messages were being saved before tool calls finished, causing incomplete UI rendering when loading from the database
-   - **Vercel AI SDK Type Standardization**: Implemented consistent type definitions for the Vercel AI SDK on both frontend and backend
+   - **Tool Display Components**: Created a modular UI component system in `ToolDisplay.tsx` that renders different tool invocations with appropriate visual styles. This has been a key area of UI/UX improvement.
+   - **Custom Tool Result Components**: Implemented dedicated components for each (advanced Sanity) tool type that handle loading, error, and success states consistently.
+   - **Database Saving Improvements**: Fixed a critical issue where assistant messages were being saved before tool calls finished. Now, messages are stored correctly as `JSONB` objects, ensuring all parts of a message (including tool calls and their results) are persisted together, aligning with Vercel AI SDK standards.
+   - **Vercel AI SDK Type Standardization**: Implemented consistent type definitions for the Vercel AI SDK on both frontend and backend.
    - **Refinement Chat Feature**: Added a powerful refinement mode that allows starting a new conversation focused on improving existing content
      - Implemented a separate API route for refinement conversations
      - Created a specialized system prompt for content refinement
@@ -704,19 +705,19 @@ The website now includes Content Copilot, an admin-only feature designed to stre
 9. **Tool UI Component Structure**
    - **Message Part Rendering**: Created a component hierarchy that renders different message parts:
      - Text parts with rich typography
-     - Tool invocations with specialized UI components
+     - Tool invocations with specialized UI components (e.g., `WriteToolDisplay`, `ArrayToolDisplay`, etc.)
    - **Tool-specific Components**: Implemented specialized rendering for different tool types:
-     - `ToolCallNotification`: Compact notifications for document operations
-     - `GitHubToolCard`: Rich card for GitHub repository data
-     - `DocumentToolCard`: Card for document data display
-   - **State Handling**: Each tool component handles three primary states:
+     - `DocumentListToolCard`, `DocumentToolCard`, `DocumentTypesToolCard` for document-related (legacy) tools.
+     - `GitHubToolCard` for GitHub operations.
+     - `ArrayToolDisplay`, `DeleteToolDisplay`, `QueryToolDisplay`, `WriteToolDisplay` for the new advanced Sanity primitive tools. These provide a much-improved UI/UX for visualizing tool operations.
+   - **State Handling**: Each tool display component handles three primary states:
      - Loading state with appropriate visual indicators
      - Error state with clear error messages and suggestions
      - Success state with operation results in user-friendly format
-   - **Integration**: The ContentCopilotView now delegates all tool-specific UI rendering to these specialized components, creating a cleaner, more maintainable codebase
+   - **Integration**: The `ContentCopilotView` now delegates all tool-specific UI rendering to these specialized components, creating a cleaner, more maintainable codebase. The `ToolDisplay.tsx` component acts as a router to the correct primitive display.
 
 10. **Tool Response Format Standardization**
-    - **Consistent Structure**: All tools now return a consistent response format with:
+    - **Consistent Structure**: All advanced Sanity tools now return a consistent response format with:
       - Success/error status
       - Operation type
       - Detailed success or error information
