@@ -9,10 +9,10 @@ CREATE TABLE conversations (
                                            -- e.g., { "source": "sanity", "documentId": "123", "schemaType": "project" }
                                            -- or { "source": "website", "page": "/about" }
   user_id TEXT,                            -- User identifier (if applicable)
-  system_prompt TEXT,                      -- The system prompt used for this conversation
   metadata JSONB,                          -- Additional arbitrary metadata
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  messages JSONB -- NEW field for storing messages. 
 );
 
 CREATE INDEX idx_conversations_type ON conversations(conversation_type);

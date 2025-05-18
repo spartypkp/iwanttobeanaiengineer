@@ -1,6 +1,5 @@
 import { ConversationMode } from '@/lib/types';
 import { createClient } from '@/lib/utils/supabase/server';
-import { CoreAssistantMessage, CoreMessage, CoreUserMessage } from 'ai';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -36,46 +35,13 @@ export async function POST(request: Request) {
 			return NextResponse.json({ conversation: null, messages: [] });
 		}
 
-		const { data: messagesData, error: messagesError } = await supabase
-			.from('messages')
-			.select(`
-				*
-			`)
-			.eq('conversation_id', conversationData.id)
-			.order('sequence', { ascending: true });
 
-		if (messagesError) {
-			console.error('Error fetching messages:', messagesError);
-			return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 });
-		}
-
-		const messages: CoreMessage[] = [];
-
-		for (const message of messagesData) {
-			if (message.role === 'user') {
-				let userMessage: CoreUserMessage = {
-					role: message.role,
-					content: message.content
-				};
-				messages.push(userMessage);
-			} else if (message.role === 'assistant') {
-				let toAdd = message.content_parts;
-				if (!message.content_parts) {
-					toAdd = [{ type: 'text', text: message.content }];
-				}
-				let assistantMessage: CoreAssistantMessage = {
-					role: message.role,
-					content: toAdd
-				};
-				messages.push(assistantMessage);
-			}
-		}
 
 
 
 		return NextResponse.json({
 			conversation: conversationData,
-			messages: messages,
+			messages: conversationData.messages,
 			mode
 		});
 	} catch (error) {

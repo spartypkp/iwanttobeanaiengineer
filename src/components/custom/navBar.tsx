@@ -29,13 +29,13 @@ const NavBar = () => {
 							</NavigationMenuLink>
 						</Link>
 					</NavigationMenuItem>
-					<NavigationMenuItem>
+					{/* <NavigationMenuItem>
 						<Link href="/dave" legacyBehavior passHref>
 							<NavigationMenuLink className={navigationMenuTriggerStyle()}>
 								My AI Assistant
 							</NavigationMenuLink>
 						</Link>
-					</NavigationMenuItem>
+					</NavigationMenuItem> */}
 
 
 				</NavigationMenuList>

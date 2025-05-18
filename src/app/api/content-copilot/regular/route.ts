@@ -1,19 +1,27 @@
 import { generateContentCopilotSystemPrompt } from '@/lib/prompts';
 import { githubTools } from '@/lib/tools/github';
 import {
-	addToArrayTool,
+	//removeFromArrayTool,
+	// Only import legacy tools
+	arrayTool,
+	deleteTool,
+	//addToArrayTool,
 	getAllDocumentTypesTool,
 	getRelatedDocumentTool,
 	listDocumentsByTypeTool,
-	removeFromArrayTool,
-	// Only import legacy tools
-	writeFieldTool
+	queryTool,
+	writeTool
 } from '@/lib/tools/index';
+import { saveChat } from '@/lib/utils/messagesManager';
 import { createClient } from '@/lib/utils/supabase/server';
 import { SerializableSchema } from '@/utils/schema-serialization';
 import { anthropic } from '@ai-sdk/anthropic';
-import { Message, streamText, type Tool } from 'ai';
-
+import {
+	appendResponseMessages,
+	streamText,
+	type Message, // This is typically UIMessage from 'ai'
+	type Tool
+} from 'ai';
 // Configure GitHub tools with authentication
 const githubToolsConfig = githubTools(
 	{
@@ -31,10 +39,10 @@ const githubToolsConfig = githubTools(
 
 // Define available tools - only use legacy tools for regular mode
 const availableTools: Record<string, Tool> = {
-	// Legacy tools only
-	writeField: writeFieldTool,
-	addToArray: addToArrayTool,
-	removeFromArray: removeFromArrayTool,
+	writeTool,
+	deleteTool,
+	arrayTool,
+	queryTool,
 
 	// Other tools
 	getRelatedDocument: getRelatedDocumentTool,
@@ -50,7 +58,7 @@ if (githubToolsConfig.getRepositoryDetails) {
 // Request interface that matches what we receive from the frontend
 interface ContentCopilotRequest {
 	id?: string;
-	messages: Message[];
+	messages: Message[]; // Messages from useChat, which are UIMessages
 	documentId: string;
 	conversationId: string | null;
 	schemaType: string;
@@ -63,10 +71,10 @@ export async function POST(req: Request) {
 	const requestData: ContentCopilotRequest = await req.json();
 	console.log('POST content-copilot - received request for document:', requestData.documentId);
 
-	const {
-		messages,
+	let {
+		messages, // These are UIMessages from the client
 		documentId,
-		conversationId,
+		conversationId, // This can be null for a new conversation
 		schemaType,
 		serializableSchema,
 		documentData
@@ -75,21 +83,9 @@ export async function POST(req: Request) {
 	// Initialize Supabase client
 	const supabase = await createClient();
 
-	let sessionId: string;
-
-	// Use existing conversation ID if provided
-	if (conversationId) {
-		sessionId = conversationId;
-		console.log('Using existing conversation:', sessionId);
-
-		// Update the conversation timestamp
-		await supabase
-			.from('conversations')
-			.update({ updated_at: new Date().toISOString() })
-			.eq('id', sessionId);
-	} else {
+	// Use existing conversation ID or create a new one
+	if (!conversationId) {
 		console.log('Creating new conversation for document:', documentId);
-		// Create a new conversation record
 		const { data: newConversation, error } = await supabase
 			.from('conversations')
 			.insert({
@@ -102,14 +98,9 @@ export async function POST(req: Request) {
 					documentTitle: documentData.title || 'Untitled',
 					mode: 'regular'
 				},
-				system_prompt: generateContentCopilotSystemPrompt({
-					documentId,
-					schemaType,
-					documentData,
-					serializableSchema
-				})
+				messages: JSON.stringify(messages) // Save initial messages if creating new conv
 			})
-			.select()
+			.select('id')
 			.single();
 
 		if (error) {
@@ -119,33 +110,16 @@ export async function POST(req: Request) {
 				headers: { 'Content-Type': 'application/json' }
 			});
 		}
-
-		sessionId = newConversation.id;
-		console.log('Created new conversation:', sessionId);
+		conversationId = newConversation.id;
+		console.log('Created new conversation:', conversationId);
+	} else {
+		// Optionally, update the conversation's updated_at timestamp or messages if needed
+		await supabase
+			.from('conversations')
+			.update({ updated_at: new Date().toISOString() })
+			.eq('id', conversationId);
 	}
 
-	// Get the last user message to save
-	const userMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-
-	// If we have a user message, save it to the database
-	if (userMessage && userMessage.role === 'user') {
-		const nextSequence = await getNextSequence(supabase, sessionId);
-		await supabase.from('messages').insert({
-			conversation_id: sessionId,
-			external_id: userMessage.id || `msg_${Date.now()}`,
-			role: 'user',
-			content: userMessage.content,
-			sequence: nextSequence
-		});
-		console.log('Saved user message:', { conversationId: sessionId, sequence: nextSequence });
-	}
-
-	// Convert messages to the format expected by the streamText function
-	const aiMessages: Message[] = messages.map(msg => ({
-		id: msg.id || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-		role: msg.role,
-		content: msg.content
-	}));
 
 	const systemPrompt = generateContentCopilotSystemPrompt({
 		documentId,
@@ -153,104 +127,43 @@ export async function POST(req: Request) {
 		documentData,
 		serializableSchema
 	});
-	//'console.log('System prompt:', systemPrompt);
 
-
-	// Create the stream with callbacks
 	const stream = streamText({
 		model: anthropic('claude-3-7-sonnet-latest'),
 		system: systemPrompt,
-		messages: aiMessages,
+		messages: messages, // Pass UIMessages directly
 		tools: availableTools,
 		maxSteps: 20,
-		onFinish: async (result) => {
-			// Save the assistant's response
-			const nextSequence = await getNextSequence(supabase, sessionId);
-
-
-			// Update any analytics if needed
-			await updateConversationAnalytics(supabase, sessionId);
-		}
+		async onFinish({ response }) { // response contains response.messages as CoreMessage[]
+			if (!conversationId) {
+				console.error('onFinish: conversationId is null, cannot save chat.');
+				return;
+			}
+			const updatedMessages = appendResponseMessages({
+				messages, // Original UIMessages
+				responseMessages: response.messages, // New CoreMessages from AI
+			});
+			await saveChat({
+				conversationId: conversationId, // Corrected parameter name
+				messages: updatedMessages, // These should be UIMessage[]
+			});
+			// Optionally update analytics if still needed
+			// await updateConversationAnalytics(supabase, conversationId);
+		},
 	});
 
-	// Add conversation ID to the response
-	const originalResponse = await stream.toDataStreamResponse();
-
-	// Create a new Response with an additional header containing the conversation ID
+	// Add conversation ID to the response headers for the client to pick up if it's a new chat
 	const responseInit = {
-		status: originalResponse.status,
-		statusText: originalResponse.statusText,
-		headers: new Headers(originalResponse.headers)
+		status: 200,
+		headers: new Headers({
+			'Content-Type': 'text/plain; charset=utf-8',
+			'X-Conversation-Id': conversationId as string // Ensure it's a string for the header
+		})
 	};
-	responseInit.headers.set('X-Conversation-Id', sessionId);
 
-	return new Response(originalResponse.body, responseInit);
+	return stream.toDataStreamResponse(responseInit);
 }
 
-// Helper function to get the next sequence number for messages
-async function getNextSequence(supabase: any, conversationId: string): Promise<number> {
-	const { data, error } = await supabase
-		.from('messages')
-		.select('sequence')
-		.eq('conversation_id', conversationId)
-		.order('sequence', { ascending: false })
-		.limit(1);
-
-	if (error) {
-		console.error('Error getting next sequence:', error);
-		return 0;
-	}
-
-	return data?.length > 0 ? (data[0].sequence + 1) : 0;
-}
-
-// Helper function to update conversation analytics
-async function updateConversationAnalytics(supabase: any, conversationId: string) {
-	try {
-		// Count messages
-		const { data: messageCount, error: countError } = await supabase
-			.from('messages')
-			.select('id', { count: 'exact' })
-			.eq('conversation_id', conversationId);
-
-		if (countError) {
-			console.error('Error counting messages:', countError);
-			return;
-		}
-
-		// Check if analytics record exists
-		const { data: existingAnalytics, error: existingError } = await supabase
-			.from('conversation_analytics')
-			.select('id')
-			.eq('conversation_id', conversationId)
-			.limit(1);
-
-		if (existingError) {
-			console.error('Error checking analytics:', existingError);
-			return;
-		}
-
-		if (existingAnalytics && existingAnalytics.length > 0) {
-			// Update existing record
-			await supabase
-				.from('conversation_analytics')
-				.update({
-					message_count: messageCount,
-					updated_at: new Date().toISOString(),
-					model_used: 'claude-3-7-sonnet'
-				})
-				.eq('conversation_id', conversationId);
-		} else {
-			// Create new record
-			await supabase
-				.from('conversation_analytics')
-				.insert({
-					conversation_id: conversationId,
-					message_count: messageCount,
-					model_used: 'claude-3-7-sonnet'
-				});
-		}
-	} catch (error) {
-		console.error('Failed to update analytics:', error);
-	}
-}
+// Helper functions like getNextSequence and updateConversationAnalytics might be obsolete
+// if not used elsewhere, or if analytics are handled differently with the new message storage.
+// Consider removing them if they are no longer needed.

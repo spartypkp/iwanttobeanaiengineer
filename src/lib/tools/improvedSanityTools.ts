@@ -99,7 +99,6 @@ export const writeTool = tool({
 	}),
 	execute: async ({ documentId, path, value, createIfMissing = true }, { toolCallId }) => {
 		try {
-			// Get the current document to verify it exists and get the previous value
 			const document = await sanityClient.getDocument(documentId) as SanityDocument<Record<string, any>> | null;
 			if (!document) {
 				const error = {
@@ -110,18 +109,16 @@ export const writeTool = tool({
 					suggestion: "Check that the document ID is correct and the document exists."
 				};
 				await logToolCall(toolCallId, 'writeTool', { documentId, path, value }, error, true);
+				console.log('[writeTool] Returning error:', JSON.stringify(error, null, 2));
 				return error;
 			}
 
-			// Try to get the previous value for logging (if the path exists)
 			let previousValue;
 			try {
-				// Navigate to get the previous value - this is a simplified approach
-				const pathParts = path.split(/\.|\[|\]\.?/).filter(Boolean);
+				const pathParts = path.split(/[.\\[\\]]+/).filter(Boolean); // Simplified path splitting
 				let current: any = document;
 				for (const part of pathParts) {
 					if (current === undefined || current === null) break;
-					// Handle array index or key access
 					if (part.includes('_key==')) {
 						const keyMatch = part.match(/_key=="([^"]+)"/);
 						if (keyMatch && Array.isArray(current)) {
@@ -137,14 +134,12 @@ export const writeTool = tool({
 				}
 				previousValue = current;
 			} catch (error) {
-				// If we can't get the previous value, it's okay to proceed
-				console.log("Could not get previous value:", error);
+				console.log("[writeTool] Could not get previous value:", error);
+				previousValue = { error: 'Could not retrieve previous value' }; // Ensure it's serializable
 			}
 
-			// Use the helper function to write to the path
 			await writeToPath(documentId, path, value, createIfMissing);
 
-			// Log successful tool call
 			const result = {
 				success: true,
 				operation: "write",
@@ -155,15 +150,12 @@ export const writeTool = tool({
 			};
 
 			await logToolCall(toolCallId, 'writeTool', { documentId, path, value }, result, false);
+			console.log('[writeTool] Returning result:', JSON.stringify(result, null, 2));
 			return result;
 
 		} catch (error) {
-			console.error('Error using writeTool:', error);
-
-			// Categorize the error
+			console.error('[writeTool] Error:', error);
 			const { type, message, suggestion } = categorizeError(error);
-
-			// Log failed tool call
 			const errorResult = {
 				success: false,
 				operation: "write",
@@ -172,8 +164,8 @@ export const writeTool = tool({
 				suggestion,
 				path
 			};
-
 			await logToolCall(toolCallId, 'writeTool', { documentId, path, value }, errorResult, true);
+			console.log('[writeTool] Returning error result from catch:', JSON.stringify(errorResult, null, 2));
 			return errorResult;
 		}
 	}
@@ -190,7 +182,6 @@ export const deleteTool = tool({
 	}),
 	execute: async ({ documentId, path }, { toolCallId }) => {
 		try {
-			// Get the current document to verify it exists and get the value being deleted
 			const document = await sanityClient.getDocument(documentId) as SanityDocument<Record<string, any>> | null;
 			if (!document) {
 				const error = {
@@ -201,18 +192,16 @@ export const deleteTool = tool({
 					suggestion: "Check that the document ID is correct and the document exists."
 				};
 				await logToolCall(toolCallId, 'deleteTool', { documentId, path }, error, true);
+				console.log('[deleteTool] Returning error:', JSON.stringify(error, null, 2));
 				return error;
 			}
 
-			// Try to get the value that will be deleted
 			let deletedValue;
 			try {
-				// Navigate to get the value - simplified approach
-				const pathParts = path.split(/\.|\[|\]\.?/).filter(Boolean);
+				const pathParts = path.split(/[.\\[\\]]+/).filter(Boolean); // Simplified path splitting
 				let current: any = document;
 				for (const part of pathParts) {
 					if (current === undefined || current === null) break;
-					// Handle array index or key access
 					if (part.includes('_key==')) {
 						const keyMatch = part.match(/_key=="([^"]+)"/);
 						if (keyMatch && Array.isArray(current)) {
@@ -228,14 +217,12 @@ export const deleteTool = tool({
 				}
 				deletedValue = current;
 			} catch (error) {
-				// If we can't get the value, it's okay to proceed
-				console.log("Could not get value to delete:", error);
+				console.log("[deleteTool] Could not get value to delete:", error);
+				deletedValue = { error: 'Could not retrieve value to delete' }; // Ensure it's serializable
 			}
 
-			// Use the helper function to delete the path
 			await deleteFromPath(documentId, path);
 
-			// Log successful tool call
 			const result = {
 				success: true,
 				operation: "delete",
@@ -245,15 +232,12 @@ export const deleteTool = tool({
 			};
 
 			await logToolCall(toolCallId, 'deleteTool', { documentId, path }, result, false);
+			console.log('[deleteTool] Returning result:', JSON.stringify(result, null, 2));
 			return result;
 
 		} catch (error) {
-			console.error('Error using deleteTool:', error);
-
-			// Categorize the error
+			console.error('[deleteTool] Error:', error);
 			const { type, message, suggestion } = categorizeError(error);
-
-			// Log failed tool call
 			const errorResult = {
 				success: false,
 				operation: "delete",
@@ -262,8 +246,8 @@ export const deleteTool = tool({
 				suggestion,
 				path
 			};
-
 			await logToolCall(toolCallId, 'deleteTool', { documentId, path }, errorResult, true);
+			console.log('[deleteTool] Returning error result from catch:', JSON.stringify(errorResult, null, 2));
 			return errorResult;
 		}
 	}
@@ -288,7 +272,6 @@ export const arrayTool = tool({
 	}),
 	execute: async ({ documentId, path, operation, items = [], at, position }, { toolCallId }) => {
 		try {
-			// Get the current document to verify it exists
 			const document = await sanityClient.getDocument(documentId) as SanityDocument<Record<string, any>> | null;
 			if (!document) {
 				const error = {
@@ -299,10 +282,10 @@ export const arrayTool = tool({
 					suggestion: "Check that the document ID is correct and the document exists."
 				};
 				await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, error, true);
+				console.log('[arrayTool] Returning error (document not found):', JSON.stringify(error, null, 2));
 				return error;
 			}
 
-			// Validate parameters based on operation
 			if (['append', 'prepend', 'insert', 'replace'].includes(operation) && (!items || items.length === 0)) {
 				const error = {
 					success: false,
@@ -312,6 +295,7 @@ export const arrayTool = tool({
 					suggestion: "Provide at least one item in the items array for this operation."
 				};
 				await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, error, true);
+				console.log('[arrayTool] Returning error (items required):', JSON.stringify(error, null, 2));
 				return error;
 			}
 
@@ -324,31 +308,27 @@ export const arrayTool = tool({
 					suggestion: "Specify the position (index or _key) for the operation."
 				};
 				await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, error, true);
+				console.log('[arrayTool] Returning error (at required):', JSON.stringify(error, null, 2));
 				return error;
 			}
 
-			// Get the current array length if possible
 			let arrayLengthBefore = 0;
 			try {
-				// Navigate to get the array
-				const pathParts = path.split(/\.|\[|\]\.?/).filter(Boolean);
+				const pathParts = path.split(/[.\\[\\]]+/).filter(Boolean);
 				let current: any = document;
 				for (const part of pathParts) {
 					if (current === undefined || current === null) break;
 					current = current[part];
 				}
-
 				if (Array.isArray(current)) {
 					arrayLengthBefore = current.length;
 				}
 			} catch (error) {
-				console.log("Could not get array length:", error);
+				console.log("[arrayTool] Could not get array length:", error);
 			}
 
-			// Use the helper function to perform the array operation
 			await performArrayOperation(documentId, path, operation, items, at, position);
 
-			// Calculate expected new length for a more informative response
 			let expectedArrayLength = arrayLengthBefore;
 			if (operation === 'append' || operation === 'prepend') {
 				expectedArrayLength += items.length;
@@ -357,9 +337,7 @@ export const arrayTool = tool({
 			} else if (operation === 'remove') {
 				expectedArrayLength = Math.max(0, expectedArrayLength - 1);
 			}
-			// For replace, the length stays the same
 
-			// Log successful tool call
 			const result = {
 				success: true,
 				operation: "array",
@@ -372,15 +350,12 @@ export const arrayTool = tool({
 			};
 
 			await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, result, false);
+			console.log('[arrayTool] Returning result:', JSON.stringify(result, null, 2));
 			return result;
 
 		} catch (error) {
-			console.error('Error using arrayTool:', error);
-
-			// Categorize the error
+			console.error('[arrayTool] Error:', error);
 			const { type, message, suggestion } = categorizeError(error);
-
-			// Log failed tool call
 			const errorResult = {
 				success: false,
 				operation: "array",
@@ -390,8 +365,8 @@ export const arrayTool = tool({
 				arrayOperation: operation,
 				path
 			};
-
 			await logToolCall(toolCallId, 'arrayTool', { documentId, path, operation }, errorResult, true);
+			console.log('[arrayTool] Returning error result from catch:', JSON.stringify(errorResult, null, 2));
 			return errorResult;
 		}
 	}
@@ -413,18 +388,7 @@ export const queryTool = tool({
 	}),
 	execute: async ({ type, id, field, value, limit = 10, groq, projection = '*' }, { toolCallId }) => {
 		try {
-			// Use helper function to query documents
-			const results = await queryDocuments({
-				type,
-				id,
-				field,
-				value,
-				limit,
-				groq,
-				projection
-			});
-
-			// Prepare query details for better response
+			const results = await queryDocuments({ type, id, field, value, limit, groq, projection });
 			const queryDetails = {
 				...(type && { type }),
 				...(id && { id }),
@@ -434,8 +398,6 @@ export const queryTool = tool({
 				limit,
 				projection
 			};
-
-			// Log successful tool call
 			const result = {
 				success: true,
 				operation: "query",
@@ -449,25 +411,25 @@ export const queryTool = tool({
 			};
 
 			await logToolCall(toolCallId, 'queryTool', { type, id, field, value, limit, groq, projection }, result, false);
+			// For queryTool, results can be large. Stringify with caution or summarize for logging.
+			try {
+				console.log('[queryTool] Returning result (first item if many):', results.length > 0 ? JSON.stringify(results[0], null, 2) : '[]');
+			} catch (e) { console.error('[queryTool] Error stringifying result for console log'); }
 			return result;
 
 		} catch (error) {
-			console.error('Error using queryTool:', error);
-
-			// Categorize the error
-			const { type, message, suggestion } = categorizeError(error);
-
-			// Log failed tool call
+			console.error('[queryTool] Error:', error);
+			const { type: errType, message, suggestion } = categorizeError(error); // Renamed 'type' to 'errType' to avoid conflict
 			const errorResult = {
 				success: false,
 				operation: "query",
-				errorType: type,
+				errorType: errType,
 				errorMessage: message,
 				suggestion,
 				queryDetails: { type, id, field, value, limit, groq }
 			};
-
 			await logToolCall(toolCallId, 'queryTool', { type, id, field, value, limit, groq, projection }, errorResult, true);
+			console.log('[queryTool] Returning error result from catch:', JSON.stringify(errorResult, null, 2));
 			return errorResult;
 		}
 	}

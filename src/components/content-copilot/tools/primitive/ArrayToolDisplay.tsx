@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { ToolInvocation } from "ai";
 import { Check, ChevronDown, ChevronUp, List, ListPlus, Loader2, Minus, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -18,6 +19,54 @@ type ToolInvocationWithResult = ToolInvocation & {
 	};
 };
 
+// Format simple values for display (used by ObjectDisplay and displayFullValueForHover)
+const formatSimpleValue = (val: any): { value: string, type: string; } => {
+	if (val === null) return { value: 'null', type: 'null' };
+	if (val === undefined) return { value: 'undefined', type: 'undefined' };
+
+	switch (typeof val) {
+		case 'string':
+			return { value: `"${val}"`, type: 'string' };
+		case 'number':
+			return { value: val.toString(), type: 'number' };
+		case 'boolean':
+			return { value: val ? 'true' : 'false', type: 'boolean' };
+		default:
+			return { value: String(val), type: 'unknown' };
+	}
+};
+
+// Get appropriate class for a value type (used by ObjectDisplay and displayFullValueForHover)
+const getTypeClass = (type: string): string => {
+	switch (type) {
+		case 'string': return 'text-green-600 font-mono';
+		case 'number': return 'text-blue-600 font-mono';
+		case 'boolean': return 'text-purple-600 font-mono';
+		case 'null':
+		case 'undefined': return 'text-gray-500 font-mono italic';
+		default: return 'text-black font-mono';
+	}
+};
+
+// Helper to display full values in HoverCard
+const displayFullValueForHover = (val: any, isNested: boolean = false) => {
+	if (val === null || val === undefined) {
+		const { value: formattedSimpleValue, type } = formatSimpleValue(val);
+		return <span className={`${getTypeClass(type)}`}>{formattedSimpleValue}</span>;
+	}
+	if (typeof val === 'object') {
+		return (
+			<div className={`max-h-32 overflow-y-auto bg-slate-50 p-1.5 rounded border border-slate-200 font-mono text-xs ${isNested ? 'mt-0' : 'mt-0.5'}`}>
+				<pre className="whitespace-pre-wrap break-all text-black">
+					{JSON.stringify(val, null, 2)}
+				</pre>
+			</div>
+		);
+	}
+	const { value: formattedSimpleValue, type } = formatSimpleValue(val);
+	return <span className={`${getTypeClass(type)} break-words`}>{formattedSimpleValue}</span>;
+};
+
 /**
  * Component that renders an array tool invocation
  * Handles all array operations (append, prepend, insert, remove, replace)
@@ -32,7 +81,7 @@ export const ArrayToolDisplay = ({ toolInvocation }: ArrayToolDisplayProps) => {
 	// Extract arguments based on tool type (legacy or new)
 	let operation = '';
 	let path = '';
-	let items = [];
+	let items: any[] = [];
 	let at: string | number | undefined;
 	let position: string | undefined;
 
@@ -110,7 +159,8 @@ export const ArrayToolDisplay = ({ toolInvocation }: ArrayToolDisplayProps) => {
 		}
 	};
 
-	const { icon: OpIcon, color, label, description } = getOperationConfig();
+	// Destructure config ONCE with unique names
+	const { icon: CfgOpIcon, color: cfgOpColor, label: cfgOpLabel, description: cfgOpDescription } = getOperationConfig();
 
 	// Helper for coloring based on operation
 	const getColorClass = (type: 'bg' | 'border' | 'text') => {
@@ -137,8 +187,17 @@ export const ArrayToolDisplay = ({ toolInvocation }: ArrayToolDisplayProps) => {
 				slate: 'text-slate-700',
 			}
 		};
-		return classes[type][color as keyof typeof classes[typeof type]] || classes[type].slate;
+		return classes[type][cfgOpColor as keyof typeof classes[typeof type]] || classes[type].slate;
 	};
+
+	const compactViewBorderColorClass = (() => {
+		const borderColors = { blue: 'border-blue-500', indigo: 'border-indigo-500', amber: 'border-amber-500', violet: 'border-violet-500', slate: 'border-slate-500' };
+		return borderColors[cfgOpColor as keyof typeof borderColors] || borderColors.slate;
+	})();
+
+	const themedTextColorClass = getColorClass('text');
+	const themedBgColorClass = getColorClass('bg');
+	const themedBadgeBorderClass = `border-${cfgOpColor}-200`;
 
 	// Toggle expansion for a specific object key path
 	const toggleObjectKey = (keyPath: string, e?: React.MouseEvent) => {
@@ -155,35 +214,6 @@ export const ArrayToolDisplay = ({ toolInvocation }: ArrayToolDisplayProps) => {
 		if (Array.isArray(val)) return val.length > 0;
 		if (typeof val === 'object') return Object.keys(val).length > 0;
 		return false;
-	};
-
-	// Format simple values for display
-	const formatSimpleValue = (val: any): { value: string, type: string; } => {
-		if (val === null) return { value: 'null', type: 'null' };
-		if (val === undefined) return { value: 'undefined', type: 'undefined' };
-
-		switch (typeof val) {
-			case 'string':
-				return { value: `"${val}"`, type: 'string' };
-			case 'number':
-				return { value: val.toString(), type: 'number' };
-			case 'boolean':
-				return { value: val ? 'true' : 'false', type: 'boolean' };
-			default:
-				return { value: String(val), type: 'unknown' };
-		}
-	};
-
-	// Get appropriate class for a value type
-	const getTypeClass = (type: string): string => {
-		switch (type) {
-			case 'string': return 'text-green-600 font-mono';
-			case 'number': return 'text-blue-600 font-mono';
-			case 'boolean': return 'text-purple-600 font-mono';
-			case 'null':
-			case 'undefined': return 'text-gray-500 font-mono italic';
-			default: return 'text-black font-mono';
-		}
 	};
 
 	// Display value with proper formatting and potential expansion
@@ -263,11 +293,11 @@ export const ArrayToolDisplay = ({ toolInvocation }: ArrayToolDisplayProps) => {
 								<div className="flex items-start">
 									<span className="text-slate-500 mr-2 font-mono">
 										{isArray ? (
-											<Badge variant="outline" className="text-[10px] h-4 py-0 px-1 font-mono bg-slate-50">
+											<Badge variant="outline" className="text-[10px] h-4 py-0 px-1 font-mono bg-slate-50 border-slate-300">
 												{key}
 											</Badge>
 										) : (
-											<span>{key}:</span>
+											<span className="font-mono">{key}:</span>
 										)}
 									</span>
 									{isChildExpandable ? (
@@ -296,40 +326,38 @@ export const ArrayToolDisplay = ({ toolInvocation }: ArrayToolDisplayProps) => {
 			try {
 				const isArray = Array.isArray(val);
 				const size = isArray ? val.length : Object.keys(val).length;
-				return isArray ? `[Array: ${size} items]` : `{Object: ${size} properties}`;
+				return isArray ? `[Array: ${size} items]` : `{Object: ${size} props}`;
 			} catch (e) {
 				return '[Complex Object]';
 			}
 		}
 
 		const stringVal = String(val);
-		return stringVal.length > 50
-			? stringVal.substring(0, 47) + '...'
+		return stringVal.length > 35 // Reduced length for very brief display
+			? stringVal.substring(0, 32) + '...'
 			: stringVal;
 	};
 
 	// Only render loading state if we don't have a result
 	if (state === 'partial-call' || state === 'call') {
 		return (
-			<Card className={`w-full border bg-white text-black ${getColorClass('border')} shadow-sm hover:shadow-md transition-all duration-200`}>
-				<CardHeader className={`${getColorClass('bg')} py-2`}>
+			<Card className={`w-full border bg-white text-black ${getColorClass('border')} shadow-sm`}>
+				<CardHeader className={`${themedBgColorClass} py-2`}>
 					<div className="flex items-center justify-between">
-						<CardTitle className={`text-sm font-medium ${getColorClass('text')}`}>
+						<CardTitle className={`text-sm font-medium ${themedTextColorClass}`}>
 							<span className="flex items-center gap-1.5">
 								<Loader2 className="h-3.5 w-3.5 animate-spin" />
 								Array Operation
-								<span className="text-xs font-normal opacity-80">
-									{path.split('.').pop()}
-								</span>
+								<span className="text-xs font-normal opacity-80 ml-1">{path.split('.').pop()}</span>
 							</span>
 						</CardTitle>
-						<Badge variant="outline" className={`${getColorClass('bg')} ${getColorClass('text')} border-${color}-200`}>
+						<Badge variant="outline" className={`${themedBgColorClass} ${themedTextColorClass} ${themedBadgeBorderClass}`}>
 							{operation}
 						</Badge>
 					</div>
 				</CardHeader>
 				<CardContent className="p-3 bg-white text-black">
-					<div className="text-xs">{description}</div>
+					<div className="text-xs">{cfgOpDescription}</div>
 				</CardContent>
 			</Card>
 		);
@@ -349,130 +377,126 @@ export const ArrayToolDisplay = ({ toolInvocation }: ArrayToolDisplayProps) => {
 			<span key={i}>{segment}.</span>
 	);
 
+	if (!expanded) {
+		return (
+			<HoverCard openDelay={200} closeDelay={100}>
+				<HoverCardTrigger asChild>
+					<div
+						className={`my-0.5 flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-slate-200 bg-white hover:bg-slate-50 rounded-md cursor-pointer shadow-sm border-l-4 ${compactViewBorderColorClass}`}
+						onClick={() => setExpanded(true)}
+						role="button" tabIndex={0} aria-expanded="false"
+						aria-label={`${cfgOpLabel} operation on ${path.split('.').pop()}, click to expand`}
+					>
+						<Check className={`h-3.5 w-3.5 ${themedTextColorClass}`} />
+						<CfgOpIcon className={`h-3.5 w-3.5 ${themedTextColorClass}`} />
+						<span className="font-medium text-slate-800">
+							<span className={`font-semibold ${themedTextColorClass}`}>{cfgOpLabel}</span>: <span className="font-semibold text-slate-800 font-mono">{path.split('.').pop()}</span>
+						</span>
+						{itemsAffected > 0 && (
+							<Badge variant="outline" className={`px-1.5 py-0 text-[10px] ${themedBgColorClass} ${themedTextColorClass} ${themedBadgeBorderClass}`}>
+								{itemsAffected} {(itemsAffected === 1 && hasArrayItems) ? 'item' : 'items'}
+							</Badge>
+						)}
+						<span className="flex-grow"></span>
+						<ChevronDown className="h-3.5 w-3.5 text-slate-500" />
+					</div>
+				</HoverCardTrigger>
+				<HoverCardContent className="w-auto max-w-xl p-3 text-xs bg-white border border-slate-200 shadow-xl rounded-lg" side="top" align="start">
+					<div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 items-start">
+						<span className="font-semibold text-slate-600">Operation:</span>
+						<span className={`font-medium ${themedTextColorClass}`}>{cfgOpLabel}</span>
+
+						<span className="font-semibold text-slate-600">Path:</span>
+						<code className="text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded text-xs break-all font-mono">
+							{path}
+						</code>
+
+						<span className="font-semibold text-slate-600 self-start">Details:</span>
+						<span className="text-slate-700 break-words">{cfgOpDescription}</span>
+
+						{itemsAffected > 0 && (
+							<>
+								<span className="font-semibold text-slate-600">Modified:</span>
+								<span className={`font-medium ${themedTextColorClass} font-mono`}>{itemsAffected}</span>
+							</>
+						)}
+						{newLength !== undefined && (
+							<>
+								<span className="font-semibold text-slate-600">New Length:</span>
+								<span className="text-slate-800 font-mono">{newLength}</span>
+							</>
+						)}
+						{hasArrayItems && items.length > 0 && (
+							<>
+								<span className="font-semibold text-slate-600 col-span-2 pt-1.5 border-t border-slate-200 mt-1">Preview Items ({Math.min(items.length, 3)} of {items.length}):</span>
+								{items.slice(0, 3).map((item: any, i: number) => (
+									<div key={i} className="col-span-2 pl-2 text-[11px]">
+										{displayFullValueForHover(item, true)}
+									</div>
+								))}
+								{items.length > 3 && (
+									<span className="col-span-2 pl-2 text-slate-500 italic text-[11px]">
+										+ {items.length - 3} more items...
+									</span>
+								)}
+							</>
+						)}
+					</div>
+				</HoverCardContent>
+			</HoverCard>
+		);
+	}
+
 	return (
 		<Card
-			className={`w-full border bg-white text-black ${getColorClass('border')} shadow-sm hover:shadow-md transition-all duration-200`}
-			role="region"
-			aria-expanded={expanded}
+			className={`w-full border bg-white text-black ${getColorClass('border')} shadow-lg my-0.5`}
+			role="region" aria-expanded={true}
 		>
 			<CardHeader
-				className={`${getColorClass('bg')} py-2 ${hasArrayItems ? 'cursor-pointer' : ''}`}
-				onClick={() => hasArrayItems && setExpanded(!expanded)}
+				className={`${themedBgColorClass} py-2 cursor-pointer`}
+				onClick={() => setExpanded(false)}
 			>
 				<div className="flex items-center justify-between">
-					<CardTitle className={`text-sm font-medium ${getColorClass('text')}`}>
+					<CardTitle className={`text-sm font-medium ${themedTextColorClass}`}>
 						<span className="flex items-center gap-1.5">
 							<Check className="h-3.5 w-3.5" />
-							<OpIcon className="h-3.5 w-3.5" />
-							{label}
-							<span className="text-xs ml-1 font-mono opacity-90">
-								{formattedPath}
-							</span>
+							<CfgOpIcon className="h-3.5 w-3.5" />
+							{cfgOpLabel}
+							<span className="text-xs ml-1 font-mono opacity-90">{formattedPath}</span>
 						</span>
 					</CardTitle>
 					<div className="flex items-center gap-2">
 						{newLength !== undefined && (
-							<Badge className={`${getColorClass('bg')} ${getColorClass('text')} border-${color}-200 text-xs py-0`}>
+							<Badge className={`${themedBgColorClass} ${themedTextColorClass} ${themedBadgeBorderClass} text-xs py-0`}>
 								{newLength} items
 							</Badge>
 						)}
-						{hasArrayItems && (
-							<button
-								onClick={(e) => {
-									e.stopPropagation();
-									setExpanded(!expanded);
-								}}
-								className={`flex items-center justify-center h-5 w-5 rounded-full bg-${color}-100 ${getColorClass('text')}`}
-							>
-								{expanded ?
-									<ChevronUp className="h-3 w-3" /> :
-									<ChevronDown className="h-3 w-3" />
-								}
-							</button>
-						)}
+						<button
+							onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
+							className={`flex items-center justify-center h-5 w-5 rounded-full bg-${cfgOpColor}-100 ${themedTextColorClass}`}
+							aria-label="Collapse details"
+						>
+							<ChevronUp className="h-3 w-3" />
+						</button>
 					</div>
 				</div>
 			</CardHeader>
 			<CardContent className="p-3 bg-white text-black">
 				<div className="flex flex-col space-y-2">
-					{/* Description and status info */}
 					<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-y-1.5">
-						<div className="text-xs text-slate-600 font-medium">{description}</div>
-						{itemsAffected && (
+						<div className="text-xs text-slate-600 font-medium">{cfgOpDescription}</div>
+						{itemsAffected > 0 && (
 							<div className="text-xs inline-flex items-center px-2 py-1 rounded-full bg-slate-100">
 								<span className="mr-1">Modified:</span>
-								<span className={`${getColorClass('text')} font-medium`}>
-									{itemsAffected} item{itemsAffected !== 1 ? 's' : ''}
-								</span>
+								<span className={`${themedTextColorClass} font-medium font-mono`}>{itemsAffected} item{itemsAffected !== 1 ? 's' : ''}</span>
 							</div>
 						)}
 					</div>
-
-					{/* Preview when collapsed */}
-					{hasArrayItems && !expanded && items.length > 0 && (
+					{hasArrayItems && (
 						<div className="mt-2">
-							<div className="flex flex-col">
-								<div className="text-xs font-medium mb-1 text-slate-700">Value{items.length !== 1 ? 's' : ''}:</div>
-								<div className="rounded-md bg-slate-50 p-2 border border-slate-200 font-mono text-sm overflow-x-auto">
-									{items.length <= 3 ? (
-										<div className="flex flex-wrap gap-2">
-											{items.map((item: any, i: number) => {
-												const { value, type } = formatSimpleValue(item);
-												return (
-													<div key={i} className="flex items-center">
-														<Badge variant="outline" className="h-5 mr-1.5 bg-slate-100 font-mono text-slate-500">{i}</Badge>
-														<span className={getTypeClass(type)}>
-															{value}
-														</span>
-														{i < items.length - 1 && <span className="mx-1 text-slate-400">,</span>}
-													</div>
-												);
-											})}
-										</div>
-									) : (
-										<div className="flex flex-col gap-1.5">
-											<div className="flex items-center">
-												<Badge variant="outline" className="h-5 mr-1.5 bg-slate-100 font-mono text-slate-500">0</Badge>
-												<span className={getTypeClass(typeof items[0])}>
-													{formatSimpleValue(items[0]).value}
-												</span>
-											</div>
-											<div className="text-center text-slate-500 text-xs py-1">• • •</div>
-											<div className="flex items-center">
-												<Badge variant="outline" className="h-5 mr-1.5 bg-slate-100 font-mono text-slate-500">{items.length - 1}</Badge>
-												<span className={getTypeClass(typeof items[items.length - 1])}>
-													{formatSimpleValue(items[items.length - 1]).value}
-												</span>
-											</div>
-											<div className="text-xs mt-1 text-slate-500">
-												<span className="font-medium">{items.length}</span> items total
-											</div>
-										</div>
-									)}
-								</div>
-							</div>
-						</div>
-					)}
-
-					{/* Expanded view with object explorer */}
-					{hasArrayItems && expanded && (
-						<div className="mt-2">
-							<div className="flex justify-between items-center mb-2">
-								<div className="text-xs font-medium text-slate-700">Items:</div>
-								<button
-									onClick={() => setExpanded(false)}
-									className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
-								>
-									<ChevronUp className="h-3 w-3" />
-									<span>Collapse</span>
-								</button>
-							</div>
+							<div className="text-xs font-medium text-slate-700 mb-2">Items ({items.length}):</div>
 							<div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs">
-								<ObjectDisplay
-									value={items}
-									keyPath="items"
-									isTopLevel={true}
-								/>
+								<ObjectDisplay value={items} keyPath="items-expanded" isTopLevel={true} />
 							</div>
 						</div>
 					)}

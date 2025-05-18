@@ -10,10 +10,112 @@ import { cn } from "@/lib/utils";
 import { createSerializableSchema } from '@/utils/schema-serialization';
 import { useChat } from '@ai-sdk/react';
 import { type ObjectSchemaType } from '@sanity/types';
-import { Message, UIMessage } from "ai";
-import { Loader2 } from "lucide-react";
+import { type Message as UIMessage } from "ai";
+import { Check, Edit3, Loader2, X } from "lucide-react";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// --- CHILD COMPONENTS FIRST (for clarity and to avoid hoisting issues with linters) ---
+const ChatInputForm = ({
+	input,
+	hasMessages,
+	handleInputChange,
+	handleFormSubmit,
+	isLoading,
+	textAreaRef,
+	documentData,
+	validSchemaType,
+	setIsTyping,
+	setInput
+}: {
+	input: string;
+	hasMessages: boolean;
+	handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+	handleFormSubmit: (e: React.FormEvent) => void;
+	isLoading: boolean;
+	textAreaRef: React.RefObject<HTMLTextAreaElement>;
+	documentData?: Record<string, any> | null;
+	validSchemaType?: string | null;
+	setIsTyping?: (isTyping: boolean) => void;
+	setInput?: (value: string) => void;
+}) => {
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter' && !e.shiftKey) {
+			e.preventDefault();
+			handleFormSubmit(e as unknown as React.FormEvent);
+		}
+	};
+
+	const startConversation = () => {
+		const docType = validSchemaType || 'document';
+		const docTitle = documentData?.title || 'this content';
+		const regularMessage = `Let's work on ${docTitle} together. Please help me flesh out the details for this ${docType}. What kind of information should I include?`;
+
+		if (setIsTyping) setIsTyping(true);
+		if (setInput) setInput(regularMessage);
+
+		setTimeout(() => {
+			const syntheticEvent = { preventDefault: () => { } } as React.FormEvent;
+			handleFormSubmit(syntheticEvent);
+		}, 100);
+	};
+
+	if (!hasMessages) {
+		return (
+			<div className="flex flex-col gap-3 items-center justify-center p-4 text-center">
+				<p className="text-sm text-black">
+					Content Copilot will help you create and edit content through natural conversation.
+				</p>
+				<Button
+					onClick={startConversation}
+					className="mt-1"
+					disabled={isLoading}
+				>
+					{isLoading ? (
+						<>
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							Starting...
+						</>
+					) : (
+						"Start Conversation"
+					)}
+				</Button>
+			</div>
+		);
+	}
+
+	return (
+		<form onSubmit={handleFormSubmit} className="flex gap-2 items-end">
+			<div className="relative flex-1 text-black">
+				<Textarea
+					ref={textAreaRef}
+					value={input}
+					onChange={handleInputChange}
+					onKeyDown={handleKeyDown}
+					placeholder={isLoading
+						? "Loading conversation..."
+						: "Message Content Copilot about this content... (Enter to send)"
+					}
+					rows={1}
+					disabled={isLoading}
+					className="resize-none min-h-[44px] max-h-[200px] w-full p-3 text-sm text-black bg-white"
+				/>
+			</div>
+			<Button
+				type="submit"
+				size="icon"
+				disabled={isLoading || !input.trim()}
+				className="h-[44px] w-[44px] shrink-0"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+					<path d="M5 12h14"></path>
+					<path d="m12 5 7 7-7 7"></path>
+				</svg>
+				<span className="sr-only">Send</span>
+			</Button>
+		</form>
+	);
+};
 
 // Custom components have the following props:
 // document – an object containing the various document states and their data
@@ -37,28 +139,21 @@ interface ConversationResponse {
 		title: string;
 		[key: string]: any;
 	} | null;
-	messages: Array<{
-		id: string;
-		external_id?: string;
-		role: string;
-		content: string;
-		parts?: Array<{
-			type: string;
-			[key: string]: any;
-		}>;
-		[key: string]: any;
-	}>;
+	messages: UIMessage[];
 	error?: string;
 }
 
-
+// Define state for managing which message is being edited
+interface EditingMessageState {
+	id: string;
+	content: string;
+}
 
 // Define the conversation mode type
 type ConversationMode = 'regular' | 'refinement';
 
 export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 	// --- STATE MANAGEMENT ---
-	// Document state - consolidated into a single object
 	const [document, setDocument] = useState<{
 		id: string | null;
 		type: string | null;
@@ -71,73 +166,110 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		isValid: false
 	});
 
-	// Track mode - keep this state outside of the reset
 	const [mode, setMode] = useState<ConversationMode>('regular');
 	const [parentConversationId, setParentConversationId] = useState<string | null>(null);
-
-	// Simplified loading state using a single enum
 	const [status, setStatus] = useState<'initializing' | 'loading' | 'ready' | 'error'>('initializing');
 	const [error, setError] = useState<string | null>(null);
-
-	// Conversation state
 	const [conversationId, setConversationId] = useState<string | null>(null);
 	const [isTyping, setIsTyping] = useState(false);
-	const [loadedMessages, setLoadedMessages] = useState<any[]>([]);
+	const [loadedMessages, setLoadedMessages] = useState<UIMessage[]>([]);
 	const [conversationLoaded, setConversationLoaded] = useState(false);
+	const [editingMessage, setEditingMessage] = useState<EditingMessageState | null>(null);
 
-	// Refs
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-	// Extract values from props immediately
-	const documentId = props.documentId;
-	const schemaType = props.schemaType?.name;
-	const documentData = props.document.displayed;
+	const documentIdFromProps = props.documentId;
+	const schemaTypeFromProps = props.schemaType?.name;
+	const documentDataFromProps = props.document.displayed;
 
-	// Determine the API route based on mode
+	// --- SANITY FIELD HIGHLIGHTING (Hacky DOM Manipulation) ---
+	// Defined earlier as it's a dependency for handleToolCall
+	const attemptSanityFieldHighlight = useCallback((fieldPath: string) => {
+		const scrollerElement = window.document.querySelector('[data-testid="document-panel-scroller"]') as HTMLElement | null;
+
+		if (!scrollerElement) {
+			console.warn("[ContentCopilotView] Sanity document panel scroller not found. Field highlighting may not work as expected.");
+			const fieldElementForWindowScroll = window.document.querySelector(`[data-comments-field-id="${fieldPath}"]`) as HTMLElement | null;
+			if (fieldElementForWindowScroll) {
+				fieldElementForWindowScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			} else {
+				console.warn(`[ContentCopilotView] Fallback: Sanity field element not found in document for selector: [data-comments-field-id="${fieldPath}"]`);
+				return;
+			}
+		}
+
+		try {
+			const targetSelector = `[data-comments-field-id="${fieldPath}"]`;
+			const fieldElement = scrollerElement?.querySelector(targetSelector) as HTMLElement | null || window.document.querySelector(targetSelector) as HTMLElement | null;
+
+			if (fieldElement) {
+				if (scrollerElement) {
+					const scrollerRect = scrollerElement.getBoundingClientRect();
+					const fieldRect = fieldElement.getBoundingClientRect();
+					const desiredScrollTop = scrollerElement.scrollTop + (fieldRect.top - scrollerRect.top) - (scrollerRect.height / 3);
+					scrollerElement.scrollTo({
+						top: desiredScrollTop,
+						behavior: 'smooth'
+					});
+				} else {
+					fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}
+
+				const originalOutline = fieldElement.style.outline;
+				const originalBackgroundColor = fieldElement.style.backgroundColor;
+				const originalBoxShadow = fieldElement.style.boxShadow;
+				const originalTransition = fieldElement.style.transition;
+
+				fieldElement.style.transition = 'outline 0.2s ease-in-out, background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out';
+				fieldElement.style.outline = '3px solid #FFBF00';
+				fieldElement.style.backgroundColor = 'rgba(255, 191, 0, 0.1)';
+				fieldElement.style.boxShadow = '0 0 15px rgba(255, 191, 0, 0.5)';
+				fieldElement.style.padding = '2px';
+
+				setTimeout(() => {
+					fieldElement.style.outline = originalOutline;
+					fieldElement.style.backgroundColor = originalBackgroundColor;
+					fieldElement.style.boxShadow = originalBoxShadow;
+					fieldElement.style.transition = originalTransition;
+					fieldElement.style.padding = '';
+				}, 3000);
+			} else {
+				console.warn(`[ContentCopilotView] Sanity field element not found for highlighting. Selector: ${targetSelector}`);
+			}
+		} catch (e) {
+			console.error("[ContentCopilotView] Error during Sanity field highlighting:", e);
+		}
+	}, []);
+
 	const apiRoute = mode === 'regular'
 		? '/api/content-copilot/regular'
 		: '/api/content-copilot/refinement';
 
-	// Memoize the schema serialization to prevent expensive recalculations
 	const serializableSchema = useMemo(() => {
 		if (!props.schemaType) return null;
 		return createSerializableSchema(props.schemaType);
 	}, [props.schemaType]);
 
-	// --- DOCUMENT VALIDATION ---
-	// Single effect to validate document and set initial state
 	useEffect(() => {
-		// Validate document properties
-		if (documentId && schemaType && documentData) {
-			// Set document state
+		if (documentIdFromProps && schemaTypeFromProps) {
 			setDocument({
-				id: documentId,
-				type: schemaType,
-				data: documentData,
+				id: documentIdFromProps,
+				type: schemaTypeFromProps,
+				data: documentDataFromProps,
 				isValid: true
 			});
-
-			// Move to loading state
 			setStatus('loading');
 		} else {
 			setError('Missing required document properties');
 			setStatus('error');
 		}
-	}, [documentId]);
+	}, [documentIdFromProps, schemaTypeFromProps]);
 
-
-
-	// --- CONVERSATION LOADING ---
-	// Effect to handle conversation loading
 	useEffect(() => {
-		// Only proceed if we're in the loading state and have a valid document
 		if (status !== 'loading' || !document.isValid) return;
-
-		// Async function to load conversation
 		const loadConversation = async () => {
 			try {
-				console.log(`Loading conversation for document ${document.id} in ${mode} mode`);
 				const response = await fetch('/api/conversation/get', {
 					method: 'POST',
 					headers: {
@@ -155,79 +287,94 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 					throw new Error(`Failed to load conversation: ${data.error || response.status}`);
 				}
 
-				// Set conversation ID if available
 				if (data.conversation) {
-					console.log(`[DEBUG] Loaded ${mode} mode conversation:`, data.conversation.id);
+					console.log(`[ContentCopilotView] Loaded ${mode} mode conversation:`, data.conversation.id);
 					setConversationId(data.conversation.id);
-
-					// Set messages if available
-					if (data.messages && data.messages.length > 0) {
-						// Transform messages to ensure they have the proper structure
-						const formattedMessages = data.messages.map((msg) => {
-							// Log the first message with tool parts for debugging
-							if (msg.parts?.some(part => part.type === 'tool-invocation')) {
-								const toolParts = msg.parts.filter(part => part.type === 'tool-invocation');
-								console.log(`[DEBUG] Message ${msg.id} has ${toolParts.length} tool part(s)`);
-
-								// Log the first tool part state
-								if (toolParts.length > 0 && toolParts[0].toolInvocation) {
-									console.log(`[DEBUG] First tool part - Name: ${toolParts[0].toolInvocation.toolName}, State: ${toolParts[0].toolInvocation.state}`);
-								}
-							}
-
-							return {
-								id: msg.external_id || msg.id,
-								role: msg.role,
-								content: msg.content,
-								// Ensure parts are properly formatted with preserved state
-								...(msg.parts ? {
-									parts: msg.parts.map(part => {
-										if (part.type === 'tool-invocation' && part.toolInvocation) {
-											// Make sure the state and result are preserved
-											console.log(`[DEBUG] Preserving tool state: ${part.toolInvocation.toolName}, State: ${part.toolInvocation.state}, HasResult: ${!!part.toolInvocation.result}`);
-											return {
-												...part,
-												toolInvocation: {
-													...part.toolInvocation,
-													// Ensure state is 'result' if there's a result
-													state: part.toolInvocation.result ? 'result' : part.toolInvocation.state
-												}
-											};
-										}
-										return part;
-									})
-								} : {})
-							};
-						});
-
-						setLoadedMessages(formattedMessages);
-					} else {
-						// Clear messages if none exist
-						setLoadedMessages([]);
-					}
+					setLoadedMessages(data.messages || []);
 				} else {
-					// No existing conversation found
-					console.log(`No existing ${mode} mode conversation found`);
+					console.log(`[ContentCopilotView] No existing ${mode} mode conversation found for document ${document.id}`);
 					setConversationId(null);
 					setLoadedMessages([]);
 				}
-
-				// Mark conversation as loaded
 				setConversationLoaded(true);
 				setStatus('ready');
-
 			} catch (error) {
-				console.error('Failed to load conversation:', error);
+				console.error('[ContentCopilotView] Failed to load conversation:', error);
 				setError(`Error: ${error instanceof Error ? error.message : String(error)}`);
 				setStatus('error');
 			}
 		};
-
 		loadConversation();
-	}, [document, status, mode]);
+	}, [status, mode, document.id, document.isValid]); // Added document.isValid back based on its usage
 
-	// --- CHAT INTEGRATION ---
-	// Initialize chat hooks with available data
+	const chatBody = useMemo(() => ({
+		documentId: document.id || '',
+		conversationId,
+		parentConversationId: mode === 'refinement' ? parentConversationId : undefined,
+		schemaType: document.type || '',
+		serializableSchema,
+		documentData: document.data || {},
+	}), [document.id, conversationId, mode, parentConversationId, document.type, serializableSchema, document.data]);
+
+	const handleChatResponse = useCallback((response: Response) => {
+		const newConversationId = response.headers.get('X-Conversation-Id');
+		if (newConversationId && (!conversationId || newConversationId !== conversationId)) {
+			console.log(`[ContentCopilotView] Received new conversation ID (${newConversationId}), current was (${conversationId}). Will update state.`);
+			setConversationId(newConversationId);
+		}
+		setIsTyping(true);
+	}, [conversationId]);
+
+	const handleChatFinish = useCallback((message: UIMessage) => {
+		setIsTyping(false);
+	}, []);
+
+	const handleChatError = useCallback((error: Error) => {
+		console.error("[ContentCopilotView] Chat API error:", error);
+		setError(`API error: ${error.message}`);
+		setIsTyping(false);
+		setStatus('error');
+	}, []);
+
+	// handleToolCall depends on attemptSanityFieldHighlight, so it's defined after.
+	// const handleToolCall = useCallback(
+	// 	// Match the signature expected by the linter for onToolCall
+	// 	({ toolCall }: { toolCall: { toolCallId: string; toolName: string; args: unknown; } | undefined; }) => {
+	// 		// Guard against toolCall itself being undefined
+	// 		if (!toolCall) {
+	// 			console.warn("[ContentCopilotView] onToolCall's 'toolCall' property was falsy:", toolCall);
+	// 			return;
+	// 		}
+
+	// 		console.log("[ContentCopilotView] onToolCall received (actual toolCall object):", toolCall);
+	// 		const knownMutationTools = ['writeTool', 'deleteTool', 'arrayTool', 'updateDocumentField'];
+	// 		const { toolName, args, toolCallId } = toolCall; // toolCallId is vital for addToolResult
+
+	// 		if (knownMutationTools.includes(toolName)) {
+	// 			let fieldPath: string | undefined = undefined;
+	// 			if (args && typeof args === 'object' && args !== null) {
+	// 				const coercedArgs = args as Record<string, any>;
+	// 				fieldPath = coercedArgs.path || coercedArgs.fieldPath;
+	// 			}
+
+	// 			console.log(`[ContentCopilotView] onToolCall - Tool: ${toolName}, Extracted fieldPath: ${fieldPath}`);
+	// 			if (fieldPath && typeof fieldPath === 'string') {
+	// 				console.log(`[ContentCopilotView] onToolCall - Valid fieldPath found: \"${fieldPath}\". Triggering highlight.`);
+	// 				attemptSanityFieldHighlight(fieldPath);
+	// 			} else {
+	// 				console.warn(`[ContentCopilotView] onToolCall - fieldPath is invalid, not a string, or args is not a suitable object. FieldPath: ${fieldPath}, Args:`, args);
+	// 			}
+	// 		} else {
+	// 			console.log(`[ContentCopilotView] onToolCall - Tool (${toolName}) not in knownMutationTools, skipping highlight.`);
+	// 		}
+
+	// 		// WARNING: This onToolCall handler does not call addToolResult.
+	// 		// The AI SDK expects addToolResult(toolCallId, result) to be called.
+	// 		// Failure to do so will likely cause issues with the AI's operation.
+	// 	},
+	// 	[attemptSanityFieldHighlight]
+	// );
+
 	const {
 		messages,
 		input,
@@ -236,202 +383,181 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		setInput,
 		addToolResult,
 		isLoading: chatIsLoading,
-		setMessages
+		setMessages,
+		append
 	} = useChat({
 		api: apiRoute,
-		body: {
-			documentId: document.id || '',
-			conversationId,
-			parentConversationId: mode === 'refinement' ? parentConversationId : undefined,
-			schemaType: document.type || '',
-			serializableSchema,
-			documentData: document.data || {},
-		},
+		body: chatBody,
 		id: conversationId || undefined,
 		initialMessages: loadedMessages,
-		onResponse: (response) => {
-			// Extract conversation ID from headers if available
-			const newConversationId = response.headers.get('X-Conversation-Id');
-			if (newConversationId && (!conversationId || newConversationId !== conversationId)) {
-				console.log(`Received new conversation ID: ${newConversationId}`);
-				setConversationId(newConversationId);
-			}
-			// Show typing indicator
-			setIsTyping(true);
-		},
-		onFinish: async (message: Message) => {
-			// Hide typing indicator when response is complete
-			setIsTyping(false);
-			// Get the last message from the message array
-			const lastMessage = messages[messages.length - 1];
-			console.log(`Last message received from AI SDK:`, lastMessage);
-
-			// Save the assistant's message with standard format
-			if (conversationId) {
-				saveMessage(lastMessage);
-			}
-		},
-		onError: (error) => {
-			console.error("Chat API error:", error);
-			setError(`API error: ${error.message}`);
-			setIsTyping(false);
-			setStatus('error');
-		}
+		sendExtraMessageFields: true,
+		onResponse: handleChatResponse,
+		onFinish: handleChatFinish,
+		onError: handleChatError,
+		// onToolCall: handleToolCall
 	});
 
-	// --- UI EFFECTS ---
-	// Auto-scroll to the bottom when new messages arrive
 	useEffect(() => {
 		if (messagesEndRef.current) {
 			messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
 		}
 	}, [messages, isTyping]);
 
-	// Adjust textarea height on mount and input change
 	useEffect(() => {
 		if (textAreaRef.current) {
 			adjustTextAreaHeight(textAreaRef.current);
 		}
 	}, []);
 
-	// --- HELPER FUNCTIONS ---
-	// Auto-grow textarea function
-	const handleTextAreaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		handleInputChange(e);
-		// Use the input event target or fall back to the ref
-		const textArea = e.target || textAreaRef.current;
-		if (textArea) {
-			adjustTextAreaHeight(textArea);
-		}
-	};
-
-	// Helper function to adjust textarea height
-	const adjustTextAreaHeight = (target: HTMLTextAreaElement) => {
-		// Skip if target is undefined or doesn't have style property
+	const adjustTextAreaHeight = useCallback((target: HTMLTextAreaElement) => {
 		if (!target || typeof target.style === 'undefined') {
-			console.warn('Invalid textarea element for height adjustment');
+			console.warn('[ContentCopilotView] Invalid textarea element for height adjustment');
 			return;
 		}
-
 		try {
-			// Reset height to auto to get proper scrollHeight measurement
 			target.style.height = 'auto';
-			// Set height based on scrollHeight (plus small buffer)
 			target.style.height = `${Math.min(target.scrollHeight + 2, 200)}px`;
 		} catch (err) {
 			console.warn('Error adjusting textarea height:', err);
 		}
-	};
+	}, []);
 
-	// Handle form submission with improved UX
-	const handleFormSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!input.trim()) {
-			return;
+	const handleTextAreaInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		handleInputChange(e);
+		const textArea = e.target || textAreaRef.current;
+		if (textArea) {
+			adjustTextAreaHeight(textArea);
 		}
+	}, [handleInputChange, textAreaRef, adjustTextAreaHeight]);
 
-		// Save user message if we have a conversation ID
-
-
+	const handleFormSubmit = useCallback((e: React.FormEvent) => {
+		e.preventDefault();
+		if (!input.trim() && messages.length === 0) {
+			if (messages.length > 0) return;
+		}
 		handleSubmit(e);
-
-		// Focus back on textarea after sending
 		setTimeout(() => {
 			if (textAreaRef.current) {
 				textAreaRef.current.focus();
-				// Reset textarea height
 				textAreaRef.current.style.height = '44px';
 			}
 		}, 0);
-	};
+	}, [input, messages, handleSubmit, textAreaRef]);
 
-	// Helper function to save messages
-	const saveMessage = async (message: UIMessage) => {
-		if (!conversationId) return;
+	const handleEditSubmit = useCallback(async () => {
+		if (!editingMessage || !conversationId) {
+			console.warn('[ContentCopilotView] No message selected for editing or missing conversation ID.');
+			setEditingMessage(null);
+			return;
+		}
 
+		const messageIndex = messages.findIndex(msg => msg.id === editingMessage.id);
+		if (messageIndex === -1) {
+			console.error("[ContentCopilotView] Editing message not found in current messages array.");
+			setEditingMessage(null);
+			return;
+		}
+
+		const messagesToKeep = messages.slice(0, messageIndex);
+		const editedContent = editingMessage.content;
+
+		// Prevent submission if content is empty after edit
+		if (!editedContent.trim()) {
+			console.warn('[ContentCopilotView] Edited message content is empty. Aborting edit.');
+			// Optionally, restore original content or provide feedback
+			// For now, just cancel edit
+			setEditingMessage(null);
+			return;
+		}
+
+		setStatus('loading');
 		try {
-			const response = await fetch('/api/conversation/save-message', {
+			// 1. Persist the truncated messages to the database
+			const saveResponse = await fetch('/api/conversation/save-messages', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					conversationId,
-					message
+					conversationId: conversationId,
+					messages: messagesToKeep,
 				}),
 			});
 
-			if (!response.ok) {
-				console.error('Failed to save message:', await response.text());
+			if (!saveResponse.ok) {
+				const errorData = await saveResponse.json();
+				throw new Error(errorData.error || 'Failed to save truncated messages');
 			}
-		} catch (error) {
-			console.error('Error saving message:', error);
+
+			// 2. Update local chat state with truncated messages
+			setMessages(messagesToKeep);
+
+			// 3. Clear the editing state
+			setEditingMessage(null);
+
+			// 4. Append the edited message as a new user message.
+			// This will also trigger the API call to /api/content-copilot/regular
+			await append({
+				role: 'user',
+				content: editedContent,
+				// id will be generated by useChat
+			});
+
+			// Reset input form height for the main input after submission
+			if (textAreaRef.current) {
+				textAreaRef.current.style.height = '44px';
+				textAreaRef.current.focus();
+			}
+
+		} catch (err) {
+			console.error("[ContentCopilotView] Failed to save edited message or resubmit:", err);
+			setError(`Failed to apply edit: ${err instanceof Error ? err.message : String(err)}`);
+			// Optionally, revert UI changes or reload messages if the save/append failed.
+			// For now, just show error. User might need to refresh.
+		} finally {
+			// Set status to ready if not already set by an error in append (onError handler)
+			// This assumes append() might trigger onError which sets status to 'error'
+			// If append() succeeds, onFinish would eventually run.
+			// It's tricky to set status here directly without knowing append's full lifecycle.
+			// For now, let onError/onFinish handle status if they are triggered.
+			// If error occurred above before append, status is 'error'. If not, it's 'loading'.
+			// Let's ensure it goes to 'ready' if no error occurred within this block before append.
+			// The chatIsLoading state from useChat should reflect if append is in progress.
+			if (status !== 'error') {
+				setStatus('ready');
+			}
 		}
-	};
+	}, [editingMessage, conversationId, messages, setMessages, append, setInput, setStatus, setError, textAreaRef]);
 
-	// Handle switching to refinement mode
-	const switchToRefinementMode = () => {
-		// Store current conversation ID as parent for refinement
+	const switchToRefinementMode = useCallback(() => {
 		setParentConversationId(conversationId);
-
-		// Reset conversation state for the new mode
 		setConversationId(null);
 		setLoadedMessages([]);
 		setConversationLoaded(false);
-
-		// Set to refinement mode
 		setMode('refinement');
-
-		// Trigger reload
 		setStatus('loading');
-	};
+	}, [conversationId]);
 
-	// Handle switching to regular mode
-	const switchToRegularMode = () => {
-		// Reset parent conversation ID
+	const switchToRegularMode = useCallback(() => {
 		setParentConversationId(null);
-
-		// Reset conversation state for the new mode
 		setConversationId(null);
 		setLoadedMessages([]);
 		setConversationLoaded(false);
-
-		// Set to regular mode
 		setMode('regular');
-
-		// Trigger reload
 		setStatus('loading');
-	};
+	}, []);
 
-	// Handle mode change
-	const handleModeChange = (value: string) => {
-		console.log('handleModeChange', value);
+	const handleModeChange = useCallback((value: string) => {
+		console.log('[ContentCopilotView] Mode changed to:', value);
 		if (value === 'refinement') {
 			switchToRefinementMode();
 		} else if (value === 'regular') {
 			switchToRegularMode();
 		}
-	};
+	}, [switchToRefinementMode, switchToRegularMode]);
 
-	// Helper function to get document title
-	const getDocumentTitle = () => {
+	const getDocumentTitle = useCallback(() => {
 		return document.data?.title || document.data?.name || `Untitled ${document.type}`;
-	};
+	}, [document.data, document.type]);
 
-	// --- RENDERING ---
-	// Add debugging for development
-	useEffect(() => {
-		console.log(`============= State Update =============`);
-		console.log(`Mode: ${mode}`);
-		console.log(`Status: ${status}`);
-		console.log(`ConversationId: ${conversationId}`);
-		console.log(`ParentConversationId: ${parentConversationId}`);
-		console.log(`Messages: ${loadedMessages.length}`);
-		console.log(`API Route: ${apiRoute}`);
-		console.log(`=======================================`);
-	}, [mode, status, conversationId, parentConversationId, loadedMessages, apiRoute]);
-
-	// Handle error state
 	if (error) {
 		return (
 			<Card className="w-full p-4 bg-red-50 border border-red-100">
@@ -444,7 +570,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		);
 	}
 
-	// Main component render - using key to force full component remount when mode changes
 	return (
 		<div key={`content-copilot-${mode}`} className="flex flex-col w-full h-full max-h-screen border rounded-md">
 			{/* Header with mode toggle */}
@@ -503,7 +628,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 					</div>
 				) : (
 					<>
-						{messages.map((message) => (
+						{messages.map((message: UIMessage) => (
 							<div
 								key={message.id}
 								className={cn(
@@ -513,35 +638,91 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 							>
 								<div
 									className={cn(
-										"px-4 py-3 rounded-xl max-w-[85%] break-words",
+										"px-4 py-3 rounded-xl max-w-[85%] break-words relative group",
 										message.role === 'user'
 											? "bg-emerald-100 text-emerald-900 rounded-br-sm ml-auto"
 											: "bg-gray-100 text-black rounded-bl-sm mr-auto"
 									)}
 								>
 									{message.role === 'user' ? (
-										<p>{message.content}</p>
+										editingMessage?.id === message.id ? (
+											<div className="flex flex-col gap-2">
+												<Textarea
+													value={editingMessage.content}
+													onChange={(e) => setEditingMessage({ ...editingMessage, content: e.target.value })}
+													rows={3}
+													className="text-sm text-black bg-white resize-none w-full p-2 border border-emerald-300 focus:ring-emerald-500"
+												/>
+												<div className="flex gap-2 justify-end">
+													<Button
+														size="sm"
+														variant="ghost"
+														onClick={() => setEditingMessage(null)}
+														className="text-xs text-gray-600 hover:text-gray-800"
+													>
+														<X className="mr-1 h-3 w-3" /> Cancel
+													</Button>
+													<Button
+														size="sm"
+														onClick={handleEditSubmit}
+														className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
+														disabled={chatIsLoading || status !== 'ready'}
+													>
+														<Check className="mr-1 h-3 w-3" /> Save & Resubmit
+													</Button>
+												</div>
+											</div>
+										) : (
+											<>
+												<p>{message.content}</p>
+												{!chatIsLoading && status === 'ready' && (
+													<Button
+														variant="ghost"
+														size="icon"
+														className="absolute bottom-1 right-1 h-6 w-6 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity"
+														onClick={() => setEditingMessage({ id: message.id, content: message.content })}
+														title="Edit message"
+													>
+														<Edit3 className="h-3.5 w-3.5" />
+														<span className="sr-only">Edit message</span>
+													</Button>
+												)}
+											</>
+										)
 									) : (
 										<div className="w-full">
-											{Array.isArray(message.content) ? (
-												message.content.map((part, partIndex) => (
-													<div key={`${message.id}-part-${partIndex}`} className="w-full mb-2 last:mb-0">
-														{part.type === 'text' ? (
-															<div className="whitespace-pre-wrap prose prose-sm max-w-none prose-p:text-black prose-headings:text-black prose-a:text-emerald-600 prose-ol:pl-5 prose-ul:pl-5 prose-li:my-0 prose-ol:my-2 prose-ul:my-2 prose-ol:list-decimal prose-ul:list-disc">
-																{part.text}
+											{message.parts && message.parts.map((part, partIndex) => (
+												<div key={`${message.id}-part-${partIndex}`} className="w-full last:mb-0">
+													{part.type === 'text' && (
+														<div className="whitespace-pre-wrap prose prose-sm max-w-none prose-p:text-black prose-headings:text-black prose-a:text-emerald-600 prose-ol:pl-5 prose-ul:pl-5 prose-li:my-0 prose-ol:my-2 prose-ul:my-2 prose-ol:list-decimal prose-ul:list-disc mb-2 last:mb-0">
+															{part.text}
+														</div>
+													)}
+													{part.type === 'tool-invocation' && part.toolInvocation && (() => {
+														// The highlighting logic is now moved to onToolCall handler
+
+														return (
+															<div className="flex flex-row">
+																<div className="my-2 w-2/3">
+																	<ToolDisplay toolCall={part.toolInvocation} addToolResult={addToolResult} />
+																</div>
+																<div className="w-1/3">
+
+																</div>
 															</div>
-														) : part.type === 'tool-invocation' ? (
-															<ToolDisplay toolCall={part.toolInvocation} addToolResult={addToolResult} />
-														) : part.type === 'tool-result' ? (
-															null // Don't render tool results separately, they get handled with the tool calls
-														) : part.type === 'step-start' || part.type === 'step-finish' ? (
-															null // Skip step events
-														) : (
-															<p className="text-xs text-red-600">Unsupported part type: {part.type}</p>
+														);
+													})()}
+													{part.type === 'step-start' && partIndex > 0 && (
+														<hr className="border-gray-300 w-2/3" />
+													)}
+													{!(part.type === 'text' ||
+														(part.type === 'tool-invocation' && part.toolInvocation) ||
+														(part.type === 'step-start')) && (
+															<p className="text-xs text-gray-500 mb-2 last:mb-0">Unsupported/empty part type: {part.type}</p>
 														)}
-													</div>
-												))
-											) : (
+												</div>
+											))}
+											{(!message.parts || message.parts.length === 0) && message.content && (
 												<div className="whitespace-pre-wrap prose prose-sm max-w-none prose-p:text-black prose-headings:text-black prose-a:text-emerald-600 prose-ol:pl-5 prose-ul:pl-5 prose-li:my-0 prose-ol:my-2 prose-ul:my-2 prose-ol:list-decimal prose-ul:list-disc">
 													{message.content}
 												</div>
@@ -551,7 +732,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 								</div>
 							</div>
 						))}
-
 						<div ref={messagesEndRef} />
 					</>
 				)}
@@ -573,117 +753,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 				/>
 			</div>
 		</div>
-	);
-};
-
-// Extract the input form to prevent unnecessary re-renders
-const ChatInputForm = ({
-	input,
-	handleInputChange,
-	handleFormSubmit,
-	isLoading,
-	textAreaRef,
-	hasMessages,
-	documentData,
-	validSchemaType,
-	setIsTyping,
-	setInput
-}: {
-	input: string;
-	handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-	handleFormSubmit: (e: React.FormEvent) => void;
-	isLoading: boolean;
-	textAreaRef: React.RefObject<HTMLTextAreaElement>;
-	hasMessages: boolean;
-	documentData?: Record<string, any> | null;
-	validSchemaType?: string | null;
-	setIsTyping?: (isTyping: boolean) => void;
-	setInput?: (value: string) => void;
-}) => {
-	// Handle keyboard shortcuts
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		// Submit on Enter (without shift)
-		if (e.key === 'Enter' && !e.shiftKey) {
-			e.preventDefault();
-			handleFormSubmit(e as unknown as React.FormEvent);
-		}
-	};
-
-	// Function to start a new conversation
-	const startConversation = () => {
-		// Create a context-aware regular message
-		const docType = validSchemaType || 'document';
-		const docTitle = documentData?.title || 'this content';
-		const regularMessage = `Let's work on ${docTitle} together. Please help me flesh out the details for this ${docType}. What kind of information should I include?`;
-
-		if (setIsTyping) setIsTyping(true);
-
-		// Set the input value directly
-		if (setInput) setInput(regularMessage);
-
-		// Submit after a short delay to ensure the input is set
-		setTimeout(() => {
-			const syntheticEvent = { preventDefault: () => { } } as React.FormEvent;
-			handleFormSubmit(syntheticEvent);
-		}, 100);
-	};
-
-	// If there are no messages yet, show the start button instead of the input
-	if (!hasMessages) {
-		return (
-			<div className="flex flex-col gap-3 items-center justify-center p-4 text-center">
-				<p className="text-sm text-black">
-					Content Copilot will help you create and edit content through natural conversation.
-				</p>
-				<Button
-					onClick={startConversation}
-					className="mt-1"
-					disabled={isLoading}
-				>
-					{isLoading ? (
-						<>
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							Starting...
-						</>
-					) : (
-						"Start Conversation"
-					)}
-				</Button>
-			</div>
-		);
-	}
-
-	// Regular input form when conversation is already started
-	return (
-		<form onSubmit={handleFormSubmit} className="flex gap-2 items-end">
-			<div className="relative flex-1 text-black">
-				<Textarea
-					ref={textAreaRef}
-					value={input}
-					onChange={handleInputChange}
-					onKeyDown={handleKeyDown}
-					placeholder={isLoading
-						? "Loading conversation..."
-						: "Message Content Copilot about this content... (Enter to send)"
-					}
-					rows={1}
-					disabled={isLoading}
-					className="resize-none min-h-[44px] max-h-[200px] w-full p-3 text-sm text-black bg-white"
-				/>
-			</div>
-			<Button
-				type="submit"
-				size="icon"
-				disabled={isLoading || !input.trim()}
-				className="h-[44px] w-[44px] shrink-0"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-					<path d="M5 12h14"></path>
-					<path d="m12 5 7 7-7 7"></path>
-				</svg>
-				<span className="sr-only">Send</span>
-			</Button>
-		</form>
 	);
 };
 

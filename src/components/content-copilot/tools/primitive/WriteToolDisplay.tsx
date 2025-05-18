@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { ToolInvocation } from "ai";
 import { Check, ChevronDown, ChevronUp, FileEdit, Loader2, Minus, Plus } from "lucide-react";
 import { useState } from "react";
@@ -14,6 +15,54 @@ type ToolInvocationWithResult = ToolInvocation & {
 		previousValue?: any;
 		[key: string]: any;
 	};
+};
+
+// Format simple values for display (used by ObjectDisplay and displayFullValueForHover)
+const formatSimpleValue = (val: any): { value: string, type: string; } => {
+	if (val === null) return { value: 'null', type: 'null' };
+	if (val === undefined) return { value: 'undefined', type: 'undefined' };
+
+	switch (typeof val) {
+		case 'string':
+			return { value: `"${val}"`, type: 'string' };
+		case 'number':
+			return { value: val.toString(), type: 'number' };
+		case 'boolean':
+			return { value: val ? 'true' : 'false', type: 'boolean' };
+		default:
+			return { value: String(val), type: 'unknown' };
+	}
+};
+
+// Get appropriate class for a value type (used by ObjectDisplay and displayFullValueForHover)
+const getTypeClass = (type: string): string => {
+	switch (type) {
+		case 'string': return 'text-green-600 font-mono';
+		case 'number': return 'text-blue-600 font-mono';
+		case 'boolean': return 'text-purple-600 font-mono';
+		case 'null':
+		case 'undefined': return 'text-gray-500 font-mono italic';
+		default: return 'text-black font-mono';
+	}
+};
+
+// Helper to display full values in HoverCard
+const displayFullValueForHover = (val: any) => {
+	if (val === null || val === undefined) {
+		const { value: formattedSimpleValue, type } = formatSimpleValue(val);
+		return <span className={`${getTypeClass(type)}`}>{formattedSimpleValue}</span>;
+	}
+	if (typeof val === 'object') {
+		return (
+			<div className="max-h-32 overflow-y-auto bg-slate-50 p-1.5 rounded border border-slate-200 font-mono text-xs mt-0.5">
+				<pre className="whitespace-pre-wrap break-all">
+					{JSON.stringify(val, null, 2)}
+				</pre>
+			</div>
+		);
+	}
+	const { value: formattedSimpleValue, type } = formatSimpleValue(val);
+	return <span className={`${getTypeClass(type)} break-words`}>{formattedSimpleValue}</span>;
 };
 
 /**
@@ -51,35 +100,6 @@ export const WriteToolDisplay = ({ toolInvocation }: WriteToolDisplayProps) => {
 		return false;
 	};
 
-	// Format simple values for display
-	const formatSimpleValue = (val: any): { value: string, type: string; } => {
-		if (val === null) return { value: 'null', type: 'null' };
-		if (val === undefined) return { value: 'undefined', type: 'undefined' };
-
-		switch (typeof val) {
-			case 'string':
-				return { value: `"${val}"`, type: 'string' };
-			case 'number':
-				return { value: val.toString(), type: 'number' };
-			case 'boolean':
-				return { value: val ? 'true' : 'false', type: 'boolean' };
-			default:
-				return { value: String(val), type: 'unknown' };
-		}
-	};
-
-	// Get appropriate class for a value type
-	const getTypeClass = (type: string): string => {
-		switch (type) {
-			case 'string': return 'text-green-600';
-			case 'number': return 'text-blue-600';
-			case 'boolean': return 'text-purple-600';
-			case 'null':
-			case 'undefined': return 'text-gray-500';
-			default: return 'text-black';
-		}
-	};
-
 	// Display value with proper formatting and potential expansion
 	const ObjectDisplay = ({
 		value,
@@ -106,7 +126,7 @@ export const WriteToolDisplay = ({ toolInvocation }: WriteToolDisplayProps) => {
 
 		// If empty object or array, render simple representation
 		if (keys.length === 0) {
-			return <span>{isArray ? '[]' : '{}'}</span>;
+			return <span className="font-mono text-gray-500">{isArray ? '[]' : '{}'}</span>;
 		}
 
 		const isExpanded = isTopLevel ? expanded : objectExpanded[keyPath] || false;
@@ -123,7 +143,7 @@ export const WriteToolDisplay = ({ toolInvocation }: WriteToolDisplayProps) => {
 						className="inline-flex items-center space-x-1 hover:bg-slate-100 rounded px-1 text-xs"
 					>
 						<Plus className="h-3 w-3 text-slate-500" />
-						<span>
+						<span className="font-mono">
 							{isArray
 								? `Array(${keys.length})`
 								: `Object{${keys.length}}`}
@@ -145,7 +165,7 @@ export const WriteToolDisplay = ({ toolInvocation }: WriteToolDisplayProps) => {
 						className="inline-flex items-center hover:bg-slate-100 rounded px-1 mb-1 text-xs"
 					>
 						<Minus className="h-3 w-3 text-slate-500 mr-1" />
-						<span>
+						<span className="font-mono">
 							{isArray
 								? `Array(${keys.length})`
 								: `Object{${keys.length}}`}
@@ -161,8 +181,14 @@ export const WriteToolDisplay = ({ toolInvocation }: WriteToolDisplayProps) => {
 						return (
 							<div key={childKeyPath} className={`${index === keys.length - 1 ? '' : 'mb-1'}`}>
 								<div className="flex items-start">
-									<span className="text-slate-500 mr-2">
-										{isArray ? '' : <span className="mr-1">{key}:</span>}
+									<span className="text-slate-500 mr-2 font-mono">
+										{isArray ? (
+											<Badge variant="outline" className="text-[10px] h-4 py-0 px-1 font-mono bg-slate-50 border-slate-300">
+												{key}
+											</Badge>
+										) : (
+											<span className="font-mono">{key}:</span>
+										)}
 									</span>
 									{isChildExpandable ? (
 										<ObjectDisplay
@@ -190,15 +216,15 @@ export const WriteToolDisplay = ({ toolInvocation }: WriteToolDisplayProps) => {
 			try {
 				const isArray = Array.isArray(val);
 				const size = isArray ? val.length : Object.keys(val).length;
-				return isArray ? `[Array: ${size} items]` : `{Object: ${size} properties}`;
+				return isArray ? `[Array: ${size} items]` : `{Object: ${size} props}`;
 			} catch (e) {
 				return '[Complex Object]';
 			}
 		}
 
 		const stringVal = String(val);
-		return stringVal.length > 50
-			? stringVal.substring(0, 47) + '...'
+		return stringVal.length > 35 // Reduced length for very brief display
+			? stringVal.substring(0, 32) + '...'
 			: stringVal;
 	};
 
@@ -234,94 +260,121 @@ export const WriteToolDisplay = ({ toolInvocation }: WriteToolDisplayProps) => {
 	}
 
 	// For completed operations with results
+	if (!expanded) {
+		return (
+			<HoverCard openDelay={200} closeDelay={100}>
+				<HoverCardTrigger asChild>
+					<div
+						className="my-0.5 flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-slate-200 bg-white hover:bg-slate-50 rounded-md cursor-pointer shadow-sm border-l-4 border-green-500"
+						onClick={() => setExpanded(true)}
+						role="button"
+						tabIndex={0}
+						aria-expanded="false"
+						aria-label={`Write operation on ${path.split('.').pop()}, click to expand`}
+					>
+						<Check className="h-3.5 w-3.5 text-green-700" />
+						<FileEdit className="h-3.5 w-3.5 text-green-700" />
+						<span className="font-medium text-slate-800">
+							Updated: <span className="font-semibold text-green-700">{path.split('.').pop()}</span>
+						</span>
+						<span className="flex-grow"></span> {/* Spacer */}
+						<ChevronDown className="h-3.5 w-3.5 text-slate-500" />
+					</div>
+				</HoverCardTrigger>
+				<HoverCardContent className="w-auto max-w-xl p-3 text-xs bg-white border border-slate-200 shadow-xl rounded-lg" side="top" align="start">
+					<div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+						<span className="font-semibold text-slate-600">Path:</span>
+						<code className="text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded text-xs break-all font-mono">
+							{path}
+						</code>
+
+						<span className="font-semibold text-slate-600 self-start">New Value:</span>
+						<div>{displayFullValueForHover(value)}</div>
+
+						{previousValue !== undefined && (
+							<>
+								<span className="font-semibold text-slate-600 self-start">Previous:</span>
+								<div>{displayFullValueForHover(previousValue)}</div>
+							</>
+						)}
+					</div>
+				</HoverCardContent>
+			</HoverCard>
+		);
+	}
+
+	// Expanded view (when expanded is true)
 	return (
 		<Card
-			className="w-full border bg-white text-black border-green-100 shadow-sm hover:shadow-md transition-all duration-200"
+			className="w-full border bg-white text-black border-green-200 shadow-lg transition-all duration-200 my-0.5"
 			role="region"
-			aria-expanded={expanded}
+			aria-expanded={true}
 		>
 			<CardHeader
 				className="bg-green-50 py-2 cursor-pointer"
-				onClick={() => setExpanded(!expanded)}
+				onClick={() => setExpanded(false)} // Click to collapse
 			>
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-sm font-medium text-green-700">
-						<span className="flex items-center gap-1">
+						<span className="flex items-center gap-1.5">
 							<Check className="h-3.5 w-3.5" />
-							<FileEdit className="h-3.5 w-3.5 ml-0.5" />
+							<FileEdit className="h-3.5 w-3.5" />
 							Field Updated
+							<span className="text-xs ml-1 font-mono opacity-90">
+								{path.split('.').map((segment: string, i: number, arr: string[]) =>
+									i === arr.length - 1 ?
+										<span key={i} className="font-semibold">{segment}</span> :
+										<span key={i}>{segment}.</span>
+								)}
+							</span>
 						</span>
 					</CardTitle>
 					<div className="flex items-center gap-2">
 						<Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
 							{toolName}
 						</Badge>
-						{expanded ?
-							<ChevronUp className="h-3.5 w-3.5 text-green-700" /> :
-							<ChevronDown className="h-3.5 w-3.5 text-green-700" />
-						}
+						{/* Chevron now indicates collapse */}
+						<button
+							onClick={(e) => {
+								e.stopPropagation();
+								setExpanded(false);
+							}}
+							className="flex items-center justify-center h-5 w-5 rounded-full bg-green-100 text-green-700"
+							aria-label="Collapse details"
+						>
+							<ChevronUp className="h-3.5 w-3.5" />
+						</button>
 					</div>
 				</div>
 			</CardHeader>
 			<CardContent className="p-3 bg-white text-black">
-				<div className="space-y-2">
+				<div className="space-y-3">
 					<div className="flex items-start gap-2">
-						<span className="text-xs font-semibold text-black">Path:</span>
-						<code className="text-xs rounded bg-slate-100 px-1 py-0.5 text-black">
+						<span className="text-xs font-semibold text-slate-700 min-w-[80px]">Path:</span>
+						<code className="text-xs rounded bg-slate-100 px-1.5 py-1 text-slate-800 break-all font-mono">
 							{path}
 						</code>
 					</div>
 					<div className="flex items-start gap-2">
-						<span className="text-xs font-semibold text-black">Value:</span>
-						<div className="text-xs rounded bg-slate-100 px-1.5 py-1 text-black break-all max-w-full overflow-x-auto">
-							{isExpandableValue(value) ? (
-								<ObjectDisplay value={value} isTopLevel={true} />
-							) : (
-								expanded ? (
-									<span className={getTypeClass(typeof value)}>
-										{formatSimpleValue(value).value}
-									</span>
-								) : (
-									formatBriefValue(value)
-								)
-							)}
+						<span className="text-xs font-semibold text-slate-700 min-w-[80px]">New Value:</span>
+						<div className="text-xs rounded bg-slate-50 border border-slate-200 p-3 text-black max-w-full overflow-x-auto flex-grow">
+							<ObjectDisplay value={value} keyPath={`val-${path}`} isTopLevel={true} />
 						</div>
 					</div>
 
-					{previousValue && (
-						<div className={`flex items-start gap-2 ${expanded ? '' : 'hidden'}`}>
-							<span className="text-xs font-semibold text-black">Previous:</span>
-							<div className="text-xs rounded bg-slate-100 px-1.5 py-1 text-black break-all max-w-full overflow-x-auto">
-								{isExpandableValue(previousValue) ? (
-									<ObjectDisplay value={previousValue} keyPath="prev" isTopLevel={true} />
-								) : (
-									<span className={getTypeClass(typeof previousValue)}>
-										{formatSimpleValue(previousValue).value}
-									</span>
-								)}
+					{previousValue !== undefined && (
+						<div className="flex items-start gap-2">
+							<span className="text-xs font-semibold text-slate-700 min-w-[80px]">Previous:</span>
+							<div className="text-xs rounded bg-slate-50 border border-slate-200 p-3 text-black max-w-full overflow-x-auto flex-grow">
+								<ObjectDisplay value={previousValue} keyPath={`prev-${path}`} isTopLevel={true} />
 							</div>
 						</div>
 					)}
 				</div>
 			</CardContent>
-			{(previousValue || isExpandableValue(value)) && (
-				<CardFooter className="p-2 bg-slate-50 border-t border-slate-200 justify-center">
-					<button
-						onClick={(e) => {
-							e.stopPropagation();
-							setExpanded(!expanded);
-						}}
-						className="text-xs text-green-600 hover:text-green-800 transition-colors flex items-center gap-1"
-					>
-						{expanded ? 'Show Less' : 'Show More Details'}
-						{expanded ? (
-							<ChevronUp className="h-3 w-3" />
-						) : (
-							<ChevronDown className="h-3 w-3" />
-						)}
-					</button>
-				</CardFooter>
-			)}
+			{/* Footer can be removed if expand/collapse is handled by header and compact view */}
+			{/* Or keep it if it offers different functionality like "Show full details in modal" etc. */}
+			{/* For now, let's remove it to simplify, as the header handles collapse. */}
 		</Card>
 	);
 }; 

@@ -474,7 +474,7 @@ export async function writeToPath(
 	path: string,
 	value: any,
 	createIfMissing: boolean = true
-): Promise<void> {
+): Promise<{ success: boolean; documentId: string; path: string; error?: any; }> {
 	try {
 		const patch = client.patch(documentId);
 
@@ -495,9 +495,12 @@ export async function writeToPath(
 		await patch.commit();
 
 		console.log(`Successfully wrote value at path "${path}" in document ${documentId}`);
+		return { success: true, documentId, path };
 	} catch (error) {
 		console.error(`Error writing to path ${path}:`, error);
-		throw error;
+		// Ensure the error is serializable if it's a complex object
+		const serializableError = error instanceof Error ? { message: error.message, name: error.name, stack: error.stack } : error;
+		return { success: false, documentId, path, error: serializableError };
 	}
 }
 

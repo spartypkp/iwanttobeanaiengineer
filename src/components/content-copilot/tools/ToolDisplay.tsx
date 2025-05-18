@@ -17,7 +17,7 @@ interface ToolCallProps {
  * Routes to specialized components for rich UIs or renders simple notifications
  */
 export const ToolDisplay = ({ toolCall, addToolResult }: ToolCallProps) => {
-	console.log('toolCall', toolCall);
+	//console.log('toolCall', toolCall);
 	const { toolName } = toolCall;
 
 	// First, try to route to specialized rich UI components based on tool name
