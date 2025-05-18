@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Project } from '@/sanity/sanity.types';
 import { Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProjectCard from './projectCard';
 
 interface ProjectGridProps {
@@ -21,15 +21,25 @@ export default function ProjectGrid({ projects }: ProjectGridProps) {
 	const categories = [...new Set(projects.flatMap(p => p.categories || []))].filter(Boolean);
 	const statuses = [...new Set(projects.map(p => p.timeline?.status || 'active'))].filter(Boolean);
 
+	// Log initial projects and filter states
+	useEffect(() => {
+		console.log('[ProjectGrid] Received projects:', projects.length, projects.map(p => p.title || p._id));
+	}, [projects]);
+
 	// Filter projects based on current filters
 	const filteredProjects = projects.filter(project => {
+		// Log current filter states for each project being evaluated if needed for deep debugging
+		// console.log(`[ProjectGrid] Filtering project: ${project.title || project._id}, StatusFilter: ${statusFilter}, CategoryFilter: ${categoryFilter}, SearchTerm: ${searchTerm}`);
+
 		// Status filter
 		if (statusFilter && project.timeline?.status !== statusFilter) {
+			// console.log(`[ProjectGrid] Filtered out by status: ${project.title || project._id}`);
 			return false;
 		}
 
 		// Category filter
 		if (categoryFilter && !project.categories?.includes(categoryFilter)) {
+			// console.log(`[ProjectGrid] Filtered out by category: ${project.title || project._id}`);
 			return false;
 		}
 
@@ -43,12 +53,19 @@ export default function ProjectGrid({ projects }: ProjectGridProps) {
 			);
 
 			if (!titleMatch && !descMatch && !techMatch) {
+				// console.log(`[ProjectGrid] Filtered out by search: ${project.title || project._id}`);
 				return false;
 			}
 		}
 
 		return true;
 	});
+
+	// Log filtered projects
+	useEffect(() => {
+		console.log('[ProjectGrid] Filter states:', { statusFilter, categoryFilter, searchTerm });
+		console.log('[ProjectGrid] Filtered projects count:', filteredProjects.length, filteredProjects.map(p => p.title || p._id));
+	}, [filteredProjects, statusFilter, categoryFilter, searchTerm]);
 
 	// Clear all filters
 	const clearFilters = () => {

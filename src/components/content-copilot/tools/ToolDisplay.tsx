@@ -30,6 +30,8 @@ export const ToolDisplay = ({ toolCall, addToolResult }: ToolCallProps) => {
 		return <DocumentTypesToolCard toolInvocation={toolCall} />;
 	}
 
+	// Handle queryTool specifically for DocumentListToolCard if that's intended first
+	// The improved queryTool is named 'queryTool'
 	if (toolName === 'listDocumentsByType' || toolName === 'queryTool' || toolName === 'query') {
 		return <DocumentListToolCard toolInvocation={toolCall} />;
 	}
@@ -40,19 +42,24 @@ export const ToolDisplay = ({ toolCall, addToolResult }: ToolCallProps) => {
 	}
 
 	// Primitive tools - rich card UIs for data operations
-	if (toolName === 'write' || toolName === 'writeField') {
+	// Ensure these checks include the exact names of your improved tools
+	if (toolName === 'writeTool' || toolName === 'write' || toolName === 'writeField') {
 		return <WriteToolDisplay toolInvocation={toolCall} />;
 	}
 
-	if (toolName === 'delete' || toolName === 'deleteField') {
+	if (toolName === 'deleteTool' || toolName === 'delete' || toolName === 'deleteField') {
 		return <DeleteToolDisplay toolInvocation={toolCall} />;
 	}
 
-	if (toolName === 'array' || toolName === 'addToArray' || toolName === 'removeFromArray') {
+	if (toolName === 'arrayTool' || toolName === 'array' || toolName === 'addToArray' || toolName === 'removeFromArray') {
 		return <ArrayToolDisplay toolInvocation={toolCall} />;
 	}
 
-	if (toolName === 'query') {
+	// If 'queryTool' was not caught above for DocumentListToolCard and you want it for QueryToolDisplay,
+	// this specific check for 'query' (the old name) would be for a different tool.
+	// If improved 'queryTool' should go to QueryToolDisplay, the logic needs adjustment regarding DocumentListToolCard.
+	// For now, assuming the above handles 'queryTool' for DocumentListToolCard.
+	if (toolName === 'query') { // This specifically targets a tool named "query", not "queryTool"
 		return <QueryToolDisplay toolInvocation={toolCall} />;
 	}
 

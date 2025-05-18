@@ -6,6 +6,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+// Revalidate this page frequently or set to 0 for always fresh during development
+export const revalidate = 0; // For production, consider a value like 3600 (1 hour)
+
 // Generate static params for all projects
 export async function generateStaticParams() {
 	const projects = await getAllProjects();
@@ -34,6 +37,9 @@ export async function generateMetadata({ params }: { params: { slug: string; }; 
 
 export default async function ProjectPage({ params }: { params: { slug: string; }; }) {
 	const project = await getProjectBySlug(params.slug);
+
+	// Log the full project object to the server console for debugging
+	console.log("[ProjectPage] Full project object for slug:", params.slug, JSON.stringify(project, null, 2));
 
 	if (!project) {
 		notFound();

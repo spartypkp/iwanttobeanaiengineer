@@ -1,12 +1,20 @@
 import ProjectGrid from '@/components/custom/projectShowcase/projectGrid';
 import { getAllProjects } from '@/sanity/lib/client';
 import { Loader2 } from 'lucide-react';
-import { Suspense } from 'react';
+
+// Opt-out of caching for this page, or set a short revalidation time
+export const revalidate = 3600; // Revalidate at most once per hour
 
 // Metadata for the page
 export const metadata = {
 	title: 'Projects | Will Diamond',
-	description: 'Explore my projects in AI engineering, web development, and more.'
+	description: 'Explore a curated selection of projects by Will Diamond, showcasing expertise in AI, web development, and more.',
+	keywords: ['projects', 'portfolio', 'Will Diamond', 'AI engineer', 'software developer', 'web development', 'data engineering'],
+	openGraph: {
+		title: 'Projects | Will Diamond',
+		description: 'Dive into the portfolio of Will Diamond, featuring innovative projects across various tech domains.',
+		// You can add a specific image for the projects page here if desired
+	},
 };
 
 // Loading component
@@ -33,66 +41,17 @@ async function ProjectsList() {
 
 export default function ProjectsPage() {
 	return (
-		<div className="container mx-auto px-4 py-12">
-			<div className="text-center mb-12">
-				<h1 className="text-4xl font-bold mb-4 font-mono flex items-center justify-center">
-					<span className="text-primary mr-3">&gt;</span>
-					Project Portfolio
-					<span className="ml-2 inline-block w-3 h-6 bg-primary/70 animate-blink"></span>
-				</h1>
-				<p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-					A collection of my projects showcasing experience with AI, web development,
-					and software engineering. Each project represents different skills and technologies.
+		<div className="container mx-auto px-4 py-12 md:py-20">
+			<header className="mb-12 text-center">
+				<h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">My Projects</h1>
+				<p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+					A collection of my work, from AI explorations and full-stack applications to open-source contributions and experimental prototypes.
 				</p>
-			</div>
+			</header>
 
-			{/* Terminal-style header for the projects section */}
-			<div className="mx-auto mb-8 max-w-6xl">
-				<div className="bg-zinc-900 border border-primary/20 rounded-md px-4 py-3 font-mono text-xs shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)] relative">
-					{/* Terminal window controls */}
-					<div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-						<div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-						<div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-						<div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-					</div>
-
-					<div className="flex items-center justify-center">
-						<div className="text-primary/80 font-mono">
-							<span className="text-primary/80 mr-2">$</span>
-							<span className="text-primary/60">ls -la ~/projects | sort -r</span>
-						</div>
-					</div>
-
-					<div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 text-[10px] text-primary/40">
-						<span className="h-1.5 w-1.5 rounded-full bg-primary/30"></span>
-						<span>will@diamond:~</span>
-					</div>
-				</div>
-			</div>
-
-			<div className="relative">
-				{/* Terminal scan lines overlay */}
-				<div className="absolute inset-0 terminal-scan-lines pointer-events-none opacity-[0.03] z-10"></div>
-
-				<Suspense fallback={<ProjectsLoading />}>
-					<ProjectsList />
-				</Suspense>
-			</div>
-
-			{/* Terminal footer */}
-			<div className="mx-auto mt-16 max-w-6xl">
-				<div className="bg-zinc-900 border border-primary/20 rounded-md px-4 py-3 font-mono text-xs shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center">
-							<span className="text-primary/80 mr-2">$</span>
-							<span className="text-primary/60">echo &quot;Thanks for exploring my work!&quot;</span>
-						</div>
-						<div className="flex items-center gap-2 text-[10px] text-primary/40">
-							<span>exit 0</span>
-						</div>
-					</div>
-				</div>
-			</div>
+			<main>
+				<ProjectsList />
+			</main>
 		</div>
 	);
 }
