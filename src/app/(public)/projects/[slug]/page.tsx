@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 // Revalidate this page frequently or set to 0 for always fresh during development
-export const revalidate = 0; // For production, consider a value like 3600 (1 hour)
+export const revalidate = 3600; // For production, consider a value like 3600 (1 hour)
 
 // Generate static params for all projects
 export async function generateStaticParams() {
