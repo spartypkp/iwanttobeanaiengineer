@@ -1,0 +1,2243 @@
+[
+  {
+    "of": [
+      {
+        "marks": {
+          "annotations": [
+            {
+              "fields": [
+                {
+                  "validation": [
+                    {
+                      "rules": [
+                        {
+                          "flag": "uri",
+                          "constraint": {
+                            "options": {
+                              "scheme": [
+                                "/^http$/",
+                                "/^https$/"
+                              ],
+                              "allowRelative": false,
+                              "relativeOnly": false,
+                              "allowCredentials": false
+                            }
+                          }
+                        }
+                      ],
+                      "level": "error"
+                    }
+                  ],
+                  "name": "href",
+                  "type": "url",
+                  "title": "URL"
+                }
+              ],
+              "name": "link",
+              "type": "object",
+              "title": "URL"
+            }
+          ],
+          "decorators": [
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "em",
+              "title": "Emphasis"
+            }
+          ]
+        },
+        "lists": [
+          {
+            "value": "bullet",
+            "title": "Bullet"
+          }
+        ],
+        "styles": [
+          {
+            "value": "normal",
+            "title": "Normal"
+          },
+          {
+            "value": "h1",
+            "title": "H1"
+          },
+          {
+            "value": "h2",
+            "title": "H2"
+          },
+          {
+            "value": "h3",
+            "title": "H3"
+          },
+          {
+            "value": "h4",
+            "title": "H4"
+          },
+          {
+            "value": "blockquote",
+            "title": "Quote"
+          }
+        ],
+        "of": [],
+        "type": "block"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "fields": [
+          {
+            "name": "alt",
+            "type": "string",
+            "title": "Alternative Text"
+          }
+        ],
+        "type": "image"
+      }
+    ],
+    "name": "blockContent",
+    "type": "array"
+  },
+  {
+    "fields": [
+      {
+        "hidden": true,
+        "name": "contentCopilotPreview",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Personal",
+              "value": "personal"
+            },
+            {
+              "title": "Professional",
+              "value": "professional"
+            },
+            {
+              "title": "Education",
+              "value": "education"
+            },
+            {
+              "title": "Projects",
+              "value": "projects"
+            },
+            {
+              "title": "Skills",
+              "value": "skills"
+            },
+            {
+              "title": "Experience",
+              "value": "experience"
+            },
+            {
+              "title": "Preferences",
+              "value": "preferences"
+            },
+            {
+              "title": "FAQ",
+              "value": "faq"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "personal",
+                  "professional",
+                  "education",
+                  "projects",
+                  "skills",
+                  "experience",
+                  "preferences",
+                  "faq"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "description": "The question this knowledge item answers (for FAQs)",
+        "name": "question",
+        "type": "text"
+      },
+      {
+        "rows": 6,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "The main content of this knowledge item",
+        "name": "content",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Keywords to help with search and retrieval",
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "keywords",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "to": [
+              {
+                "type": "project"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to project"
+          }
+        ],
+        "name": "relatedProjects",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "to": [
+              {
+                "type": "skill"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to skill"
+          }
+        ],
+        "name": "relatedSkills",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "to": [
+              {
+                "type": "knowledgeBase"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to knowledge base"
+          }
+        ],
+        "name": "relatedKnowledge",
+        "type": "array",
+        "title": "Related Knowledge Items"
+      },
+      {
+        "description": "Where this information came from (if applicable)",
+        "name": "source",
+        "type": "string"
+      },
+      {
+        "description": "When this information was last verified as accurate",
+        "name": "lastVerified",
+        "type": "date"
+      },
+      {
+        "initialValue": 5,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 1
+              },
+              {
+                "flag": "max",
+                "constraint": 10
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Higher priority items will be used preferentially when multiple match",
+        "name": "priority",
+        "type": "number"
+      },
+      {
+        "initialValue": true,
+        "description": "Is this information suitable for public consumption?",
+        "name": "isPublic",
+        "type": "boolean",
+        "title": "Public Information"
+      }
+    ],
+    "name": "knowledgeBase",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "description": "This field enables auto-preview",
+        "hidden": false,
+        "name": "contentCopilotPreview",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Project Title"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "regex",
+                "constraint": {
+                  "pattern": "/^[a-z0-9-]+$/",
+                  "invert": false
+                }
+              }
+            ],
+            "level": "error",
+            "message": "Project ID must be lowercase, numbers, and hyphens only"
+          }
+        ],
+        "description": "A unique identifier for the project (used for routing and code references)",
+        "name": "id",
+        "type": "string",
+        "title": "Project ID"
+      },
+      {
+        "rows": 3,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "max",
+                "constraint": 400
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "A brief overview of the project (1-2 sentences)",
+        "name": "description",
+        "type": "text",
+        "title": "Short Description"
+      },
+      {
+        "description": "The company or organization associated with this project",
+        "name": "company",
+        "type": "string",
+        "title": "Company/Organization"
+      },
+      {
+        "initialValue": false,
+        "description": "Should this project be displayed on the home page?",
+        "name": "isFeatured",
+        "type": "boolean",
+        "title": "Featured Project"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "regex",
+                "constraint": {
+                  "pattern": "/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/",
+                  "invert": false
+                }
+              }
+            ],
+            "level": "error",
+            "message": "Must be a valid hex color code"
+          }
+        ],
+        "description": "The main color theme for this project (used for styling)",
+        "name": "primaryColor",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "startDate",
+            "type": "date"
+          },
+          {
+            "name": "endDate",
+            "type": "date"
+          },
+          {
+            "options": {
+              "list": [
+                {
+                  "title": "Active",
+                  "value": "active"
+                },
+                {
+                  "title": "Completed",
+                  "value": "completed"
+                },
+                {
+                  "title": "Maintenance",
+                  "value": "maintenance"
+                },
+                {
+                  "title": "Archived",
+                  "value": "archived"
+                },
+                {
+                  "title": "Concept",
+                  "value": "concept"
+                }
+              ]
+            },
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "valid",
+                    "constraint": [
+                      "active",
+                      "completed",
+                      "maintenance",
+                      "archived",
+                      "concept"
+                    ]
+                  },
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "status",
+            "type": "string",
+            "title": "Project Status"
+          }
+        ],
+        "name": "timeline",
+        "type": "object"
+      },
+      {
+        "rows": 4,
+        "description": "The problem this project aims to solve",
+        "name": "problem",
+        "type": "text",
+        "title": "Problem Statement"
+      },
+      {
+        "rows": 4,
+        "description": "How this project addresses the problem",
+        "name": "solution",
+        "type": "text",
+        "title": "Solution Overview"
+      },
+      {
+        "description": "Key challenges faced during the project",
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "title",
+                "type": "string",
+                "title": "Challenge Title"
+              },
+              {
+                "rows": 3,
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "description",
+                "type": "text",
+                "title": "Challenge Description"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "challenges",
+        "type": "array"
+      },
+      {
+        "description": "How you approached solving the challenges",
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "title",
+                "type": "string",
+                "title": "Approach Title"
+              },
+              {
+                "rows": 3,
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "description",
+                "type": "text",
+                "title": "Approach Description"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "approach",
+        "type": "array"
+      },
+      {
+        "description": "Key technical insights or innovations from the project",
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "title",
+                "type": "string",
+                "title": "Insight Title"
+              },
+              {
+                "rows": 3,
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "description",
+                "type": "text",
+                "title": "Insight Description"
+              },
+              {
+                "rows": 5,
+                "name": "code",
+                "type": "text",
+                "title": "Code Snippet"
+              },
+              {
+                "description": "Language of the code snippet for syntax highlighting",
+                "name": "language",
+                "type": "string",
+                "title": "Programming Language"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "technicalInsights",
+        "type": "array"
+      },
+      {
+        "description": "What you learned from this project",
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "learnings",
+        "type": "array",
+        "title": "Key Learnings"
+      },
+      {
+        "description": "Key accomplishments or milestones",
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "achievements",
+        "type": "array"
+      },
+      {
+        "rows": 3,
+        "description": "Your specific role and contributions to the project",
+        "name": "personalContribution",
+        "type": "text"
+      },
+      {
+        "description": "Measurable outcomes or results of the project",
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "results",
+        "type": "array"
+      },
+      {
+        "description": "Quantifiable metrics showcasing project impact",
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "label",
+                "type": "string",
+                "title": "Metric Label"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "value",
+                "type": "number",
+                "title": "Metric Value"
+              },
+              {
+                "description": "E.g., %, K, M, etc.",
+                "name": "unit",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "metrics",
+        "type": "array",
+        "title": "Project Metrics"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 1
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "name",
+                "type": "string",
+                "title": "Technology Name"
+              },
+              {
+                "options": {
+                  "list": [
+                    {
+                      "title": "Frontend",
+                      "value": "frontend"
+                    },
+                    {
+                      "title": "Backend",
+                      "value": "backend"
+                    },
+                    {
+                      "title": "Data",
+                      "value": "data"
+                    },
+                    {
+                      "title": "DevOps",
+                      "value": "devops"
+                    },
+                    {
+                      "title": "AI",
+                      "value": "ai"
+                    },
+                    {
+                      "title": "Design",
+                      "value": "design"
+                    },
+                    {
+                      "title": "Other",
+                      "value": "other"
+                    }
+                  ]
+                },
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "valid",
+                        "constraint": [
+                          "frontend",
+                          "backend",
+                          "data",
+                          "devops",
+                          "ai",
+                          "design",
+                          "other"
+                        ]
+                      },
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "category",
+                "type": "string"
+              },
+              {
+                "options": {
+                  "list": [
+                    {
+                      "title": "Beginner",
+                      "value": "beginner"
+                    },
+                    {
+                      "title": "Intermediate",
+                      "value": "intermediate"
+                    },
+                    {
+                      "title": "Advanced",
+                      "value": "advanced"
+                    },
+                    {
+                      "title": "Expert",
+                      "value": "expert"
+                    }
+                  ]
+                },
+                "name": "proficiency",
+                "type": "string",
+                "title": "Proficiency Level"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "technologies",
+        "type": "array",
+        "title": "Technologies Used"
+      },
+      {
+        "description": "Project categories (e.g., AI, Web Development, Data Engineering)",
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "categories",
+        "type": "array"
+      },
+      {
+        "description": "Tags to help with filtering and discovery",
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "tags",
+        "type": "array"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Simple",
+              "value": "simple"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Complex",
+              "value": "complex"
+            },
+            {
+              "title": "Enterprise",
+              "value": "enterprise"
+            }
+          ]
+        },
+        "name": "complexity",
+        "type": "string",
+        "title": "Project Complexity"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "The main image used for project cards and listings (separate from media gallery)",
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "alt",
+            "type": "string",
+            "title": "Alternative Text"
+          }
+        ],
+        "name": "thumbnail",
+        "type": "image",
+        "title": "Project Thumbnail"
+      },
+      {
+        "description": "Images, videos, or demos showcasing the project",
+        "of": [
+          {
+            "fields": [
+              {
+                "options": {
+                  "list": [
+                    {
+                      "title": "Image",
+                      "value": "image"
+                    },
+                    {
+                      "title": "Video",
+                      "value": "video"
+                    },
+                    {
+                      "title": "Demo",
+                      "value": "demo"
+                    },
+                    {
+                      "title": "3D Model",
+                      "value": "3d"
+                    }
+                  ]
+                },
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "valid",
+                        "constraint": [
+                          "image",
+                          "video",
+                          "demo",
+                          "3d"
+                        ]
+                      },
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "type",
+                "type": "string",
+                "title": "Media Type"
+              },
+              {
+                "options": {
+                  "list": [
+                    {
+                      "title": "Upload",
+                      "value": "upload"
+                    },
+                    {
+                      "title": "External URL",
+                      "value": "url"
+                    }
+                  ]
+                },
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "valid",
+                        "constraint": [
+                          "upload",
+                          "url"
+                        ]
+                      },
+                      {
+                        "flag": "custom"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "hidden": "conditional",
+                "name": "videoSource",
+                "type": "string"
+              },
+              {
+                "options": {
+                  "accept": "video/*"
+                },
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "custom"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "hidden": "conditional",
+                "name": "videoFile",
+                "type": "file"
+              },
+              {
+                "options": {
+                  "hotspot": true
+                },
+                "fields": [
+                  {
+                    "name": "alt",
+                    "type": "string",
+                    "title": "Alternative Text"
+                  }
+                ],
+                "hidden": "conditional",
+                "name": "image",
+                "type": "image"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "uri",
+                        "constraint": {
+                          "options": {
+                            "scheme": [
+                              "/^http$/",
+                              "/^https$/"
+                            ],
+                            "allowRelative": false,
+                            "relativeOnly": false,
+                            "allowCredentials": false
+                          }
+                        }
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "description": "External URL for video, demo or 3D content",
+                "hidden": "conditional",
+                "name": "url",
+                "type": "url",
+                "title": "URL"
+              },
+              {
+                "hidden": "conditional",
+                "name": "alt",
+                "type": "string",
+                "title": "Alternative Text"
+              },
+              {
+                "description": "Thumbnail for videos (shown before video playback begins)",
+                "hidden": "conditional",
+                "name": "poster",
+                "type": "image",
+                "title": "Poster Image"
+              },
+              {
+                "initialValue": false,
+                "description": "Feature this item prominently in the media gallery",
+                "name": "featured",
+                "type": "boolean",
+                "title": "Featured Media"
+              },
+              {
+                "description": "Optional caption describing this media item",
+                "name": "caption",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "media",
+        "type": "array",
+        "title": "Project Media"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "github",
+        "type": "url",
+        "title": "GitHub Repository"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "demoUrl",
+        "type": "url",
+        "title": "Live Demo URL"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "caseStudyUrl",
+        "type": "url",
+        "title": "Case Study URL"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "title",
+                "type": "string",
+                "title": "Post Title"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "uri",
+                        "constraint": {
+                          "options": {
+                            "scheme": [
+                              "/^http$/",
+                              "/^https$/"
+                            ],
+                            "allowRelative": false,
+                            "relativeOnly": false,
+                            "allowCredentials": false
+                          }
+                        }
+                      },
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "url",
+                "type": "url",
+                "title": "Post URL"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "blogPosts",
+        "type": "array",
+        "title": "Related Blog Posts"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "documentation",
+        "type": "url",
+        "title": "Documentation URL"
+      }
+    ],
+    "name": "project",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Category Title"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "rows": 2,
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "regex",
+                "constraint": {
+                  "pattern": "/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/",
+                  "invert": false
+                }
+              }
+            ],
+            "level": "error",
+            "message": "Must be a valid hex color code"
+          }
+        ],
+        "description": "Color for category badges and UI elements",
+        "name": "color",
+        "type": "string",
+        "title": "Display Color"
+      },
+      {
+        "description": "Icon name from Lucide icons set (e.g., \"code\", \"database\", \"server\")",
+        "name": "icon",
+        "type": "string"
+      },
+      {
+        "initialValue": 100,
+        "description": "Order in which categories should be displayed (lower numbers first)",
+        "name": "displayOrder",
+        "type": "number"
+      }
+    ],
+    "name": "projectCategory",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "hidden": true,
+        "name": "contentCopilotPreview",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "name",
+        "type": "string",
+        "title": "Skill Name"
+      },
+      {
+        "options": {
+          "source": "name",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Programming Languages",
+              "value": "programming"
+            },
+            {
+              "title": "Frameworks",
+              "value": "frameworks"
+            },
+            {
+              "title": "AI & Machine Learning",
+              "value": "ai"
+            },
+            {
+              "title": "Cloud & Infrastructure",
+              "value": "cloud"
+            },
+            {
+              "title": "Tools & Software",
+              "value": "tools"
+            },
+            {
+              "title": "Soft Skills",
+              "value": "soft"
+            },
+            {
+              "title": "Domain Knowledge",
+              "value": "domain"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "programming",
+                  "frameworks",
+                  "ai",
+                  "cloud",
+                  "tools",
+                  "soft",
+                  "domain"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "rows": 4,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Detailed explanation of this skill and how it is applied",
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Beginner",
+              "value": "beginner"
+            },
+            {
+              "title": "Intermediate",
+              "value": "intermediate"
+            },
+            {
+              "title": "Advanced",
+              "value": "advanced"
+            },
+            {
+              "title": "Expert",
+              "value": "expert"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "beginner",
+                  "intermediate",
+                  "advanced",
+                  "expert"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "proficiency",
+        "type": "string",
+        "title": "Proficiency Level"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "yearsExperience",
+        "type": "number",
+        "title": "Years of Experience"
+      },
+      {
+        "description": "Projects where this skill was applied",
+        "of": [
+          {
+            "to": [
+              {
+                "type": "project"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to project"
+          }
+        ],
+        "name": "projects",
+        "type": "array",
+        "title": "Related Projects"
+      },
+      {
+        "description": "Other skills that are related to this one",
+        "of": [
+          {
+            "to": [
+              {
+                "type": "skill"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to skill"
+          }
+        ],
+        "name": "relatedSkills",
+        "type": "array"
+      },
+      {
+        "description": "Technologies associated with this skill",
+        "of": [
+          {
+            "to": [
+              {
+                "type": "technology"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to technology"
+          }
+        ],
+        "name": "technologies",
+        "type": "array",
+        "title": "Related Technologies"
+      },
+      {
+        "description": "Specific examples of how this skill has been applied",
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "title",
+                "type": "string"
+              },
+              {
+                "rows": 3,
+                "name": "description",
+                "type": "text"
+              },
+              {
+                "rows": 5,
+                "name": "code",
+                "type": "text",
+                "title": "Code Example"
+              },
+              {
+                "name": "language",
+                "type": "string",
+                "title": "Programming Language"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "examples",
+        "type": "array"
+      },
+      {
+        "description": "Useful resources for learning more about this skill",
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "title",
+                "type": "string"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "uri",
+                        "constraint": {
+                          "options": {
+                            "scheme": [
+                              "/^http$/",
+                              "/^https$/"
+                            ],
+                            "allowRelative": false,
+                            "relativeOnly": false,
+                            "allowCredentials": false
+                          }
+                        }
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "url",
+                "type": "url",
+                "title": "URL"
+              },
+              {
+                "options": {
+                  "list": [
+                    {
+                      "title": "Course",
+                      "value": "course"
+                    },
+                    {
+                      "title": "Book",
+                      "value": "book"
+                    },
+                    {
+                      "title": "Article",
+                      "value": "article"
+                    },
+                    {
+                      "title": "Video",
+                      "value": "video"
+                    },
+                    {
+                      "title": "Documentation",
+                      "value": "docs"
+                    },
+                    {
+                      "title": "Other",
+                      "value": "other"
+                    }
+                  ]
+                },
+                "name": "type",
+                "type": "string",
+                "title": "Resource Type"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "resources",
+        "type": "array",
+        "title": "Learning Resources"
+      },
+      {
+        "initialValue": false,
+        "description": "Should this skill be highlighted in your skill set?",
+        "name": "featured",
+        "type": "boolean",
+        "title": "Featured Skill"
+      }
+    ],
+    "name": "skill",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "name",
+        "type": "string",
+        "title": "Technology Name"
+      },
+      {
+        "options": {
+          "source": "name",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Frontend",
+              "value": "frontend"
+            },
+            {
+              "title": "Backend",
+              "value": "backend"
+            },
+            {
+              "title": "Data",
+              "value": "data"
+            },
+            {
+              "title": "DevOps",
+              "value": "devops"
+            },
+            {
+              "title": "AI",
+              "value": "ai"
+            },
+            {
+              "title": "Design",
+              "value": "design"
+            },
+            {
+              "title": "Other",
+              "value": "other"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "frontend",
+                  "backend",
+                  "data",
+                  "devops",
+                  "ai",
+                  "design",
+                  "other"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "rows": 3,
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "website",
+        "type": "url",
+        "title": "Official Website"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "logo",
+        "type": "image"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "regex",
+                "constraint": {
+                  "pattern": "/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/",
+                  "invert": false
+                }
+              }
+            ],
+            "level": "error",
+            "message": "Must be a valid hex color code"
+          }
+        ],
+        "description": "The official brand color (hex code)",
+        "name": "color",
+        "type": "string",
+        "title": "Brand Color"
+      },
+      {
+        "description": "Icon name from Lucide icons (e.g., \"code\", \"database\")",
+        "name": "icon",
+        "type": "string",
+        "title": "Icon Name"
+      },
+      {
+        "fields": [
+          {
+            "name": "years",
+            "type": "number",
+            "title": "Years of Experience"
+          },
+          {
+            "options": {
+              "list": [
+                {
+                  "title": "Beginner",
+                  "value": "beginner"
+                },
+                {
+                  "title": "Intermediate",
+                  "value": "intermediate"
+                },
+                {
+                  "title": "Advanced",
+                  "value": "advanced"
+                },
+                {
+                  "title": "Expert",
+                  "value": "expert"
+                }
+              ]
+            },
+            "name": "level",
+            "type": "string",
+            "title": "Proficiency Level"
+          },
+          {
+            "rows": 2,
+            "name": "notes",
+            "type": "text",
+            "title": "Personal Notes"
+          }
+        ],
+        "name": "experience",
+        "type": "object",
+        "title": "Your Experience Level"
+      },
+      {
+        "initialValue": false,
+        "description": "Should this technology be highlighted in your skill set?",
+        "name": "featured",
+        "type": "boolean",
+        "title": "Featured Technology"
+      }
+    ],
+    "name": "technology",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "company",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "position",
+        "type": "string"
+      },
+      {
+        "options": {
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "startDate",
+        "type": "date"
+      },
+      {
+        "description": "Leave blank if this is your current position",
+        "name": "endDate",
+        "type": "date"
+      },
+      {
+        "initialValue": false,
+        "name": "isCurrent",
+        "type": "boolean",
+        "title": "Current Position"
+      },
+      {
+        "rows": 4,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "responsibilities",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "achievements",
+        "type": "array",
+        "title": "Key Achievements"
+      },
+      {
+        "description": "Projects completed during this position",
+        "of": [
+          {
+            "to": [
+              {
+                "type": "project"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to project"
+          }
+        ],
+        "name": "projects",
+        "type": "array",
+        "title": "Notable Projects"
+      },
+      {
+        "of": [
+          {
+            "to": [
+              {
+                "type": "technology"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to technology"
+          }
+        ],
+        "name": "technologies",
+        "type": "array",
+        "title": "Technologies Used"
+      },
+      {
+        "of": [
+          {
+            "to": [
+              {
+                "type": "skill"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to skill"
+          }
+        ],
+        "name": "skills",
+        "type": "array",
+        "title": "Skills Applied"
+      },
+      {
+        "name": "location",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "url",
+        "type": "url",
+        "title": "Company URL"
+      },
+      {
+        "initialValue": 0,
+        "description": "Lower numbers will be displayed first",
+        "name": "displayOrder",
+        "type": "number"
+      }
+    ],
+    "name": "workHistory",
+    "type": "document"
+  }
+]
