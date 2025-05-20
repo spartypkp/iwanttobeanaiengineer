@@ -42,23 +42,23 @@ export async function logToolCall(
 				console.error('Error logging tool call:', error);
 			}
 
-			// Get current tool call count
-			const { data: analytics } = await supabase
-				.from('conversation_analytics')
-				.select('tool_call_count')
-				.eq('conversation_id', messages[0].conversation_id)
-				.single();
+			// // Get current tool call count
+			// const { data: analytics } = await supabase
+			// 	.from('conversation_analytics')
+			// 	.select('tool_call_count')
+			// 	.eq('conversation_id', messages[0].conversation_id)
+			// 	.single();
 
-			// Update tool call count in analytics
-			await supabase
-				.from('conversation_analytics')
-				.upsert({
-					conversation_id: messages[0].conversation_id,
-					tool_call_count: (analytics?.tool_call_count || 0) + 1,
-					updated_at: new Date().toISOString()
-				}, {
-					onConflict: 'conversation_id'
-				});
+			// // Update tool call count in analytics
+			// await supabase
+			// 	.from('conversation_analytics')
+			// 	.upsert({
+			// 		conversation_id: messages[0].conversation_id,
+			// 		tool_call_count: (analytics?.tool_call_count || 0) + 1,
+			// 		updated_at: new Date().toISOString()
+			// 	}, {
+			// 		onConflict: 'conversation_id'
+			// 	});
 		}
 	} catch (error) {
 		console.error('Failed to log tool call:', error);
