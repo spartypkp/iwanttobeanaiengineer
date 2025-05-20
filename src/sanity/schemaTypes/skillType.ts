@@ -1,6 +1,6 @@
-import { AutoPreviewPane } from '@/components/content-copilot/AutoPreviewPane';
 import { StarIcon } from '@sanity/icons';
 import { defineField, defineType } from 'sanity';
+import { AutoPreviewPane } from '../../components/content-copilot/AutoPreviewPane';
 
 export const skillType = defineType({
 	name: 'skill',

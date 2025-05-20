@@ -39,7 +39,7 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 	const project = await getProjectBySlug(params.slug);
 
 	// Log the full project object to the server console for debugging
-	console.log("[ProjectPage] Full project object for slug:", params.slug, JSON.stringify(project, null, 2));
+	//console.log("[ProjectPage] Full project object for slug:", params.slug, JSON.stringify(project, null, 2));
 
 	if (!project) {
 		notFound();

@@ -1,6 +1,6 @@
-import { AutoPreviewPane } from '@/components/content-copilot/AutoPreviewPane';
 import { BookIcon } from '@sanity/icons';
 import { defineField, defineType } from 'sanity';
+import { AutoPreviewPane } from '../../components/content-copilot/AutoPreviewPane';
 
 export const knowledgeBaseType = defineType({
 	name: 'knowledgeBase',

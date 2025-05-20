@@ -1,6 +1,6 @@
-import { AutoPreviewPane } from '@/components/content-copilot/AutoPreviewPane';
 import { DocumentIcon } from '@sanity/icons';
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { AutoPreviewPane } from '../../components/content-copilot/AutoPreviewPane';
 
 export const projectType = defineType({
 	name: 'project',

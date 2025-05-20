@@ -1,5 +1,4 @@
 'use client';
-import { ToolDisplay } from "@/components/content-copilot/tools/ToolDisplay";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { useChat } from '@ai-sdk/react';
 import { type ObjectSchemaType } from '@sanity/types';
 import { type Message as UIMessage } from "ai";
 import { Check, Edit3, Loader2, X } from "lucide-react";
+import { ToolDisplay } from "./tools/ToolDisplay";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 

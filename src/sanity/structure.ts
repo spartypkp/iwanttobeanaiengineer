@@ -2,7 +2,7 @@ import { CodeIcon } from '@sanity/icons';
 import type { DefaultDocumentNodeResolver, StructureResolver } from 'sanity/structure';
 
 // Import the Content Copilot view
-import { ContentCopilotView } from '@/components/content-copilot/ContentCopilotView';
+import { ContentCopilotView } from '../components/content-copilot/ContentCopilotView';
 
 // https://www.sanity.io/docs/structure-builder-cheat-sheet
 
