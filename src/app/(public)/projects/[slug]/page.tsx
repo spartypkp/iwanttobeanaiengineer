@@ -52,8 +52,9 @@ export default async function ProjectPage({ params }: { params: { slug: string; 
 	// Use featured video or media if available, otherwise use thumbnail
 	const mainMedia = featuredVideo || featuredMedia || null;
 
-	// Get thumbnail URL from Sanity
-	const thumbnailUrl = project.thumbnail ? urlForImage(project.thumbnail).url() : null;
+	// Get thumbnail URL, ensure the image has an asset reference
+	const thumbnailUrl =
+		project.thumbnail?.asset ? urlForImage(project.thumbnail).url() : null;
 
 	// Check if main media is a video
 	const isMainVideo = mainMedia?.type === 'video';
