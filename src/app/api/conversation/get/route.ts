@@ -68,9 +68,42 @@ export async function POST(request: Request) {
 
 		console.log(`[GET conversation] Successfully found conversation: ${conversationData.id}`);
 
+		// Load messages from the messages table, ordered by sequence
+		const { data: rows, error: messagesError } = await supabase
+			.from('messages')
+			.select('id, external_id, role, content, content_parts, sequence')
+			.eq('conversation_id', conversationData.id)
+			.order('sequence', { ascending: true });
+
+		if (messagesError) {
+			console.error('[GET conversation] Error loading messages from table:', messagesError);
+			return NextResponse.json({
+				conversation: conversationData,
+				messages: [],
+				mode
+			});
+		}
+
+		// Map DB rows to UI message shape expected by useChat
+		const uiMessages = (rows || []).map((row: any) => {
+			// Prefer parts if present, else fall back to plain content
+			if (Array.isArray(row.content_parts) && row.content_parts.length > 0) {
+				return {
+					id: row.external_id || row.id,
+					role: row.role,
+					parts: row.content_parts,
+				};
+			}
+			return {
+				id: row.external_id || row.id,
+				role: row.role,
+				content: row.content || '',
+			};
+		});
+
 		return NextResponse.json({
 			conversation: conversationData,
-			messages: conversationData.messages,
+			messages: uiMessages,
 			mode
 		});
 	} catch (error) {

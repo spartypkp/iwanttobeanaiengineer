@@ -98,7 +98,7 @@ export async function POST(req: Request) {
 					documentTitle: documentData.title || 'Untitled',
 					mode: 'regular'
 				},
-				messages: JSON.stringify(messages) // Save initial messages if creating new conv
+				// Do not store messages JSON here; messages live in the messages table
 			})
 			.select('id')
 			.single();
@@ -145,7 +145,7 @@ export async function POST(req: Request) {
 			});
 			await saveChat({
 				conversationId: conversationId, // Corrected parameter name
-				messages: updatedMessages, // These should be UIMessage[]
+				messages: updatedMessages, // Persist to messages table
 			});
 			// Optionally update analytics if still needed
 			// await updateConversationAnalytics(supabase, conversationId);

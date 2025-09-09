@@ -9,35 +9,60 @@ export async function saveChat({
 	conversationId: string;
 	messages: Message[];
 }): Promise<void> {
-	// Pass the messages array directly; Supabase client handles JSONB serialization
 	const supabase = await createClient();
-	await supabase.from('conversations').update({
-		messages: messages, // Pass the array directly
-		updated_at: new Date().toISOString(),
-	}).eq('id', conversationId);
-	// Save to Supabase 'conversation' table.
+
+	// 1) Delete existing message rows for this conversation (we replace history)
+	const { error: delError } = await supabase
+		.from('messages')
+		.delete()
+		.eq('conversation_id', conversationId);
+	if (delError) {
+		console.error('[saveChat] Failed to delete existing messages:', delError);
+		// Still attempt to insert new ones; do not throw
+	}
+
+	// 2) Insert new ordered rows
+	const rows = (Array.isArray(messages) ? messages : []).map((m, idx) => ({
+		conversation_id: conversationId,
+		external_id: (m as any).id,
+		role: m.role,
+		content: typeof (m as any).content === 'string' ? (m as any).content : null,
+		content_parts: Array.isArray((m as any).parts) ? (m as any).parts : null,
+		sequence: idx,
+	}));
+
+	if (rows.length > 0) {
+		const { error: insError } = await supabase.from('messages').insert(rows);
+		if (insError) {
+			console.error('[saveChat] Failed to insert messages:', insError);
+		}
+	}
+
+	// 3) Touch conversation updated_at
+	await supabase
+		.from('conversations')
+		.update({ updated_at: new Date().toISOString(), messages: null })
+		.eq('id', conversationId);
 }
 
 export async function loadChat(id: string): Promise<Message[]> {
 	const supabase = await createClient();
 	const { data, error } = await supabase
-		.from('conversations')
-		.select('messages')
-		.eq('id', id)
-		.single();
+		.from('messages')
+		.select('id, external_id, role, content, content_parts, sequence')
+		.eq('conversation_id', id)
+		.order('sequence', { ascending: true });
 
 	if (error) {
 		console.error('Error loading conversation messages:', error);
 		return [];
 	}
 
-	// data.messages should now be the actual Message[] array, or null if not present
-	if (!data || !data.messages) {
-		return [];
-	}
-
-	// No need to parse, as it's already a JavaScript array/object from JSONB
-	// Optionally, add runtime validation here if needed to ensure it's Message[]
-	return data.messages as Message[];
+	const rows = data || [];
+	return rows.map((row: any) => (
+		Array.isArray(row.content_parts) && row.content_parts.length > 0
+			? { id: row.external_id || row.id, role: row.role, parts: row.content_parts }
+			: { id: row.external_id || row.id, role: row.role, content: row.content || '' }
+	));
 }
 

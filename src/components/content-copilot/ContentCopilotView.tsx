@@ -691,7 +691,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 										)
 									) : (
 										<div className="w-full">
-											{message.parts && message.parts.map((part, partIndex) => (
+											{Array.isArray(message.parts) && message.parts.map((part, partIndex) => (
 												<div key={`${message.id}-part-${partIndex}`} className="w-full last:mb-0">
 													{part.type === 'text' && (
 														<div className="whitespace-pre-wrap prose prose-sm max-w-none prose-p:text-black prose-headings:text-black prose-a:text-emerald-600 prose-ol:pl-5 prose-ul:pl-5 prose-li:my-0 prose-ol:my-2 prose-ul:my-2 prose-ol:list-decimal prose-ul:list-disc mb-2 last:mb-0">
@@ -722,7 +722,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 														)}
 												</div>
 											))}
-											{(!message.parts || message.parts.length === 0) && message.content && (
+											{((!Array.isArray(message.parts) || message.parts.length === 0) && message.content) && (
 												<div className="whitespace-pre-wrap prose prose-sm max-w-none prose-p:text-black prose-headings:text-black prose-a:text-emerald-600 prose-ol:pl-5 prose-ul:pl-5 prose-li:my-0 prose-ol:my-2 prose-ul:my-2 prose-ol:list-decimal prose-ul:list-disc">
 													{message.content}
 												</div>
