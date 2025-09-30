@@ -1,4 +1,3 @@
-import { ConversationMode } from '@/lib/types';
 import { createClient } from '@/lib/utils/supabase/server';
 import { NextResponse } from 'next/server';
 
@@ -10,16 +9,15 @@ export async function POST(request: Request) {
 			throw new Error('Invalid JSON in request body');
 		});
 
-		const { documentId, mode = 'regular' } = body as {
+		const { documentId } = body as {
 			documentId: string;
-			mode?: ConversationMode;
 		};
 
 		if (!documentId) {
 			return NextResponse.json({ error: 'Missing documentId' }, { status: 400 });
 		}
 
-		console.log(`[GET conversation] Fetching conversation for documentId=${documentId}, mode=${mode}`);
+		console.log(`[GET conversation] Fetching conversation for documentId=${documentId}`);
 
 		// Initialize Supabase client with detailed error handling
 		let supabase;
@@ -37,12 +35,12 @@ export async function POST(request: Request) {
 			}, { status: 503 });
 		}
 
-		// Find conversation for this document and mode
+		// Find conversation for this document
 		console.log('[GET conversation] Querying Supabase for conversation data');
 		const { data: conversationData, error: conversationError } = await supabase
 			.from('conversations')
 			.select('*')
-			.contains('context', { documentId, mode })
+			.contains('context', { documentId })
 			.order('updated_at', { ascending: false })
 			.limit(1)
 			.single();
@@ -61,8 +59,8 @@ export async function POST(request: Request) {
 		}
 
 		if (!conversationData) {
-			// No conversation found for this document and mode
-			console.log('[GET conversation] No conversation found for this document and mode');
+			// No conversation found for this document
+			console.log('[GET conversation] No conversation found for this document');
 			return NextResponse.json({ conversation: null, messages: [] });
 		}
 
@@ -79,21 +77,30 @@ export async function POST(request: Request) {
 			console.error('[GET conversation] Error loading messages from table:', messagesError);
 			return NextResponse.json({
 				conversation: conversationData,
-				messages: [],
-				mode
+				messages: []
 			});
 		}
 
 		// Map DB rows to UI message shape expected by useChat
 		const uiMessages = (rows || []).map((row: any) => {
-			// Prefer parts if present, else fall back to plain content
+			// If has content_parts
 			if (Array.isArray(row.content_parts) && row.content_parts.length > 0) {
+				// For user messages with simple text parts, extract the text as content
+				if (row.role === 'user' && row.content_parts.length === 1 && row.content_parts[0].type === 'text') {
+					return {
+						id: row.external_id || row.id,
+						role: row.role,
+						content: row.content_parts[0].text || ''
+					};
+				}
+				// For assistant messages or complex parts, keep parts structure
 				return {
 					id: row.external_id || row.id,
 					role: row.role,
 					parts: row.content_parts,
 				};
 			}
+			// Fallback to content field
 			return {
 				id: row.external_id || row.id,
 				role: row.role,
@@ -103,8 +110,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({
 			conversation: conversationData,
-			messages: uiMessages,
-			mode
+			messages: uiMessages
 		});
 	} catch (error) {
 		// Enhanced error logging for the main try/catch block

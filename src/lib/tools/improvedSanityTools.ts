@@ -99,13 +99,28 @@ export const writeTool = tool({
 	}),
 	execute: async ({ documentId, path, value, createIfMissing = true }, { toolCallId }) => {
 		try {
-			const document = await sanityClient.getDocument(documentId) as SanityDocument<Record<string, any>> | null;
+			// Try to resolve document ID (handle drafts vs published)
+			let resolvedId = documentId;
+			if (!documentId.startsWith('drafts.')) {
+				// Try draft first
+				try {
+					const draftId = `drafts.${documentId}`;
+					const draftDoc = await sanityClient.getDocument(draftId);
+					if (draftDoc) {
+						resolvedId = draftId;
+					}
+				} catch (error) {
+					// Draft doesn't exist, will try published version
+				}
+			}
+
+			const document = await sanityClient.getDocument(resolvedId) as SanityDocument<Record<string, any>> | null;
 			if (!document) {
 				const error = {
 					success: false,
 					operation: "write",
 					errorType: "DOCUMENT_NOT_FOUND",
-					errorMessage: `Document not found: ${documentId}`,
+					errorMessage: `Document not found: ${resolvedId} (original: ${documentId})`,
 					suggestion: "Check that the document ID is correct and the document exists."
 				};
 				await logToolCall(toolCallId, 'writeTool', { documentId, path, value }, error, true);
@@ -138,7 +153,23 @@ export const writeTool = tool({
 				previousValue = { error: 'Could not retrieve previous value' }; // Ensure it's serializable
 			}
 
-			await writeToPath(documentId, path, value, createIfMissing);
+			// Use resolved ID for the write operation
+			const writeResult = await writeToPath(resolvedId, path, value, createIfMissing);
+
+			// Check if the write operation actually succeeded
+			if (!writeResult.success) {
+				const error = {
+					success: false,
+					operation: "write",
+					errorType: "WRITE_FAILED",
+					errorMessage: writeResult.error?.message || "Failed to write to document",
+					suggestion: "Check Sanity API permissions and document state.",
+					details: writeResult.error
+				};
+				await logToolCall(toolCallId, 'writeTool', { documentId, path, value }, error, true);
+				console.log('[writeTool] Write failed, returning error:', JSON.stringify(error, null, 2));
+				return error;
+			}
 
 			const result = {
 				success: true,

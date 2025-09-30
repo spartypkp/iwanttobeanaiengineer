@@ -476,7 +476,9 @@ export async function writeToPath(
 	createIfMissing: boolean = true
 ): Promise<{ success: boolean; documentId: string; path: string; error?: any; }> {
 	try {
-		const patch = client.patch(documentId);
+		// Try to resolve the correct document ID (handle drafts)
+		const resolvedId = await resolveDocumentId(documentId);
+		const patch = client.patch(resolvedId);
 
 		// Handle missing parent paths if needed
 		if (createIfMissing) {
@@ -494,14 +496,39 @@ export async function writeToPath(
 		patch.set(createNestedPathObject(path, value));
 		await patch.commit();
 
-		console.log(`Successfully wrote value at path "${path}" in document ${documentId}`);
-		return { success: true, documentId, path };
+		console.log(`Successfully wrote value at path "${path}" in document ${resolvedId}`);
+		return { success: true, documentId: resolvedId, path };
 	} catch (error) {
 		console.error(`Error writing to path ${path}:`, error);
 		// Ensure the error is serializable if it's a complex object
 		const serializableError = error instanceof Error ? { message: error.message, name: error.name, stack: error.stack } : error;
 		return { success: false, documentId, path, error: serializableError };
 	}
+}
+
+/**
+ * Resolves a document ID to handle draft vs published documents
+ * Tries drafts.ID first, then falls back to ID
+ */
+async function resolveDocumentId(documentId: string): Promise<string> {
+	// If already has drafts prefix, return as is
+	if (documentId.startsWith('drafts.')) {
+		return documentId;
+	}
+
+	// Try to fetch the draft version first
+	try {
+		const draftId = `drafts.${documentId}`;
+		const draftDoc = await client.getDocument(draftId);
+		if (draftDoc) {
+			return draftId;
+		}
+	} catch (error) {
+		// Draft doesn't exist, try published version
+	}
+
+	// Return the original ID (published version)
+	return documentId;
 }
 
 /**
@@ -519,12 +546,13 @@ export async function deleteFromPath(
 	path: string
 ): Promise<void> {
 	try {
+		const resolvedId = await resolveDocumentId(documentId);
 		await client
-			.patch(documentId)
+			.patch(resolvedId)
 			.unset([path])
 			.commit();
 
-		console.log(`Successfully deleted value at path "${path}" in document ${documentId}`);
+		console.log(`Successfully deleted value at path "${path}" in document ${resolvedId}`);
 	} catch (error) {
 		console.error(`Error deleting from path ${path}:`, error);
 		throw error;
@@ -543,7 +571,8 @@ export async function performArrayOperation(
 	position?: 'before' | 'after' | 'replace'
 ): Promise<void> {
 	try {
-		let patch = client.patch(documentId);
+		const resolvedId = await resolveDocumentId(documentId);
+		let patch = client.patch(resolvedId);
 
 		// Create array if it doesn't exist
 		patch = patch.setIfMissing({ [path]: [] });
@@ -587,7 +616,7 @@ export async function performArrayOperation(
 
 		await patch.commit();
 
-		console.log(`Successfully performed "${operation}" on array at "${path}" in document ${documentId}`);
+		console.log(`Successfully performed "${operation}" on array at "${path}" in document ${resolvedId}`);
 	} catch (error) {
 		console.error(`Error performing array operation on ${path}:`, error);
 		throw error;

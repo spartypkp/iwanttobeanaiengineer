@@ -1,166 +1,240 @@
-# Personal Portfolio & AI Experimentation Platform: "I Want To Be An AI Engineer"
+# Will Diamond - Portfolio & AI Experimentation
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) <!-- Assuming MIT, please update if incorrect -->
+**Personal Website & AI Portfolio** • [will-diamond.com](https://will-diamond.com)
 
-Welcome to the repository for my personal website and AI experimentation platform! This project serves as an interactive resume, a showcase of my technical abilities, and a playground for AI-driven features.
+A bold, terminal-inspired portfolio showcasing AI engineering projects and experimentation. Built in public as a demonstration of builder mentality and technical capability.
 
-**Note:** For highly detailed internal documentation, development history, and specific feature deep-dives (primarily intended for LLM-assisted development and my own reference), please see `projectDocumentation.md`.
+> **Note:** The repo name "iwanttobeanaiengineer" is legacy from the original concept. The production site is at **will-diamond.com**.
 
-## Overview
+## 🏗️ Building in Public
 
-The primary goals of this personal website are:
-*   Serve as a dynamic and interactive resume.
-*   Showcase my technical skills and projects, particularly in AI engineering.
-*   Express my personality through unique, interactive components and a distinct terminal-inspired aesthetic.
-*   Develop and integrate "Dave," an AI assistant designed to represent me and engage with visitors.
-*   Provide a compelling demonstration of my capabilities to potential employers and collaborators.
+This repo represents my approach to portfolio development: experiment boldly, ship fast, and solve real problems. The code is public not just to showcase the end result, but to share the journey - including the experiments, the "super hacky" solutions, and the satisfaction of making things work.
 
-## ✨ Key Features
+**For Visitors:** Explore the code, see how I build, and feel free to fork for your own use.
+**For Recruiters:** This repo demonstrates real-world problem-solving, architectural thinking, and comfort with modern AI tooling.
+**For Me:** A playground for experimentation and a forcing function to document my work.
 
-*   **Interactive Terminal UI/UX:** A pervasive terminal-inspired theme provides a unique user experience, with elements like simulated command executions, ASCII art, and retro aesthetics.
-*   **Comprehensive Project Showcase:**
-    *   **Featured Projects:** Highlighted on the homepage.
-    *   **Dedicated Projects Page:** A filterable grid (`/projects`) displaying all projects with options to filter by status, category, and search terms.
-    *   **Detailed Project Pages:** Dynamically generated pages for each project (`/projects/[slug]`) featuring rich media (images, videos), problem/solution descriptions, technical challenges, key insights, and technologies used.
-    *   **Terminal-Styled Cards:** Consistent and visually appealing project cards and detail views.
-*   **Content Copilot (Admin Feature):**
-    *   An AI-assisted content creation and editing tool for Sanity CMS, designed to make content management conversational and intuitive.
-    *   **Narrative-First Approach:** Employs a unique conversational UX with three distinct phases (Story, Transition, Field-Focused) to naturally extract information and populate content fields without explicit form-filling.
-    *   **Advanced Sanity Interaction:** Utilizes a powerful suite of custom-defined primitive tools (`writeTool`, `deleteTool`, `arrayTool`, `queryTool`) built with Zod schemas for precise and flexible manipulation of Sanity documents. These tools provide rich feedback on operations.
-    *   **Refinement Mode:** Allows for focused conversations to improve and polish existing content.
-    *   **Powered by Vercel AI SDK:** Leverages the `useChat` hook on the frontend and `streamText` on the backend for responsive, streaming interactions with LLMs like Anthropic's Claude.
-    *   **Asynchronous Tool Calling:** Supports asynchronous execution of its custom Sanity manipulation tools.
-*   **"Dave" AI Assistant (In Progress):**
-    *   A planned AI persona to answer questions about my skills, experience, and projects.
-    *   Aims to showcase personality and engage visitors interactively.
-    *   Backend API built with Vercel AI SDK (Claude 3.7 Sonnet) with tool integration is complete.
-    *   Data layer (`dave-data.ts`) connects to Sanity CMS for projects, skills, and a dedicated knowledge base.
-*   **Sanity CMS Integration:**
-    *   Embedded Sanity Studio (`/studio`) for seamless content management.
-    *   Custom, type-safe schemas for projects, skills, knowledge base entries, and more.
-    *   GROQ for efficient content retrieval.
-*   **Supabase for LLM Operations:**
-    *   Utilizes Supabase (PostgreSQL) for robust persistence of LLM conversation history for Content Copilot (and eventually Dave).
-    *   Stores complete conversation context, including structured messages (text, tool calls, and tool results) within JSONB fields.
-    *   Supports linked conversations for features like Content Copilot's Refinement Mode.
-*   **Responsive Design:** Ensures a consistent and accessible experience across various devices and screen sizes.
-*   **Interactive Home Page:** Features an animated boot sequence, a refactored Hero section with a simulated terminal interface, domain expertise highlights, and a tech stack overview.
-
-## 🛠️ Tech Stack
-
-*   **Frontend:** Next.js 14, React 18, TypeScript
-*   **Styling:** Tailwind CSS, ShadCN UI
-*   **UI Libraries:** Radix UI (underlying ShadCN), Lucide React (icons)
-*   **Data Visualization:** Recharts
-*   **Content Management:** Sanity CMS (Embedded Studio, GROQ queries)
-*   **AI (Content Copilot & Dave):**
-    *   **Vercel AI SDK:** Core for LLM interactions (frontend: `useChat`, backend: `streamText`), asynchronous tool calling, Zod-defined custom tools.
-    *   **Anthropic Claude Models** (e.g., Claude 3.7 Sonnet)
-*   **Database (for LLM Ops):** Supabase (PostgreSQL)
-*   **Deployment:** Vercel
-
-## 🚀 Getting Started
-
-To get a local copy up and running, follow these simple steps.
-
-### Prerequisites
-
-*   Node.js (v18.x or later recommended)
-*   npm, yarn, or pnpm
-
-### Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/spartypkp/iwanttobeanaiengineer.git
-    cd iwanttobeanaiengineer
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    # or
-    yarn install
-    # or
-    pnpm install
-    ```
-3.  **Set up environment variables:**
-    Create a `.env.local` file in the root of the project and add your Sanity-specific environment variables (project ID, dataset, API version, token), Supabase connection details (URL, anon key), and any AI-related API keys. Refer to `sanity/env.ts`, `src/lib/utils/supabase/server.ts` (for typical Supabase env var names like `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`), and the Vercel AI SDK documentation for required variables.
-    Example `.env.local`:
-    ```env
-    # Sanity
-    NEXT_PUBLIC_SANITY_PROJECT_ID="..."
-    NEXT_PUBLIC_SANITY_DATASET="..."
-    NEXT_PUBLIC_SANITY_API_VERSION="..."
-    SANITY_API_READ_TOKEN="..." # If using a token for read access
-    SANITY_API_WRITE_TOKEN="..." # For tools that modify Sanity data
-
-    # Supabase
-    NEXT_PUBLIC_SUPABASE_URL="..."
-    NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
-    SUPABASE_SERVICE_ROLE_KEY="..." # If using service role for backend operations
-
-    # AI Provider (e.g., Anthropic)
-    ANTHROPIC_API_KEY="..."
-    ```
-4.  **Run the development server:**
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    # or
-    pnpm dev
-    ```
-    Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-5.  **Access Sanity Studio:**
-    Navigate to `http://localhost:3000/studio` to access the embedded Sanity CMS. You may need to log in with your Sanity credentials.
-
-6.  **Set up Supabase Database:**
-    Ensure your Supabase instance is running and the schema (from `src/lib/utils/supabase/schema.sql`) has been applied.
-
-## 📁 Project Structure (Simplified)
-
-```
-/
-├── public/             # Static assets
-├── src/
-│   ├── app/            # Next.js App Router (pages, API routes, layouts)
-│   │   ├── (admin)/    # Admin-specific routes (e.g., Content Copilot)
-│   │   ├── api/        # API endpoints (Content Copilot, Dave)
-│   │   ├── projects/   # Project listing and detail pages
-│   │   └── studio/     # Embedded Sanity Studio
-│   ├── components/     # React components (UI, custom, Content Copilot)
-│   ├── sanity/         # Sanity CMS configuration, schemas, client, helpers
-│   ├── lib/
-│   │   ├── prompts.ts  # System prompts for LLMs
-│   │   ├── tools/      # Custom AI tools (e.g., improvedSanityTools.ts)
-│   │   └── utils/      # Utility functions (Supabase client, schema serialization)
-├── projectDocumentation.md # Detailed internal documentation
-├── sanity.config.ts    # Sanity Studio main configuration
-└── README.md           # This file
-```
-For a more detailed breakdown, please refer to `projectDocumentation.md`.
-
-## ☁️ Deployment
-
-This project is deployed on [Vercel](https://vercel.com/). The Vercel platform provides seamless integration with Next.js, CI/CD, and serverless functions for API routes. Supabase is used as the backend database for LLM conversation data.
-
-## 🔮 Future Enhancements
-
-*   **Full "Dave" AI Assistant Integration:** Complete the UI for the AI assistant and deploy it site-wide.
-*   **Enhanced Stats Page:** Integrate real data sources and build out more interactive visualizations.
-*   **Site-Wide Interactive Terminal:** Extend the terminal interface for site navigation and interaction beyond the Hero section.
-*   **Knowledge Base Population:** Continue populating the Sanity knowledge base for "Dave".
-*   **Vector Search for "Dave":** Integrate Supabase pgvector or another vector database for semantic search capabilities.
-
-## 🧑‍💻 Author & Contact
-
-**Will Diamond**
-
-*   GitHub: [@spartypkp](https://github.com/spartypkp)
-*   LinkedIn: [Will Diamond](https://www.linkedin.com/in/will-diamond-b1724520b/)
-*   Twitter / X: [@itsreallywillyd](https://x.com/itsreallywillyd)
+> **Note:** For detailed technical specifications and architecture decisions, see the [`/specs`](./specs) folder. The specs are designed as living documentation for LLM-assisted development and maintaining long-term context.
 
 ---
 
-Feel free to explore the code, and don't hesitate to reach out if you have any questions or collaboration ideas!
+## Why This Project Exists
+
+**Primary Goals:**
+- **Interactive Resume:** Showcase projects and skills in a memorable, technical way
+- **Builder Mentality:** Demonstrate experimentation and problem-solving over perfection
+- **AI Experimentation:** Push boundaries with AI-powered features like Content Copilot
+- **Personal Expression:** Bold terminal aesthetic that stands out from typical portfolios
+- **Learn by Doing:** Try new tech (Sanity CMS after being a "Postgres hardliner"), build custom tools, iterate based on real use
+
+**Philosophy:** Ship it. No tests needed. Code on main. Perfect is the enemy of done.
+
+---
+
+## ✨ What Makes This Special
+
+### Terminal Aesthetic
+A bold, distinctive UI that intimidates and awes. Monospace fonts, scan line animations, terminal window controls, command prompts. Not just for show - it's a statement: "I build cool things that work."
+
+### Content Copilot (The Flagship Feature)
+An AI-powered content creation tool that solves a real problem: the tedium of filling out 30+ fields in Sanity CMS.
+
+**Key Innovation:** Three-phase conversational flow (Story → Transition → Field-Focused) that prioritizes natural conversation while gradually populating structured data.
+
+**Technical Highlights:**
+- Primitive tool architecture (`writeTool`, `deleteTool`, `arrayTool`, `queryTool`) can manipulate ANY document structure
+- No hardcoded field mappings - works with any Sanity schema
+- Draft document ID resolution for seamless Studio integration
+- Streaming responses with Vercel AI SDK + Claude 3.7 Sonnet
+- Conversation persistence in Supabase for context maintenance
+
+**Status:** Fully operational (recently fixed after Sanity integration challenges)
+
+### Project Showcase
+- Rich media (images, videos, code snippets)
+- Problem/solution storytelling approach
+- Technical insights and learnings for each project
+- Filterable grid with search
+- Terminal-styled cards throughout
+
+### "Dave" AI Assistant (Backend Complete, UI Pending)
+Planned AI persona to answer questions about my skills and experience. Backend with Claude integration is built, waiting for compelling use case before building UI.
+
+---
+
+## 🛠️ Architecture Overview
+
+**Modern Jamstack with AI enhancements:**
+- Static generation with ISR (revalidate every hour)
+- Server components for data fetching
+- API routes for AI features
+- Vercel serverless functions
+
+**Key Technical Decisions:**
+- **Next.js App Router:** Will's standard for web development, server components for performance
+- **Sanity CMS:** Experimenting with CMS after being a Postgres hardliner - wanted to expand horizons
+- **Supabase for Conversations:** Right tool for complex LLM conversation management (messages, tool calls, threading)
+- **Claude over GPT-4:** Better "soft skills" for conversational interfaces
+- **No Tests:** Personal site, solo developer, ship fast and iterate
+- **Code on Main:** No staging environment, Vercel rollbacks provide safety net
+
+**The Stack:**
+- **Frontend:** Next.js 14 App Router, React 18, TypeScript
+- **Styling:** Tailwind CSS, ShadCN UI (Radix UI primitives)
+- **CMS:** Sanity (embedded Studio, GROQ queries, custom schemas)
+- **AI:** Vercel AI SDK, Anthropic Claude
+- **Database:** Supabase (PostgreSQL for LLM conversation persistence)
+- **Deployment:** Vercel (free tier)
+
+See [`/specs/repository-specification.md`](./specs/repository-specification.md) for detailed architecture documentation.
+
+---
+
+## 🚀 Running Locally (If You Want to Fork)
+
+**Prerequisites:**
+- Node.js 18+
+- npm/yarn/pnpm
+
+**Setup:**
+```bash
+# Clone and install
+git clone https://github.com/spartypkp/iwanttobeanaiengineer.git
+cd iwanttobeanaiengineer
+npm install
+
+# Set up environment variables
+cp .env.example .env.local  # You'll need your own API keys
+```
+
+**Required Environment Variables:**
+```bash
+# Sanity CMS
+NEXT_PUBLIC_SANITY_PROJECT_ID="your-project-id"
+NEXT_PUBLIC_SANITY_DATASET="production"
+NEXT_PUBLIC_SANITY_API_VERSION="2024-03-01"
+SANITY_API_TOKEN="your-editor-token"  # Needs write permissions
+
+# Supabase (for LLM conversations)
+NEXT_PUBLIC_SUPABASE_URL="your-supabase-url"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
+# Anthropic (for Content Copilot & Dave)
+ANTHROPIC_API_KEY="your-api-key"
+DEFAULT_ANTHROPIC_MODEL="claude-sonnet-4-5"
+```
+
+**Run development server:**
+```bash
+npm run dev
+# Open http://localhost:3000
+# Sanity Studio at http://localhost:3000/studio
+```
+
+**Database Setup:**
+The Supabase schema is documented in `/specs/repository-specification.md` section 4.
+
+---
+
+## 📁 Project Structure
+
+```
+/
+├── specs/                          # Living specifications (source of truth)
+│   ├── project-specification.md    # Vision, goals, philosophy
+│   ├── repository-specification.md # Technical architecture
+│   └── features/                   # Feature-specific specs
+│
+├── src/
+│   ├── app/                        # Next.js App Router
+│   │   ├── (public)/               # Public pages (home, projects, consulting)
+│   │   ├── (admin)/contentCopilot/ # Content Copilot UI
+│   │   ├── (sanity)/studio/        # Embedded Sanity Studio
+│   │   └── api/                    # API routes (content-copilot, conversation)
+│   │
+│   ├── components/
+│   │   ├── custom/                 # Project showcase, terminal UI
+│   │   ├── content-copilot/        # Content Copilot components
+│   │   └── ui/                     # ShadCN UI primitives
+│   │
+│   ├── sanity/                     # Sanity configuration
+│   │   ├── schemaTypes/            # Content schemas (project, skill, etc.)
+│   │   └── lib/                    # Client, helpers, CRUD operations
+│   │
+│   └── lib/
+│       ├── tools/                  # AI tools (Sanity manipulation, GitHub)
+│       ├── utils/                  # Supabase clients, utilities
+│       └── prompts.ts              # LLM system prompts
+│
+├── projectDocumentation.md         # Legacy detailed docs
+└── README.md                       # You are here
+```
+
+**Key Documentation:**
+- [`/specs`](./specs) - Technical specifications (maintained as living docs)
+- [`projectDocumentation.md`](./projectDocumentation.md) - Legacy comprehensive docs
+
+---
+
+## 🚢 Deployment
+
+**Platform:** Vercel (automatic deployments from `main` branch)
+**Philosophy:** Code on main, no staging, deploy direct to production
+**Rollback:** Instant via Vercel dashboard if needed
+**Cost:** Free tier for all services (Vercel, Sanity, Supabase, Anthropic usage negligible)
+
+---
+
+## 🔮 What's Next
+
+**Short-term:**
+- Document backlog projects using Content Copilot
+- SEO optimization (first Google result for "Will Diamond")
+- Clean up deprecated components
+
+**Maybe Someday:**
+- Complete Dave AI (if compelling use case emerges)
+- Blog posts (if natural topics emerge)
+- Stats page with real-time metrics (when vision becomes clearer)
+- Site-wide terminal interface with command navigation
+- Vector search for Dave (Supabase pgvector)
+
+**Philosophy:** Features get built when they solve real problems or spark genuine interest. No roadmap, just motivated iteration.
+
+---
+
+## 📬 Connect
+
+**Will Diamond**
+
+- Website: [will-diamond.com](https://will-diamond.com)
+- GitHub: [@spartypkp](https://github.com/spartypkp)
+- LinkedIn: [Will Diamond](https://www.linkedin.com/in/will-diamond-b1724520b/)
+- Twitter/X: [@itsreallywillyd](https://x.com/itsreallywillyd)
+
+---
+
+## 📝 Notes for Developers
+
+**If you're forking this:**
+- You'll need your own Sanity project, Supabase instance, and Anthropic API key
+- The Content Copilot integration with Sanity is "super hacky" (uses hidden preview field) but works
+- No tests, no staging - embrace the chaos or add structure as you see fit
+- The terminal aesthetic uses modern CSS that may not work in older browsers
+
+**If you're a recruiter:**
+- This represents my actual working style: experiment, iterate, ship
+- The specs show how I think about architecture and documentation
+- Content Copilot demonstrates AI tool building and LLM integration
+- The "no tests" philosophy is specific to personal projects, not professional work
+
+**If you have questions or ideas:**
+- Open an issue or PR
+- This is a learning-in-public project, feedback welcome
+
+---
+
+**License:** MIT (or whatever - feel free to use, learn from, or adapt)
+
+Built with builder mentality. Shipped with confidence. Maintained with motivation.

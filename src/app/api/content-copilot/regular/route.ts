@@ -67,103 +67,106 @@ interface ContentCopilotRequest {
 }
 
 export async function POST(req: Request) {
-	// Parse the request body
-	const requestData: ContentCopilotRequest = await req.json();
-	console.log('POST content-copilot - received request for document:', requestData.documentId);
+	try {
+		const requestData: ContentCopilotRequest = await req.json();
 
-	let {
-		messages, // These are UIMessages from the client
-		documentId,
-		conversationId, // This can be null for a new conversation
-		schemaType,
-		serializableSchema,
-		documentData
-	} = requestData;
+		let {
+			messages,
+			documentId,
+			conversationId,
+			schemaType,
+			serializableSchema,
+			documentData
+		} = requestData;
 
-	// Initialize Supabase client
-	const supabase = await createClient();
+		const supabase = await createClient();
 
-	// Use existing conversation ID or create a new one
-	if (!conversationId) {
-		console.log('Creating new conversation for document:', documentId);
-		const { data: newConversation, error } = await supabase
-			.from('conversations')
-			.insert({
-				title: documentData.title || `New ${schemaType} - ${documentId.substring(0, 8)}`,
-				conversation_type: 'content-copilot',
-				context: {
-					source: 'sanity',
-					documentId,
-					schemaType,
-					documentTitle: documentData.title || 'Untitled',
-					mode: 'regular'
-				},
-				// Do not store messages JSON here; messages live in the messages table
-			})
-			.select('id')
-			.single();
+		// Create or update conversation
+		if (!conversationId) {
+			const { data: newConversation, error } = await supabase
+				.from('conversations')
+				.insert({
+					title: documentData.title || `New ${schemaType} - ${documentId.substring(0, 8)}`,
+					conversation_type: 'content-copilot',
+					context: {
+						source: 'sanity',
+						documentId,
+						schemaType,
+						documentTitle: documentData.title || 'Untitled'
+					}
+				})
+				.select('id')
+				.single();
 
-		if (error) {
-			console.error('Failed to create conversation:', error);
-			return new Response(JSON.stringify({ error: 'Failed to create conversation' }), {
-				status: 500,
-				headers: { 'Content-Type': 'application/json' }
-			});
-		}
-		conversationId = newConversation.id;
-		console.log('Created new conversation:', conversationId);
-	} else {
-		// Optionally, update the conversation's updated_at timestamp or messages if needed
-		await supabase
-			.from('conversations')
-			.update({ updated_at: new Date().toISOString() })
-			.eq('id', conversationId);
-	}
-
-
-	const systemPrompt = generateContentCopilotSystemPrompt({
-		documentId,
-		schemaType,
-		documentData,
-		serializableSchema
-	});
-
-	const stream = streamText({
-		model: anthropic('claude-3-7-sonnet-latest'),
-		system: systemPrompt,
-		messages: messages, // Pass UIMessages directly
-		tools: availableTools,
-		maxSteps: 20,
-		async onFinish({ response }) { // response contains response.messages as CoreMessage[]
-			if (!conversationId) {
-				console.error('onFinish: conversationId is null, cannot save chat.');
-				return;
+			if (error) {
+				console.error('Failed to create conversation:', error);
+				return new Response(JSON.stringify({ error: 'Failed to create conversation' }), {
+					status: 500,
+					headers: { 'Content-Type': 'application/json' }
+				});
 			}
-			const updatedMessages = appendResponseMessages({
-				messages, // Original UIMessages
-				responseMessages: response.messages, // New CoreMessages from AI
-			});
-			await saveChat({
-				conversationId: conversationId, // Corrected parameter name
-				messages: updatedMessages, // Persist to messages table
-			});
-			// Optionally update analytics if still needed
-			// await updateConversationAnalytics(supabase, conversationId);
-		},
-	});
+			conversationId = newConversation.id;
+		} else {
+			await supabase
+				.from('conversations')
+				.update({ updated_at: new Date().toISOString() })
+				.eq('id', conversationId);
+		}
 
-	// Add conversation ID to the response headers for the client to pick up if it's a new chat
-	const responseInit = {
-		status: 200,
-		headers: new Headers({
-			'Content-Type': 'text/plain; charset=utf-8',
-			'X-Conversation-Id': conversationId as string // Ensure it's a string for the header
-		})
-	};
+		const systemPrompt = generateContentCopilotSystemPrompt({
+			documentId,
+			schemaType,
+			documentData,
+			serializableSchema
+		});
 
-	return stream.toDataStreamResponse(responseInit);
+		const modelName = process.env.DEFAULT_ANTHROPIC_MODEL || 'claude-sonnet-4-5';
+		const stream = streamText({
+			model: anthropic(modelName),
+			system: systemPrompt,
+			messages: messages,
+			tools: availableTools,
+			maxSteps: 20,
+			onError: (error) => {
+				console.error('[content-copilot/regular] Stream error:', error);
+			},
+			async onFinish({ response }) {
+				if (!conversationId) {
+					console.error('onFinish: conversationId is null, cannot save chat.');
+					return;
+				}
+				try {
+					const updatedMessages = appendResponseMessages({
+						messages,
+						responseMessages: response.messages,
+					});
+					await saveChat({
+						conversationId: conversationId,
+						messages: updatedMessages,
+					});
+				} catch (error) {
+					console.error('[content-copilot/regular] Error in onFinish:', error);
+				}
+			},
+		});
+
+		const responseInit = {
+			status: 200,
+			headers: new Headers({
+				'Content-Type': 'text/plain; charset=utf-8',
+				'X-Conversation-Id': conversationId as string
+			})
+		};
+
+		return stream.toDataStreamResponse(responseInit);
+	} catch (error) {
+		console.error('[content-copilot/regular] Error:', error);
+		return new Response(JSON.stringify({
+			error: 'Internal server error',
+			details: error instanceof Error ? error.message : String(error)
+		}), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
 }
-
-// Helper functions like getNextSequence and updateConversationAnalytics might be obsolete
-// if not used elsewhere, or if analytics are handled differently with the new message storage.
-// Consider removing them if they are no longer needed.

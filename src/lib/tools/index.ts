@@ -16,7 +16,7 @@ import {
 	writeTool
 } from './improvedSanityTools';
 
-// Legacy tools (used by regular mode)
+// Legacy Sanity tools
 export const legacySanityTools = {
 	writeFieldTool,
 	addToArrayTool,
@@ -28,7 +28,7 @@ export const legacySanityTools = {
 	listDocumentsByTypeTool
 };
 
-// Improved primitive tools (used by refinement mode)
+// Improved primitive Sanity tools
 export const improvedSanityTools = {
 	writeTool,
 	deleteTool,

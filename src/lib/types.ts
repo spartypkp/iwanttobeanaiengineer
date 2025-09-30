@@ -107,7 +107,7 @@ export interface TransformedMessage {
 }
 
 /**
- * Type for conversation mode
+ * Type for conversation types
+ * Simplified to single content-copilot type (no refinement mode)
  */
-export type ConversationMode = 'regular' | 'refinement';
-
+export type ConversationType = 'content-copilot' | 'dave';

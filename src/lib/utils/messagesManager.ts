@@ -41,7 +41,7 @@ export async function saveChat({
 	// 3) Touch conversation updated_at
 	await supabase
 		.from('conversations')
-		.update({ updated_at: new Date().toISOString(), messages: null })
+		.update({ updated_at: new Date().toISOString() })
 		.eq('id', conversationId);
 }
 
@@ -59,10 +59,31 @@ export async function loadChat(id: string): Promise<Message[]> {
 	}
 
 	const rows = data || [];
-	return rows.map((row: any) => (
-		Array.isArray(row.content_parts) && row.content_parts.length > 0
-			? { id: row.external_id || row.id, role: row.role, parts: row.content_parts }
-			: { id: row.external_id || row.id, role: row.role, content: row.content || '' }
-	));
+	return rows.map((row: any) => {
+		// If has content_parts
+		if (Array.isArray(row.content_parts) && row.content_parts.length > 0) {
+			// For user messages with simple text parts, extract the text as content
+			if (row.role === 'user' && row.content_parts.length === 1 && row.content_parts[0].type === 'text') {
+				return {
+					id: row.external_id || row.id,
+					role: row.role,
+					content: row.content_parts[0].text || ''
+				} as Message;
+			}
+			// For assistant messages or complex parts, keep parts structure
+			return {
+				id: row.external_id || row.id,
+				role: row.role,
+				content: '', // Message type requires content field
+				parts: row.content_parts
+			} as Message;
+		}
+		// Fallback to content field
+		return {
+			id: row.external_id || row.id,
+			role: row.role,
+			content: row.content || ''
+		} as Message;
+	});
 }
 

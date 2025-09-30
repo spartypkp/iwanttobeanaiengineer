@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textArea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import { createSerializableSchema } from '@/utils/schema-serialization';
 import { useChat } from '@ai-sdk/react';
@@ -149,9 +148,6 @@ interface EditingMessageState {
 	content: string;
 }
 
-// Define the conversation mode type
-type ConversationMode = 'regular' | 'refinement';
-
 export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 	// --- STATE MANAGEMENT ---
 	const [document, setDocument] = useState<{
@@ -166,8 +162,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		isValid: false
 	});
 
-	const [mode, setMode] = useState<ConversationMode>('regular');
-	const [parentConversationId, setParentConversationId] = useState<string | null>(null);
 	const [status, setStatus] = useState<'initializing' | 'loading' | 'ready' | 'error'>('initializing');
 	const [error, setError] = useState<string | null>(null);
 	const [conversationId, setConversationId] = useState<string | null>(null);
@@ -242,9 +236,7 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		}
 	}, []);
 
-	const apiRoute = mode === 'regular'
-		? '/api/content-copilot/regular'
-		: '/api/content-copilot/refinement';
+	const apiRoute = '/api/content-copilot/regular';
 
 	const serializableSchema = useMemo(() => {
 		if (!props.schemaType) return null;
@@ -277,7 +269,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 					},
 					body: JSON.stringify({
 						documentId: document.id,
-						mode,
 					}),
 				});
 
@@ -288,11 +279,11 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 				}
 
 				if (data.conversation) {
-					console.log(`[ContentCopilotView] Loaded ${mode} mode conversation:`, data.conversation.id);
+					console.log(`[ContentCopilotView] Loaded conversation:`, data.conversation.id);
 					setConversationId(data.conversation.id);
 					setLoadedMessages(data.messages || []);
 				} else {
-					console.log(`[ContentCopilotView] No existing ${mode} mode conversation found for document ${document.id}`);
+					console.log(`[ContentCopilotView] No existing conversation found for document ${document.id}`);
 					setConversationId(null);
 					setLoadedMessages([]);
 				}
@@ -305,16 +296,15 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 			}
 		};
 		loadConversation();
-	}, [status, mode, document.id, document.isValid]); // Added document.isValid back based on its usage
+	}, [status, document.id, document.isValid]);
 
 	const chatBody = useMemo(() => ({
 		documentId: document.id || '',
 		conversationId,
-		parentConversationId: mode === 'refinement' ? parentConversationId : undefined,
 		schemaType: document.type || '',
 		serializableSchema,
 		documentData: document.data || {},
-	}), [document.id, conversationId, mode, parentConversationId, document.type, serializableSchema, document.data]);
+	}), [document.id, conversationId, document.type, serializableSchema, document.data]);
 
 	const handleChatResponse = useCallback((response: Response) => {
 		const newConversationId = response.headers.get('X-Conversation-Id');
@@ -527,33 +517,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 		}
 	}, [editingMessage, conversationId, messages, setMessages, append, setInput, setStatus, setError, textAreaRef]);
 
-	const switchToRefinementMode = useCallback(() => {
-		setParentConversationId(conversationId);
-		setConversationId(null);
-		setLoadedMessages([]);
-		setConversationLoaded(false);
-		setMode('refinement');
-		setStatus('loading');
-	}, [conversationId]);
-
-	const switchToRegularMode = useCallback(() => {
-		setParentConversationId(null);
-		setConversationId(null);
-		setLoadedMessages([]);
-		setConversationLoaded(false);
-		setMode('regular');
-		setStatus('loading');
-	}, []);
-
-	const handleModeChange = useCallback((value: string) => {
-		console.log('[ContentCopilotView] Mode changed to:', value);
-		if (value === 'refinement') {
-			switchToRefinementMode();
-		} else if (value === 'regular') {
-			switchToRegularMode();
-		}
-	}, [switchToRefinementMode, switchToRegularMode]);
-
 	const getDocumentTitle = useCallback(() => {
 		return document.data?.title || document.data?.name || `Untitled ${document.type}`;
 	}, [document.data, document.type]);
@@ -571,30 +534,16 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 	}
 
 	return (
-		<div key={`content-copilot-${mode}`} className="flex flex-col w-full h-full max-h-screen border rounded-md">
-			{/* Header with mode toggle */}
+		<div className="flex flex-col w-full h-full max-h-screen border rounded-md">
+			{/* Header */}
 			<div className="border-b p-3 flex items-center justify-between shrink-0">
 				<div className="flex items-center gap-2">
 					<div className="space-y-1">
 						<h3 className="text-sm font-semibold">
-							Content Copilot {mode === 'refinement' && '- Refinement Mode'}
+							Content Copilot
 						</h3>
 						<p className="text-xs text-green-700">Working with: {getDocumentTitle()}</p>
 					</div>
-				</div>
-				<div className="flex items-center gap-2">
-					<ToggleGroup type="single" value={mode} onValueChange={handleModeChange}>
-						<ToggleGroupItem value="regular" aria-label="Regular Creation">
-							Brainstorm
-						</ToggleGroupItem>
-						<ToggleGroupItem
-							value="refinement"
-							aria-label="Refinement Mode"
-							disabled={!conversationId && mode === 'regular'}
-						>
-							Refinement
-						</ToggleGroupItem>
-					</ToggleGroup>
 				</div>
 			</div>
 
@@ -613,18 +562,6 @@ export const ContentCopilotView = (props: CustomSanityComponentProps) => {
 							<AvatarFallback className="text-lg">D</AvatarFallback>
 						</Avatar>
 						<h3 className="text-lg font-semibold">Ready to help with your content</h3>
-						{mode === 'refinement' && (
-							<div className="text-sm text-muted-foreground">
-								<p>Refinement mode active. I&apos;ll help you improve your existing content by:</p>
-								<ul className="list-disc list-inside mt-2 text-left">
-									<li>Enhancing clarity and impact</li>
-									<li>Improving technical precision</li>
-									<li>Strengthening narrative flow</li>
-									<li>Ensuring voice consistency</li>
-									<li>Optimizing for readability and SEO</li>
-								</ul>
-							</div>
-						)}
 					</div>
 				) : (
 					<>
