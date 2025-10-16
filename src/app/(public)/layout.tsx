@@ -8,6 +8,16 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
 	title: "Will Diamond",
 	description: "AI Engineer and Builder",
+	icons: {
+		icon: [
+			{ url: '/diamond.png' },
+			{ url: '/diamond.png', sizes: '32x32', type: 'image/png' },
+			{ url: '/diamond.png', sizes: '16x16', type: 'image/png' },
+		],
+		apple: [
+			{ url: '/diamond.png', sizes: '180x180', type: 'image/png' },
+		],
+	},
 };
 
 export default function RootLayout({

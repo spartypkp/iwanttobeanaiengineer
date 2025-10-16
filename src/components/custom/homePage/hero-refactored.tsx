@@ -607,7 +607,7 @@ export const Hero: React.FC<HeroProps> = ({
 												<h3 className="text-lg font-semibold">Current Position</h3>
 											</div>
 											<p className="text-lg text-muted-foreground">
-												Currently at <Link href="https://contoural.com" target="_blank" rel="noopener noreferrer" className="text-primary underline transition-all">Contoural Inc</Link>, building legal tech LLM systems for Fortune 500 companies. Pursuing independent <span className="text-primary">contract AI Engineering</span> opportunities.
+												Running <span className="text-primary font-semibold">Independent AI Engineering Consultancy</span>, providing contract development and strategic advisory for early-stage startups. Actively seeking full-time opportunities.
 											</p>
 										</div>
 
@@ -619,7 +619,13 @@ export const Hero: React.FC<HeroProps> = ({
 											</div>
 											<div className="text-lg text-muted-foreground space-y-2">
 												<p>
-													Founded <span className="text-primary transition-all">Recodify.ai</span>
+													AI Engineer at <Link href="https://contoural.com" target="_blank" rel="noopener noreferrer" className="text-primary underline transition-all">Contoural Inc</Link> <span className="text-sm text-muted-foreground/70">(Nov 2023 - Sep 2025)</span>
+												</p>
+												<p>
+													Apprentice to <Link href="https://twitter.com/swyx" target="_blank" rel="noopener noreferrer" className="text-primary underline transition-all">Swyx</Link> at <span className="text-primary">Smol AI</span> <span className="text-sm text-muted-foreground/70">(Dec 2024 - Feb 2025)</span>
+												</p>
+												<p>
+													Founded <span className="text-primary transition-all">Recodify.ai</span> <span className="text-sm text-muted-foreground/70">(Aug 2023 - Dec 2024)</span>
 												</p>
 												<p>
 													Production Assistant at <Link href="https://www.latent.space/" target="_blank" rel="noopener noreferrer" className="text-primary underline transition-all">Latent Space Podcast</Link>

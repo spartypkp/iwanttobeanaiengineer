@@ -34,7 +34,7 @@ export const WelcomeIntro: React.FC<WelcomeIntroProps> = ({
 
 	// Default welcome content
 	const defaultContent = `> Boot sequence initiated...
-> Searching for GPT-5... [NOT FOUND]
+> Searching for GPT-6... [NOT FOUND]
 > Enabling recruiter persuasion module... [LOADING]
 > Trauma dumping on my best friend Claude... [OK]
 > Mining Bitcoin while you wait... [THANKS FOR THE COMPUTE]

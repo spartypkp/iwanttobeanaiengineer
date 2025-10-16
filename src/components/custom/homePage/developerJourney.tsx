@@ -1,9 +1,9 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Code, FileBadge, Terminal } from "lucide-react";
+import { ArrowRight, Code, FileBadge, Terminal } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface JourneyMilestone {
 	id: number;
@@ -11,16 +11,14 @@ interface JourneyMilestone {
 	title: string;
 	image: string;
 	description: string;
-	category: "education" | "work" | "project" | "personal";
+	category: "work" | "project" | "personal";
 }
 
 export const DeveloperJourney: React.FC = () => {
 	const [typedTerminalText, setTypedTerminalText] = useState("");
 	const [activeMilestone, setActiveMilestone] = useState<number>(0);
 
-	const timelineWrapperRef = useRef<HTMLDivElement>(null);
-
-	const terminalText = "view career_journey --visual-timeline --use-arrows";
+	const terminalText = "cat career_journey.log --format=timeline";
 
 	// Terminal typing effect
 	useEffect(() => {
@@ -40,175 +38,91 @@ export const DeveloperJourney: React.FC = () => {
 		return () => clearInterval(typingInterval);
 	}, []);
 
-	// Handle keyboard navigation
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			// Only apply if timeline is in viewport
-			if (!timelineWrapperRef.current) return;
-			const rect = timelineWrapperRef.current.getBoundingClientRect();
-			if (rect.top > window.innerHeight || rect.bottom < 0) return;
-
-			if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-				e.preventDefault();
-				if (activeMilestone < milestones.length - 1) {
-					setActiveMilestone(prev => prev + 1);
-				}
-			} else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-				e.preventDefault();
-				if (activeMilestone > 0) {
-					setActiveMilestone(prev => prev - 1);
-				}
-			}
-		};
-
-		window.addEventListener('keydown', handleKeyDown);
-		return () => {
-			window.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [activeMilestone]);
-
 	const milestones: JourneyMilestone[] = [
 		{
 			id: 1,
-			year: "Early Days",
-			title: "Growing Up In the Bay Area",
-			image: "/losAltos.png",
-			description: "I was born and raised in Los Altos, CA, in the heart of Silicon Valley. I was very fortunate to have been raised in a good neighborhood with a loving and supportive family. I was immersed in a culture of innovation and entrepreneurship from a young age. I got good grades at Los Altos High School, played football for 4 years, and took multiple computer science courses.",
+			year: "2022",
+			title: "Post Graduation Struggles",
+			image: "/leetcode.jpeg",
+			description: "Post-graduation, the transition from academia to the professional world was unexpectedly challenging. Despite a robust educational background, the job market proved unforgiving, and repeated rejections soon took their toll, leaving me demoralized and questioning my path. Grinding leetcode was something that I seriously struggled with. I spent a year coaching JV football at Palo Alto High School with my twin brother, which was a unique and fun experience I'm glad I did.",
 			category: "personal"
 		},
 		{
 			id: 2,
-			year: "High School",
-			title: "Discovering my Love of Programming",
-			image: "/scratch.png",
-			description: "I loved the feeling of solving puzzles and the reward of building things. My first project was a 2D golf simulator built in Scratch using physics equations I had just learned in my AP Physics class! I was hooked from there, and decided to pursue a degree in Computer Science in college.",
-			category: "education"
+			year: "2023",
+			title: "A Lifechanging Act of Kindness",
+			image: "/scratch.jpeg",
+			description: "Disillusioned with leetcode grinding and depressed from the college grad job search, I found myself working 40-50+ hours bartending and wondering how I could start my career. The turning point came from an unexpected source—a chance encounter at the bar with a random customer one night. His name was Sean, and he was unexpectedly kind: asking about my education and eventually career goals. On the spot, Sean invited me to come code with him and some friends that Sunday at a local coffee shop.",
+			category: "personal"
 		},
 		{
 			id: 3,
-			year: "College",
-			title: "Undergraduate Computer Science",
-			image: "/msuEngineering.jpeg",
-			description: "I attended university at Michigan State as an undergraduate CS major. I chose Michigan State because I loved the traditional midwest college experience, and because I got a partial scholarship to go there. There I learned Python, C++, and of course fundamental data structures and algorithms.",
-			category: "education"
-		},
-		{
-			id: 4,
-			year: "Pivot",
-			title: "Switching Majors to Data Science",
-			image: "/nflStats.png",
-			description: "After taking some Data Science electives, I quickly found my true calling in data science—an area where the practical application of technology to solve real problems ignited my passion. One of my favorite projects was a statistical analysis of NFL statistics and the coefficient of correlation with number of wins. Not that I didn't like the classic algorithms and data structures of CS, but I got to model and solve real world problems in Data Science.",
-			category: "education"
-		},
-		{
-			id: 5,
-			year: "First AI Experience",
-			title: "First Hands on Experience with ML and AI",
-			image: "/SVM.png",
-			description: "As I progressed through my data science degree I got to take more classes in AI and Machine Learning, which was just the coolest thing ever to me. I knew I always wanted to work in AI and strongly believed that the hardest and most interesting problems could be solved with AI technology. (Notably this was pre ChatGPT). My capstone project worked with Argonne National Laboratory building ML models to predict moments of high volatility in fluid dynamics datasets.",
-			category: "education"
-		},
-		{
-			id: 6,
-			year: "Post Graduation",
-			title: "Post Graduation Struggles",
-			image: "/leetcode.jpeg",
-			description: "Post-graduation, the transition from academia to the professional world was unexpectedly challenging. Despite a robust educational background, the job market proved unforgiving, and repeated rejections soon took their toll, leaving me demoralized and questioning my path. Grinding leetcode was something that I seriously struggled with. I spent a year coaching JV football at Palo Alto with my twin brother, which was a unique and fun experience I'm glad I did.",
-			category: "personal"
-		},
-		{
-			id: 7,
-			year: "Turning Point",
-			title: "A Lifechanging Act of Kindness",
-			image: "/scratch.jpeg",
-			description: "Disillusioned with leetcode grinding and depressed from the college grad job search, I found myself working 40-50+ hours bartending and wondering how I could start my career. The turning point came from an unexpected source—a chance encounter at the bar with a random person at my bar one night. His name was Sean, and he was unexpectedly kind: asking about my education and eventually career goals. On the spot, Sean invited me to come code with him and some friends that Sunday at a local coffee shop.",
-			category: "personal"
-		},
-		{
-			id: 8,
 			year: "2023",
-			title: "Sunday Hustle",
+			title: "Sunday Hustle - Builder Mindset",
 			image: "/sundayHustle.webp",
 			description: "I started regularly going to Sunday Hustle every week. At my first Sunday Hustle, I didn't know what to work on. I felt self-conscious of my coding ability and thought that I needed to spend some time doing leetcode to get back to speed. Sean immediately told me this was a dumb idea (something I love about him lol). This is where I first got introduced to the hacker and builder mindset, something I am proud to say I have today.",
 			category: "personal"
 		},
 		{
-			id: 9,
+			id: 4,
 			year: "2023",
-			title: "Building My Dream Project",
-			image: "/abeChat.png",
-			description: "Every Sunday marked an improvement in my capabilities as a software engineer and an increase in my experience using LLM technologies. My dream legal help project started to take shape into a fully functional LLM chatbot. The goal of the project was to democratize access and understanding of legal knowledge to all. A user could ask simple questions to the chatbot, which would search a database of scraped legislation to find relevant legislation.",
+			title: "Ask Abe - First Full-Stack AI App",
+			image: "/abeSite.png",
+			description: "Every Sunday at Sunday Hustle marked an improvement in my software engineering capabilities. My dream legal help project evolved into a fully functional LLM chatbot with the persona of Abraham Lincoln. I learned embeddings, similarity search, RAG pipelines, query optimization with LLMs, chain of thought reasoning, and LLM limitations. Eventually, I showcased Ask Abe at a Stanford LLM hackathon. I quit bartending and started working full-time on my passion project.",
 			category: "project"
+		},
+		{
+			id: 5,
+			year: "2023",
+			title: "Founded Recodify.ai",
+			image: "/sqlStatutes.png",
+			description: "I founded my first startup based on Ask Abe, with my MSU friend Madeline as cofounder. We aimed to democratize legal knowledge by building a platform for AI Engineers to build LLM applications in the legal field. Big players had a monopoly on AI legal tools because they had a monopoly on the data. We provided extensively processed primary source legislation data and tools to level the playing field and enable rapid development.",
+			category: "work"
+		},
+		{
+			id: 6,
+			year: "2024",
+			title: "Open Sourcing & Pivoting",
+			image: "/openSourceLegislation.png",
+			description: "Finding product market fit was difficult, not to mention the technical and practical implications of offering up the world's legislative data from an API. After a lot of debate and hard thinking, I decided to open source my work and shut down the startup to focus on my career as a software engineer and AI Engineer. This was a difficult but necessary decision that taught me valuable lessons about entrepreneurship.",
+			category: "project"
+		},
+		{
+			id: 7,
+			year: "2023-2025",
+			title: "Contoural - Production AI Engineering",
+			image: "/contoural.png",
+			description: "Joined Contoural Inc, the largest independent provider of information governance consulting, trusted by 30% of Fortune 500 companies. Built LLM systems for recordkeeping requirement analysis, achieving 75% time reduction for enterprise projects and enabling Contoural to transition to fixed cost pricing. Architected citation extraction system analyzing US Federal Code with knowledge graph database. Designed comprehensive evaluation framework reaching 85% precision on AI classifications, beating human baselines. Collaborated with attorneys in hybrid technical/legal role.",
+			category: "work"
+		},
+		{
+			id: 8,
+			year: "2024-2025",
+			title: "Apprenticeship with Swyx at Smol AI",
+			image: "/sundayHustleCommits.png",
+			description: "Apprenticed with Swyx (Shawn Wang) across his portfolio of AI engineering ventures. Managed production operations for Latent Space Podcast, coordinating episode releases and building AI engineering projects to assist with production. Coordinated speaker program for AI Engineer Summit in New York, managing technical content and speaker logistics. Learned invaluable lessons about building in public and AI engineering best practices.",
+			category: "work"
+		},
+		{
+			id: 9,
+			year: "2025",
+			title: "Independent AI Engineering Consultancy",
+			image: "/totalCommits.png",
+			description: "After nearly two years building production LLM systems at Contoural and learning from industry leaders at Smol AI, I launched my independent consultancy. Providing AI engineering services to early-stage startups, building platforms for expert network search, content moderation systems, and evaluation frameworks for conversational AI. Working with multiple clients across diverse AI challenges.",
+			category: "work"
 		},
 		{
 			id: 10,
-			year: "2023",
-			title: "Ask Abe - My First Full Stack AI Application",
-			image: "/abeSite.png",
-			description: "I gave my LLM the persona of Abraham Lincoln, always honest and truthful. I learned so much about embeddings, similarity search, rag pipelines, optimizations to user queries with LLMs, chain of thought reasoning and prompting, and limitations to LLM technology. Eventually, I went to a Stanford LLM hackathon to showcase Ask Abe. I quit my job bartending, and started working full time on my passion project.",
-			category: "project"
-		},
-		{
-			id: 11,
-			year: "2023",
-			title: "Starting Recodify.ai",
-			image: "/sqlStatutes.png",
-			description: "I founded my first startup based on the work I had been doing with Ask Abe. The idea was to build a platform to help AI Engineers build LLM applications in the legal field. I asked my data science friend from MSU, Madeline, to be my cofounder. We would provide extensively processed primary source legislation data and tools to streamline the difficult task of building applications.",
-			category: "work"
-		},
-		{
-			id: 12,
-			year: "2023",
-			title: "Democratizing Legal Knowledge",
-			image: "/abeMission.png",
-			description: "These big players had such a monopoly on these AI applications because they had a monopoly on the data. We aimed to remove this barrier, level the playing field, and provide all the data and tools an AI Engineer would need to start building instantly. We wanted to democratize legal knowledge to allow for the construction of more powerful and wide spread AI applications.",
-			category: "work"
-		},
-		{
-			id: 13,
-			year: "2024",
-			title: "Open Sourcing My Work",
-			image: "/openSourceLegislation.png",
-			description: "Finding product market fit was difficult, not to mention the technical and practical implications of offering up the world's legislative data from an API. After a lot of debate and hard thinking, I decided to open source my work and shut down the startup to focus on my career as a software engineer and AI Engineer.",
-			category: "project"
-		},
-		{
-			id: 14,
-			year: "2024",
-			title: "AI Engineering Work with Contoural",
-			image: "/contoural.png",
-			description: "Because of our extensive IP of scraped and processed legislation, we were able to get our first client: Contoural. Contoural is an information governance consulting company which does extensive work consulting clients on how to handle large amounts of data to maintain legal and regulatory compliance.",
-			category: "work"
-		},
-		{
-			id: 15,
-			year: "2024",
-			title: "Building LLM Systems for Fortune 500 Companies",
-			image: "/rrExtraction.png",
-			description: "We were brought on to Contoural to build an AI system for extracting Recordkeeping Requirements with higher accuracy and quality metadata than anything on the market. This complex AI system pushed the boundaries of LLM capabilities for reasoning and structured data extraction in the legal field. I gained so much experience building production ready LLM applications.",
-			category: "work"
-		},
-		{
-			id: 16,
 			year: "Present",
-			title: "Looking to the Future",
-			image: "/totalCommits.png",
-			description: "Although I loved founding Recodify.ai, and building LLM applications for Contoural, I've always felt I hadn't reached my potential. I'm currently looking for full time employment in software engineering and AI Engineering. I want to work on interesting and difficult projects in a fast paced environment, BUILDING! Shipping fast, and contributing as much as possible.",
+			title: "Building the Future",
+			image: "/iWantToBeAnAIEngineer.png",
+			description: "Running my independent consultancy while actively seeking full-time AI engineering opportunities. Building innovative projects like Texas Hold LLM (multi-agent poker with AI personalities), Specification Engine (dual-space graph visualization), and Sanity Content Copilot (conversational CMS). Still driven by the same passion from Sunday Hustle: working on interesting and difficult projects in a fast-paced environment, BUILDING! Shipping fast, and contributing as much as possible.",
 			category: "personal"
 		}
 	];
 
-	// Handle navigation between milestones
-	const navigateToMilestone = (index: number) => {
-		if (index >= 0 && index < milestones.length) {
-			setActiveMilestone(index);
-		}
-	};
-
 	const getCategoryColor = (category: string): string => {
 		switch (category) {
-			case "education":
-				return "bg-blue-500/20 text-blue-300 border-blue-500/30";
 			case "work":
 				return "bg-green-500/20 text-green-300 border-green-500/30";
 			case "project":
@@ -222,11 +136,8 @@ export const DeveloperJourney: React.FC = () => {
 
 	return (
 		<section className="py-16 relative">
-			{/* Section divider with terminal styling */}
-
-
 			<div className="relative z-10 container mx-auto px-4">
-				<div className="mx-auto max-w-6xl shadow-[0_0_60px_rgba(var(--primary),0.1)] rounded-xl overflow-hidden">
+				<div className="mx-auto max-w-7xl shadow-[0_0_60px_rgba(var(--primary),0.1)] rounded-xl overflow-hidden">
 					{/* Terminal window header bar */}
 					<div className="bg-zinc-900 border-b border-primary/20 flex items-center justify-between px-4 py-2.5">
 						<div className="flex items-center gap-4">
@@ -240,7 +151,7 @@ export const DeveloperJourney: React.FC = () => {
 							{/* Terminal title */}
 							<div className="text-xs text-primary/70 font-mono flex items-center">
 								<Terminal size={11} className="mr-1.5" />
-								<span>developer-journey — timeline.terminal</span>
+								<span>career-journey — timeline.log</span>
 							</div>
 						</div>
 
@@ -254,142 +165,242 @@ export const DeveloperJourney: React.FC = () => {
 					{/* Terminal content area */}
 					<div className="bg-zinc-900/90 backdrop-blur-sm border-x border-b border-primary/20">
 						{/* Main content */}
-						<div className="bg-background/90 px-6 py-8">
+						<div className="bg-background/90">
 							{/* Terminal command */}
-							<div className="flex items-center gap-2 mb-6">
+							<div className="flex items-center gap-2 px-6 pt-6 pb-4">
 								<Terminal className="h-5 w-5 text-primary" />
 								<p className="text-sm font-mono text-primary">$ {typedTerminalText}<span className="animate-pulse">▌</span></p>
 							</div>
 
-
-							{/* Timeline display */}
-							<div
-								ref={timelineWrapperRef}
-								className="relative"
-							>
-								{/* Progress indicator */}
-								<div className="flex justify-between px-2 mb-6">
-									<div className="text-xs font-mono text-primary/60">
-										<span className="mr-1">Milestone</span>
-										<span className="bg-black/40 px-2 py-0.5 rounded">{activeMilestone + 1}/{milestones.length}</span>
-									</div>
-
-									<div className="flex items-center gap-1">
-										{milestones.map((_, idx) => (
-											<button
-												key={idx}
-												onClick={() => navigateToMilestone(idx)}
-												className={`h-1.5 rounded-full transition-all ${idx === activeMilestone
-													? 'w-5 bg-primary'
-													: 'w-1.5 bg-primary/30 hover:bg-primary/50'
+							{/* TWO COLUMN LAYOUT - Timeline + Detail */}
+							<div className="flex flex-col lg:flex-row gap-0 lg:h-[calc(100vh-280px)] lg:max-h-[800px]">
+								{/* LEFT SIDEBAR - Vertical Timeline (Always Visible) */}
+								<div className="lg:w-[35%] border-r border-primary/10 bg-black/20 lg:overflow-y-auto terminal-scrollbar">
+									<div className="p-4">
+										<div className="space-y-1">
+											{milestones.map((milestone, idx) => (
+												<button
+													key={milestone.id}
+													onClick={() => setActiveMilestone(idx)}
+													className={`w-full text-left px-3 py-3 rounded-md transition-all group relative ${
+														idx === activeMilestone
+															? 'bg-primary/20 border border-primary/30'
+															: 'hover:bg-black/40 border border-transparent'
 													}`}
-												aria-label={`Go to milestone ${idx + 1}`}
-											/>
-										))}
+												>
+													{/* Timeline connector line */}
+													{idx < milestones.length - 1 && (
+														<div className="absolute left-2 top-full h-1 w-px bg-primary/20"></div>
+													)}
+
+													<div className="flex items-start gap-3">
+														{/* Dot indicator */}
+														<div className={`mt-1 flex-shrink-0 h-2 w-2 rounded-full transition-all ${
+															idx === activeMilestone
+																? 'bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.6)]'
+																: 'bg-primary/30 group-hover:bg-primary/50'
+														}`}></div>
+
+														<div className="flex-1 min-w-0">
+															{/* Year */}
+															<div className="text-[10px] font-mono text-primary/60 mb-0.5">
+																{milestone.year}
+															</div>
+
+															{/* Title */}
+															<div className={`text-sm font-medium transition-colors truncate ${
+																idx === activeMilestone
+																	? 'text-primary'
+																	: 'text-muted-foreground group-hover:text-foreground'
+															}`}>
+																{milestone.title}
+															</div>
+
+															{/* Category badge */}
+															<div className="mt-1.5">
+																<Badge
+																	variant="outline"
+																	className={`${getCategoryColor(milestone.category)} text-[10px] py-0 px-1.5 font-mono uppercase`}
+																>
+																	{milestone.category}
+																</Badge>
+															</div>
+														</div>
+													</div>
+												</button>
+											))}
+										</div>
 									</div>
 								</div>
 
-								{/* Navigation arrows on sides of timeline */}
-								{activeMilestone > 0 && (
-									<button
-										onClick={() => navigateToMilestone(activeMilestone - 1)}
-										className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-primary/70 hover:text-primary rounded-r-lg p-2 transition-all border-y border-r border-primary/20 shadow-lg"
-										aria-label="Previous milestone"
-									>
-										<ChevronLeft className="h-8 w-8" />
-									</button>
-								)}
+								{/* RIGHT PANEL - Milestone Detail */}
+								<div className="lg:w-[65%] p-4 lg:p-6 relative lg:overflow-y-auto terminal-scrollbar">
+									{/* Animated background gradient */}
+									<div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none"></div>
 
-								{activeMilestone < milestones.length - 1 && (
-									<button
-										onClick={() => navigateToMilestone(activeMilestone + 1)}
-										className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-primary/70 hover:text-primary rounded-l-lg p-2 transition-all border-y border-l border-primary/20 shadow-lg"
-										aria-label="Next milestone"
-									>
-										<ChevronRight className="h-8 w-8" />
-									</button>
-								)}
+									<div className="relative space-y-4 lg:space-y-5">
+										{/* Header Section with Terminal Styling */}
+										<div className="space-y-3">
+											{/* Year badge */}
+											<div className="inline-flex items-center gap-2 px-3 py-1 bg-black/40 border border-primary/20 rounded-md">
+												<Code className="h-3 w-3 text-primary/70" />
+												<span className="text-xs font-mono text-primary/80 tracking-wider">
+													{milestones[activeMilestone].year}
+												</span>
+											</div>
 
-								{/* Current milestone card */}
-								<div
-									className="bg-black/30 rounded-lg border border-primary/20 overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.2)]"
-								>
-									{/* Header */}
-									<div className="bg-black/60 px-4 py-3 border-b border-primary/20 flex items-center justify-between">
-										<div className="flex items-center gap-2">
-											<Code className="h-4 w-4 text-primary" />
-											<h3 className="text-primary/90 font-semibold flex items-center gap-2">
-												<span>{milestones[activeMilestone].title}</span>
-												<span className="text-xs text-primary/60 font-mono">({milestones[activeMilestone].year})</span>
-											</h3>
+											{/* Title with animated underline */}
+											<div className="relative">
+												<h3 className="text-3xl lg:text-4xl font-bold text-foreground leading-tight mb-2 transition-all duration-300">
+													{milestones[activeMilestone].title}
+												</h3>
+												<div className="h-0.5 w-16 bg-primary/80 rounded-full transition-all duration-500"></div>
+											</div>
+
+											{/* Category badge with icon */}
+											<div className="flex items-center gap-3">
+												<Badge
+													variant="outline"
+													className={`${getCategoryColor(milestones[activeMilestone].category)} text-xs font-mono uppercase px-2 py-0.5`}
+												>
+													{milestones[activeMilestone].category}
+												</Badge>
+												<div className="text-xs font-mono text-muted-foreground/60">
+													{activeMilestone + 1} of {milestones.length}
+												</div>
+											</div>
 										</div>
-										<Badge
-											variant="outline"
-											className={`${getCategoryColor(milestones[activeMilestone].category)} text-xs font-mono`}
-										>
-											{milestones[activeMilestone].category}
-										</Badge>
-									</div>
 
-									{/* Content with image and text */}
-									<div className="flex flex-col md:flex-row">
-										{/* Image */}
-										<div className="md:w-1/2 relative">
-											<div className="aspect-video md:aspect-square relative overflow-hidden border-b md:border-b-0 md:border-r border-primary/10">
-												<div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-transparent z-10"></div>
+										{/* Divider */}
+										<div className="flex items-center gap-2">
+											<div className="h-px flex-1 bg-gradient-to-r from-primary/40 via-primary/20 to-transparent"></div>
+											<div className="h-1 w-1 rounded-full bg-primary/40"></div>
+											<div className="h-px flex-1 bg-gradient-to-l from-primary/40 via-primary/20 to-transparent"></div>
+										</div>
+
+										{/* Image with enhanced styling */}
+										<div className="group relative">
+											<div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden border border-primary/20 shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)] transition-all duration-500 group-hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.2)] group-hover:border-primary/30 bg-black/40">
+												{/* Corner decorations */}
+												<div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary/50 z-20"></div>
+												<div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-primary/50 z-20"></div>
+												<div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-primary/50 z-20"></div>
+												<div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary/50 z-20"></div>
+
+												{/* Scan line effect */}
+												<div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent z-10 animate-pulse-slow"></div>
+
+												{/* Image gradient overlay */}
+												<div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-primary/10 z-10 transition-opacity duration-500 group-hover:opacity-70"></div>
+
 												<Image
 													src={milestones[activeMilestone].image}
 													alt={milestones[activeMilestone].title}
 													fill
-													className="object-cover transition-transform duration-700"
+													className="object-contain transition-transform duration-700 group-hover:scale-105 p-4"
 													priority={activeMilestone < 3}
 												/>
 											</div>
-										</div>
 
-										{/* Description */}
-										<div className="md:w-1/2 p-5 bg-gradient-to-b from-black/10 to-black/30">
-											<div className="flex text-muted-foreground">
-												<span className="text-primary/50 font-mono text-sm mr-2 flex-shrink-0">
-													<ArrowRight className="h-4 w-4" />
-												</span>
-												<p className="text-sm">{milestones[activeMilestone].description}</p>
+											{/* Image caption */}
+											<div className="mt-2 flex items-center gap-2 text-xs font-mono text-primary/50">
+												<div className="h-px w-6 bg-primary/30"></div>
+												<span>visual_memory_{activeMilestone + 1}.jpg</span>
 											</div>
 										</div>
-									</div>
 
-									{/* Navigation controls */}
-									<div className="flex justify-center items-center px-4 py-3 bg-black/40 border-t border-primary/10">
-										{/* <button
-											onClick={() => navigateToMilestone(activeMilestone - 1)}
-											disabled={activeMilestone === 0}
-											className={`px-4 py-2 rounded text-sm font-mono flex items-center gap-2 transition-colors
-												${activeMilestone === 0
-													? 'bg-black/20 text-primary/30 cursor-not-allowed'
-													: 'bg-black/50 text-primary hover:text-primary/100 hover:bg-black/70 border border-primary/30 hover:border-primary/50 shadow-[0_0_10px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_0_10px_rgba(var(--primary-rgb),0.2)]'}`}
-										>
-											<ArrowLeft className="h-4 w-4" />
-											Previous
-										</button> */}
+										{/* Description with terminal box */}
+										<div className="relative">
+											{/* Terminal-style container */}
+											<div className="bg-black/30 border border-primary/20 rounded-lg p-4 backdrop-blur-sm">
+												{/* Terminal header */}
+												<div className="flex items-center justify-between mb-3 pb-2 border-b border-primary/10">
+													<div className="flex items-center gap-2">
+														<div className="flex gap-1">
+															<div className="h-2 w-2 rounded-full bg-red-500/50"></div>
+															<div className="h-2 w-2 rounded-full bg-yellow-500/50"></div>
+															<div className="h-2 w-2 rounded-full bg-green-500/50"></div>
+														</div>
+														<span className="text-[10px] font-mono text-primary/50 ml-1">story.txt</span>
+													</div>
+													<div className="text-[10px] font-mono text-primary/40">
+														{milestones[activeMilestone].description.length} chars
+													</div>
+												</div>
 
-										{/* Navigation instruction */}
-										<div className="flex items-center justify-center gap-3 mt-4 text-primary/70 text-sm font-mono border border-primary/30 rounded-md py-2 bg-black/20">
-											<ArrowLeft className="h-4 w-4" />
-											<ArrowRight className="h-4 w-4" />
-											<span>Use arrow keys or navigation buttons to explore my journey</span>
+												{/* Description text */}
+												<div className="flex gap-3">
+													<div className="flex-shrink-0 pt-0.5">
+														<ArrowRight className="h-3.5 w-3.5 text-primary/60" />
+													</div>
+													<div className="flex-1">
+														<p className="text-sm lg:text-base leading-relaxed text-foreground/90 font-light">
+															{milestones[activeMilestone].description}
+														</p>
+													</div>
+												</div>
+
+												{/* Terminal cursor */}
+												<div className="mt-3 pt-2 border-t border-primary/10">
+													<div className="flex items-center gap-2 text-xs font-mono text-primary/40">
+														<span>$</span>
+														<span className="animate-pulse">▌</span>
+													</div>
+												</div>
+											</div>
 										</div>
 
-										{/* <button
-											onClick={() => navigateToMilestone(activeMilestone + 1)}
-											disabled={activeMilestone === milestones.length - 1}
-											className={`px-4 py-2 rounded text-sm font-mono flex items-center gap-2 transition-colors
-												${activeMilestone === milestones.length - 1
-													? 'bg-black/20 text-primary/30 cursor-not-allowed'
-													: 'bg-black/50 text-primary hover:text-primary/100 hover:bg-black/70 border border-primary/30 hover:border-primary/50 shadow-[0_0_10px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_0_10px_rgba(var(--primary-rgb),0.2)]'}`}
-										>
-											Next
-											<ArrowRight className="h-4 w-4" />
-										</button> */}
+										{/* Navigation with enhanced styling */}
+										<div className="relative pt-4">
+											{/* Divider */}
+											<div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+
+											<div className="flex items-center justify-between gap-3">
+												<button
+													onClick={() => setActiveMilestone(Math.max(0, activeMilestone - 1))}
+													disabled={activeMilestone === 0}
+													className={`group flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono transition-all duration-300 ${
+														activeMilestone === 0
+															? 'opacity-30 cursor-not-allowed bg-black/20'
+															: 'bg-black/40 hover:bg-primary/20 text-primary border border-primary/30 hover:border-primary/50 shadow-[0_0_10px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]'
+													}`}
+												>
+													<ArrowRight className="h-3.5 w-3.5 rotate-180 transition-transform group-hover:-translate-x-1" />
+													<span className="text-xs">Previous</span>
+												</button>
+
+												<div className="flex items-center gap-2 px-3 py-1.5 bg-black/40 border border-primary/20 rounded-lg">
+													<div className="flex gap-1">
+														{milestones.map((_, idx) => (
+															<div
+																key={idx}
+																className={`h-1 rounded-full transition-all duration-300 ${
+																	idx === activeMilestone
+																		? 'w-5 bg-primary shadow-[0_0_6px_rgba(var(--primary-rgb),0.6)]'
+																		: 'w-1 bg-primary/30'
+																}`}
+															></div>
+														))}
+													</div>
+													<div className="text-xs font-mono text-primary/60 border-l border-primary/20 pl-2">
+														{activeMilestone + 1}/{milestones.length}
+													</div>
+												</div>
+
+												<button
+													onClick={() => setActiveMilestone(Math.min(milestones.length - 1, activeMilestone + 1))}
+													disabled={activeMilestone === milestones.length - 1}
+													className={`group flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono transition-all duration-300 ${
+														activeMilestone === milestones.length - 1
+															? 'opacity-30 cursor-not-allowed bg-black/20'
+															: 'bg-black/40 hover:bg-primary/20 text-primary border border-primary/30 hover:border-primary/50 shadow-[0_0_10px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]'
+													}`}
+												>
+													<span className="text-xs">Next</span>
+													<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+												</button>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -399,7 +410,7 @@ export const DeveloperJourney: React.FC = () => {
 						<div className="px-4 py-3 bg-zinc-900 border-t border-primary/10">
 							<div className="font-mono text-xs flex items-center text-primary/60">
 								<span className="text-primary/80 mr-2">$</span>
-								<span className="mr-1">journey --next-chapter</span>
+								<span className="mr-1">journey --write-next-chapter</span>
 								<span className="animate-pulse-slow">▌</span>
 							</div>
 						</div>
@@ -408,4 +419,4 @@ export const DeveloperJourney: React.FC = () => {
 			</div>
 		</section>
 	);
-}; 
+};
