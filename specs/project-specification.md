@@ -485,7 +485,28 @@ The builder mentality philosophy spreads: more developers prioritize shipping an
 
 ---
 
-## 13. Related Documentation
+## 13. External Integrations
+
+### Calendly Scheduling Links
+
+**Coffee Chat** (Home Page)
+- URL: `https://calendly.com/willdiamond3/coffee-chat`
+- Purpose: Casual conversation with friends, fellow developers, and potential collaborators
+- Location: Home page contact CTA
+
+**Discovery Call** (Consulting Page)
+- URL: `https://calendly.com/willdiamond3/30min`
+- Purpose: 30-minute consultation call for potential consulting clients
+- Location: Consulting page contact section
+
+**Usage Notes:**
+- Links should open in new tab/window
+- Terminal-styled buttons for consistency
+- Clear CTAs describing what each meeting is for
+
+---
+
+## 14. Related Documentation
 
 - [repository-specification.md](./repository-specification.md) - Technical implementation details
 - [project-analysis.md](./features/project-analysis.md) - Comprehensive codebase analysis
@@ -494,7 +515,7 @@ The builder mentality philosophy spreads: more developers prioritize shipping an
 
 ---
 
-## 14. Changelog
+## 15. Changelog
 
 ### 2025-09-30 - Initial Specification
 - Created project specification based on interview with Will
@@ -512,3 +533,9 @@ The builder mentality philosophy spreads: more developers prioritize shipping an
 - Messages table now single source of truth
 - Fixed user message display on page reload
 - Cleaned up temporary migration scripts
+
+### 2025-10-17 - Calendly Integration Documentation
+- Added External Integrations section with Calendly links
+- Coffee Chat link: https://calendly.com/willdiamond3/coffee-chat (for home page)
+- Discovery Call link: https://calendly.com/willdiamond3/30min (for consulting page)
+- Documented usage notes and purpose for each link

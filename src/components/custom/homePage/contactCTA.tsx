@@ -97,7 +97,7 @@ export const ContactCTA: React.FC<ContactCTAProps> = ({
 								size="lg"
 								glowIntensity="low"
 								className="flex items-center justify-between px-4"
-								onClick={() => { window.open('https://calendly.com/yourusername', '_blank'); }}
+								onClick={() => { window.open('https://calendly.com/willdiamond3/coffee-chat', '_blank'); }}
 							>
 								<span className="text-primary/80 font-mono text-sm">[02]</span>
 								<div className="flex items-center gap-2">

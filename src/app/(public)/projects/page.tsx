@@ -7,13 +7,39 @@ export const revalidate = 3600; // Revalidate at most once per hour
 
 // Metadata for the page
 export const metadata = {
-	title: 'Projects | Will Diamond',
-	description: 'Explore a curated selection of projects by Will Diamond, showcasing expertise in AI, web development, and more.',
-	keywords: ['projects', 'portfolio', 'Will Diamond', 'AI engineer', 'software developer', 'web development', 'data engineering'],
+	title: 'AI Engineering Projects - Will Diamond Portfolio',
+	description: 'Explore Will Diamond\'s AI engineering projects: compliance AI systems, LLM applications, legal tech tools, and production RAG systems. Featured work from Contoural, Texas Hold LLM, and more.',
+	keywords: [
+		'Will Diamond projects',
+		'AI engineering portfolio',
+		'compliance AI projects',
+		'LLM applications',
+		'legal tech AI',
+		'RAG systems',
+		'production AI systems',
+		'AI engineer portfolio',
+		'Contoural AI',
+		'Texas Hold LLM'
+	],
 	openGraph: {
-		title: 'Projects | Will Diamond',
-		description: 'Dive into the portfolio of Will Diamond, featuring innovative projects across various tech domains.',
-		// You can add a specific image for the projects page here if desired
+		title: 'AI Engineering Projects | Will Diamond',
+		description: 'Portfolio of production AI systems including compliance AI for Fortune 500, LLM applications, and legal tech innovations.',
+		url: 'https://will-diamond.com/projects',
+		type: 'website',
+		images: [
+			{
+				url: '/diamond.png',
+				width: 1200,
+				height: 630,
+				alt: 'Will Diamond - AI Engineering Projects',
+			},
+		],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'AI Engineering Projects | Will Diamond',
+		description: 'Portfolio of production AI systems and LLM applications',
+		images: ['/diamond.png'],
 	},
 };
 

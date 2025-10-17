@@ -1,0 +1,16 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://will-diamond.com/sitemap.xml
+
+# Disallow admin/studio routes
+User-agent: *
+Disallow: /studio/
+Disallow: /api/
+
+# Allow important pages for crawling
+Allow: /
+Allow: /consulting
+Allow: /projects
